@@ -1,0 +1,29 @@
+{
+  "name": "labi",
+  "owner": {
+    "name": "Sven Labitzki",
+    "url": "https://labi.dev"
+  },
+  "plugins": [
+    {
+      "name": "agent-docs",
+      "source": "./plugins/agent-docs",
+      "description": "Sync, Audit, Prune & Init für Agent-Doku (CLAUDE.md/AGENTS.md + Rules). Approval-gated, evidenz-basiert, löschen-bevorzugt."
+    },
+    {
+      "name": "git-work",
+      "source": "./plugins/git-work",
+      "description": "Logisch geschnittene Commits und concise Changelogs im Haus-Stil."
+    },
+    {
+      "name": "deps",
+      "source": "./plugins/deps",
+      "description": "Dependency-Pflege, bun-first: /deps:bump bringt alles aufs letzte offizielle stabile Release."
+    },
+    {
+      "name": "dead-code",
+      "source": "./plugins/dead-code",
+      "description": "Dead Code in einem Durchlauf finden, belegen und nach Freigabe löschen."
+    }
+  ]
+}
