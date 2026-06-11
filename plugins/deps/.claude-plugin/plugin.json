@@ -1,7 +1,7 @@
 {
   "name": "deps",
-  "version": "0.1.0",
-  "description": "Dependency-Pflege, bun-first. Aktuell: /deps:bump — alles auf das letzte offizielle stabile Release, mit Plan, Major-Risiko-Notizen und Verify.",
+  "version": "0.2.0",
+  "description": "Dependency-Pflege, bun-first: /deps:bump bringt alles aufs letzte offizielle stabile Release, /deps:audit meldet CVEs, EOL und Lizenz-Flags (read-only).",
   "author": {
     "name": "Sven Labitzki"
   }

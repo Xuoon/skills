@@ -98,12 +98,23 @@ def check_plugin(entry_name: str, plugin_dir: Path) -> None:
     if not (plugin_dir / "CHANGELOG.md").exists():
         warn(f"{rel}: CHANGELOG.md fehlt")
 
+    hooks_file = plugin_dir / "hooks" / "hooks.json"
+    if hooks_file.exists():
+        hooks_data = load_json(hooks_file)
+        if hooks_data is not None:
+            for ref in re.findall(r"\$\{CLAUDE_PLUGIN_ROOT\}([^\s\"'\\]+)", json.dumps(hooks_data)):
+                target = plugin_dir / ref.lstrip("/")
+                if not target.exists():
+                    err(f"{rel}: hooks.json referenziert fehlende Datei -> {ref}")
+                elif not target.stat().st_mode & 0o111:
+                    warn(f"{rel}: Hook-Script nicht ausführbar (chmod +x) -> {ref}")
+
     skills = sorted((plugin_dir / "skills").glob("*/SKILL.md")) if (plugin_dir / "skills").is_dir() else []
     root_skill = plugin_dir / "SKILL.md"
     if skills and root_skill.exists():
         warn(f"{rel}: skills/-Verzeichnis UND Root-SKILL.md — Root wird ignoriert")
-    if not skills and not root_skill.exists():
-        warn(f"{rel}: kein Skill gefunden (weder skills/*/SKILL.md noch SKILL.md)")
+    if not skills and not root_skill.exists() and not hooks_file.exists():
+        warn(f"{rel}: kein Skill/Hook gefunden (weder skills/*/SKILL.md noch SKILL.md noch hooks/hooks.json)")
     for skill in skills or ([root_skill] if root_skill.exists() else []):
         check_skill(skill, plugin_dir)
     for md in plugin_dir.rglob("*.md"):

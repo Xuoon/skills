@@ -2,8 +2,9 @@
 
 ## 1. Muster wählen
 
-- **Ein Befehl** → Single-Skill: `plugins/<name>/SKILL.md` im Plugin-Root → Befehl `/<name>` (Beispiel: dead-code).
+- **Ein Befehl** → Single-Skill: `plugins/<name>/SKILL.md` im Plugin-Root → Befehl `/<name>`.
 - **Mehrere Befehle / gemeinsames Wissen** → Multi-Skill: `plugins/<name>/skills/<sub>/SKILL.md` → `/<name>:<sub>` (Beispiel: agent-docs). Geteilte Inhalte nach `plugins/<name>/references/` — Skills referenzieren sie mit `${CLAUDE_SKILL_DIR}/../../references/<datei>.md`. Referenzen dürfen nie aus dem Plugin-Ordner herauszeigen (Plugins werden in einen Cache kopiert).
+- **Kein Befehl, nur Verhalten** → Hook-Plugin: `hooks/hooks.json` + Scripts, referenziert via `${CLAUDE_PLUGIN_ROOT}/…` (Beispiel: notify). Scripts brauchen `chmod +x`.
 
 ## 2. Pflichtdateien
 
@@ -11,7 +12,7 @@
 plugins/<name>/
 ├── .claude-plugin/plugin.json   # name (= Ordnername!), version "0.1.0", description, author
 ├── CHANGELOG.md
-└── SKILL.md oder skills/…
+└── SKILL.md, skills/… oder hooks/hooks.json
 ```
 
 ## 3. Frontmatter-Entscheidungen pro Skill
@@ -26,4 +27,8 @@ Eintrag in `.claude-plugin/marketplace.json` (`"source": "./plugins/<name>"`), d
 
 ## 5. Lokal testen, dann releasen
 
-Im Repo-Ordner: `/plugin marketplace add .` → `/plugin install <name>@labi` → Befehle testen. SKILL.md-Änderungen greifen live, alles andere braucht `/reload-plugins`. Beim Release: Version bumpen + CHANGELOG (macht `/git-work:changelog plugins/<name>`), pushen — Geräte ziehen es per `/plugin update`.
+Im Repo-Ordner: `/plugin marketplace add .` → `/plugin install <name>@labi` → Befehle testen. SKILL.md-Änderungen greifen live, alles andere braucht `/reload-plugins`. Beim Release: Version bumpen + CHANGELOG (macht `/git-work:changelog plugins/<name>`), pushen — Geräte ziehen es per `/plugin update`. Semver-Faustregel: Befehls-/Argument-Änderungen = minor, reine Instruktions-Verbesserungen = patch, Umbenennungen/Entfernungen = major.
+
+## 6. Externe Plugins
+
+Ein Marketplace-Eintrag kann statt auf einen lokalen Ordner auf ein fremdes Repo zeigen: `"source": { "source": "github", "repo": "owner/repo", "ref": "v1.2.0" }`. `ref` (Tag/Commit) pinnen ist Pflicht — fremder Code mit Hooks/MCP-Servern läuft lokal.

@@ -1,6 +1,6 @@
 ---
-description: Comprehensive scored review of all agent docs (CLAUDE.md/AGENTS.md plus rules directories) with bidirectional claim verification, coverage sweep, paths-glob validation and prune-sweep. Manual-only — invoke via /agent-docs:audit. Optional args — subtree path; `solo` runs without subagents; `quick` skips scoring and coverage (red flags + below-B list only).
-argument-hint: "[pfad] [solo] [quick]"
+description: Comprehensive scored review of all agent docs (CLAUDE.md/AGENTS.md plus rules directories) with bidirectional claim verification, coverage sweep, paths-glob validation and prune-sweep. Manual-only — invoke via /agent-docs:audit. Optional arg — `quick` skips scoring and coverage (red flags + below-B list only).
+argument-hint: "[quick]"
 disable-model-invocation: true
 allowed-tools: Bash(git status *) Bash(git diff *) Bash(git log *)
 ---
@@ -9,15 +9,11 @@ allowed-tools: Bash(git status *) Bash(git diff *) Bash(git log *)
 
 Comprehensive Review aller Agent-Docs mit Scoring. Teuer und tokenintensiv — läuft nur auf expliziten Befehl.
 
-**Zuerst lesen:** `${CLAUDE_SKILL_DIR}/../../references/shared.md` (Scope, Ground Rules, Subagenten, Vorschlags-Format, Verify, Anti-Patterns) und `${CLAUDE_SKILL_DIR}/../../references/style.md` (Qualitätsmaßstab). Für Schritt 1e: `${CLAUDE_SKILL_DIR}/../../references/prune-sweep.md`.
+**Zuerst lesen:** `${CLAUDE_SKILL_DIR}/../../references/shared.md` (Scope, Ground Rules, Subagenten, Vorschlags-Format, Verify, Anti-Patterns) und `${CLAUDE_SKILL_DIR}/../../references/style.md` (Qualitätsmaßstab). Für Sweep 1d: `${CLAUDE_SKILL_DIR}/../../references/prune-sweep.md`.
 
 ## Argumente
 
-`$ARGUMENTS` — alle optional, kombinierbar:
-
-- Token existiert als Pfad im Repo → nur diesen Subtree auditen (Cross-Refs zu anderen Files trotzdem prüfen).
-- `solo` → keine Subagenten; dieselben Aufträge inline sequenziell (gilt automatisch, wenn die Umgebung keine Subagenten kann).
-- `quick` → Spar-Variante: Claim-Verifikation, Link-/Glob-Checks und Duplikat-Scan laufen, aber **kein** 6-Kriterien-Scoring, **keine** Per-File-Tabellen, **kein** Coverage-Sweep. Report = Red Flags + Below-B-Verdachtsliste (1 Zeile pro Datei) + Fix-Proposals nur für Red Flags.
+`quick` (optional) → Spar-Variante: Claim-Verifikation, Link-/Glob-Checks und Duplikat-Scan laufen, aber **kein** 6-Kriterien-Scoring, **keine** Per-File-Tabellen, **kein** Coverage-Sweep. Report = Red Flags + Below-B-Verdachtsliste (1 Zeile pro Datei) + Fix-Proposals nur für Red Flags.
 
 ## Workflow
 

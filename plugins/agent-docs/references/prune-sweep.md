@@ -1,6 +1,6 @@
 # Prune-Sweep (Dedup + Löschen)
 
-Gegenrichtung zum Vollständigkeits-Check — verhindert, dass Audits die Docs fett machen. Wird vom Audit (Discovery-Schritt 1e) und vom Prune-Skill als Standalone-Prozedur genutzt.
+Gegenrichtung zum Vollständigkeits-Check — verhindert, dass Audits die Docs fett machen. Wird vom Audit als Discovery-Sweep 1d ausgeführt.
 
 1. **Duplikations-Scan**: Alle Docs vollständig lesen, Thema→Dateien-Mapping bauen. Akzeptabel: kurzer Pointer-Satz + Link auf die kanonische Stelle. NICHT akzeptabel: dieselbe Mechanik zweimal inhaltlich ausgeführt (auch datei-intern!). Besonders drift-anfällig: konkrete Zahlen/Zeiten/Limits, die an mehreren Stellen stehen — auf eine kanonische Stelle reduzieren.
 2. **Kanonik-Konflikte**: Wenn Datei A Datei B als kanonisch deklariert, aber selbst die Mechanik voll ausführt → A auf Pointer kürzen. Wenn zwei Dateien sich gegenseitig als kanonisch deklarieren → auflösen.

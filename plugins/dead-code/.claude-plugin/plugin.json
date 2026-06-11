@@ -1,8 +1,0 @@
-{
-  "name": "dead-code",
-  "version": "0.1.0",
-  "description": "Dead Code in einem Durchlauf: scannen (knip-first), verifizieren, auflisten, nach Freigabe purgen, mit typecheck/build/test beweisen.",
-  "author": {
-    "name": "Sven Labitzki"
-  }
-}

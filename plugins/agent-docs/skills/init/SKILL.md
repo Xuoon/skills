@@ -1,6 +1,5 @@
 ---
-description: Bootstrap agent docs (CLAUDE.md + rules structure) in a repo or subtree that has none yet. Use ONLY when the user explicitly asks to initialize/set up agent docs — "init claude docs", "setup CLAUDE.md", "bootstrap agent docs", "leg mir eine CLAUDE.md an". Produces minimal, code-verified docs (no boilerplate, no empty scaffolds), approval-gated. Optional arg — subtree path for monorepo packages.
-argument-hint: "[pfad]"
+description: Bootstrap agent docs (CLAUDE.md + rules structure) in a repo or subtree that has none yet. Use ONLY when the user explicitly asks to initialize/set up agent docs — "init claude docs", "setup CLAUDE.md", "bootstrap agent docs", "leg mir eine CLAUDE.md an". Produces minimal, code-verified docs (no boilerplate, no empty scaffolds), approval-gated.
 allowed-tools: Bash(git status *) Bash(git log *) Bash(ls *) Bash(find *)
 ---
 
@@ -9,10 +8,6 @@ allowed-tools: Bash(git status *) Bash(git log *) Bash(ls *) Bash(find *)
 Erzeugt das **Minimum** an Agent-Doku, das ein Audit überleben würde — nicht das Maximum, das beeindruckend aussieht. Jede Zeile muss den Qualitätsmaßstab bestehen, sonst gehört sie nicht in den Erstwurf.
 
 **Zuerst lesen:** `${CLAUDE_SKILL_DIR}/../../references/shared.md` (Ground Rules, Vorschlags-Format, Verify, Anti-Patterns) und `${CLAUDE_SKILL_DIR}/../../references/style.md` (Qualitätsmaßstab — beim Init wichtiger als überall sonst).
-
-## Argumente
-
-`$ARGUMENTS` — optional: existiert das Token als Pfad im Repo → nur diesen Subtree bootstrappen (z. B. neues Workspace-Package im Monorepo). Leer → Repo-Root.
 
 ## Grundsätze (zusätzlich zu den Ground Rules)
 

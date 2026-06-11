@@ -9,6 +9,7 @@ Wird von jedem agent-docs-Skill zuerst geladen. Qualitätsmaßstab für alle Inh
 - Frontmatter `paths:`-Globs in Rules-Files — sie steuern die **Auto-Injection** der Rule beim Editieren matchender Dateien; too-narrow heißt "Regel fehlt genau dann, wenn sie gebraucht wird". Typische Lücke: Test-Suiten und Lib-/Helper-Pfade außerhalb der Feature-Verzeichnisse.
 - Code-Kommentare mit Doku-Refs (`grep -rn "\.claude/rules\|CLAUDE\.md\|AGENTS\.md"` über die Source-Verzeichnisse).
 - Excludieren: `node_modules/**`, `.turbo/**`, `dist/**`, `build/**`, `.next/**`, `coverage/**`, `.git/**`.
+- Nennt der User im Aufruf einen Subtree-Pfad → Scope darauf einschränken; kanonische Gegenstellen und Cross-Refs außerhalb trotzdem prüfen, sonst sind Duplikate unsichtbar.
 
 ## Ground Rules (alle Modi)
 
@@ -21,11 +22,9 @@ Wird von jedem agent-docs-Skill zuerst geladen. Qualitätsmaßstab für alle Inh
 - **Future Agent als Maßstab.** Ohne Fix wäre der nächste Agent misled/blocked oder müsste Müll lesen.
 - **Nebenbefunde separat.** Code-Befunde, die beim Doku-Check auffallen (Bugs, stale Code-Kommentare), als eigene "Nebenbefunde"-Liste an den Report hängen — nicht fixen, nicht als Doku-Issue zählen.
 
-## Subagenten (Sync-Discovery + Audit + große Prune-Läufe)
+## Subagenten (Sync-Discovery + Audit)
 
-Parallel gründliche Subagenten einsetzen (Sync: 1 pro Bereich; Audit/Prune: ~1 pro 3–5 Files; stärkstes verfügbares Modell) statt Excerpt-only-Suche. Output-Format im Subagenten-Prompt **festnageln**: nur strukturierte Daten, kein Fließtext-Bericht; verified-Claims nur als Gesamtzahl pro Datei, ausführlich nur Abweichungen; am Ende 1-Satz-Einschätzung pro Datei. Sonst liefern Agenten Prosa, die sich nicht aggregieren lässt.
-
-Ohne Subagenten-Fähigkeit der Umgebung (z. B. Claude.ai) oder bei `solo`-Argument: dieselben Aufträge mit demselben Output-Format inline sequenziell abarbeiten.
+Parallel gründliche Subagenten einsetzen (Sync: 1 pro Bereich; Audit: ~1 pro 3–5 Files; stärkstes verfügbares Modell) statt Excerpt-only-Suche. Output-Format im Subagenten-Prompt **festnageln**: nur strukturierte Daten, kein Fließtext-Bericht; verified-Claims nur als Gesamtzahl pro Datei, ausführlich nur Abweichungen; am Ende 1-Satz-Einschätzung pro Datei. Sonst liefern Agenten Prosa, die sich nicht aggregieren lässt.
 
 ## Vorschlags-Format + Approval (alle Modi)
 
