@@ -1,0 +1,8 @@
+{
+  "name": "load-context",
+  "version": "0.1.0",
+  "description": "Lädt repo-spezifische Doku (CLAUDE.md, AGENTS.md, README.md, .claude/rules/** sowie Instruktionsdateien anderer AI-Tools) via SessionStart-Hook in den Kontext — bei Session-Start und nach jedem Compact. Git-tracked, read-only.",
+  "author": {
+    "name": "Sven Labitzki"
+  }
+}

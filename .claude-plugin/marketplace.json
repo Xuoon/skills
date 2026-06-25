@@ -24,6 +24,11 @@
       "name": "notify",
       "source": "./plugins/notify",
       "description": "Desktop-Benachrichtigung via Hooks, wenn Claude fertig ist oder Input braucht."
+    },
+    {
+      "name": "load-context",
+      "source": "./plugins/load-context",
+      "description": "Lädt repo-spezifische Doku (CLAUDE.md/AGENTS.md/README/.claude/rules + AI-Tool-Instruktionen) bei Session-Start und nach Compact in den Kontext."
     }
   ]
 }
