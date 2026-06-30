@@ -1,7 +1,7 @@
 {
   "name": "agent-docs",
-  "version": "2.0.0",
-  "description": "Sync, Audit & Init für Agent-Doku (CLAUDE.md/AGENTS.md + Rules-Verzeichnisse). Approval-gated, evidenz-basiert, löschen-bevorzugt.",
+  "version": "3.0.0",
+  "description": "Sync als smarter Router (Init/Sync/Review) plus Audit für Agent-Doku (CLAUDE.md/AGENTS.md + Rules-Verzeichnisse). Approval-gated, evidenz-basiert, löschen-bevorzugt.",
   "author": {
     "name": "Sven Labitzki"
   }

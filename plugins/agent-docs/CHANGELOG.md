@@ -1,5 +1,16 @@
 # Changelog — agent-docs
 
+## [3.0.0] – 2026-06-30
+
+### Changed
+
+- `/agent-docs:sync` ist jetzt der smarte Alltags-Einstieg (Router): Der Skill erkennt, ob Agent-Doku fehlt (Init), ein Code-Diff synchronisiert werden muss (Sync) oder ein Quick-/Full-Review passend ist.
+- `sync` `allowed-tools` um `ls`/`find` erweitert — der Init-Modus braucht sie für den Recon, sonst Permission-Prompts beim Auto-Routing.
+
+### Removed
+
+- **Breaking:** `/agent-docs:init` als eigener Befehl entfernt — der Init-Workflow läuft jetzt als Modus des `sync`-Routers (Branch „keine Doku im Scope"); die Prozedur liegt in `references/init.md`. Bootstrap-Aufrufe („leg mir eine CLAUDE.md an" etc.) triggern `sync`.
+
 ## [2.0.0] – 2026-06-11
 
 ### Changed
