@@ -7,7 +7,9 @@ CI:     läuft via .github/workflows/validate.yml bei jedem Push.
 """
 
 import json
+import os
 import re
+import subprocess
 import sys
 from pathlib import Path
 
@@ -81,6 +83,67 @@ def check_skill(path: Path, plugin_dir: Path) -> None:
     check_md_links(path)
 
 
+def _git(*args):
+    """git am Repo-Root ausführen; stdout (str) oder None bei Fehler/fehlendem git."""
+    try:
+        return subprocess.run(
+            ["git", "-C", str(ROOT), *args],
+            capture_output=True, text=True, check=True,
+        ).stdout
+    except Exception:  # noqa: BLE001
+        return None
+
+
+def _release_baseline():
+    """Vergleichs-Ref je Kontext (PR/Push/lokal). None -> Release-Regel überspringen."""
+    if _git("rev-parse", "--git-dir") is None:
+        return None
+    base_ref = os.environ.get("GITHUB_BASE_REF")
+    if base_ref:  # PR-Build
+        mb = _git("merge-base", f"origin/{base_ref}", "HEAD")
+        return mb.strip() if mb else None
+    if os.environ.get("GITHUB_EVENT_NAME") == "push":
+        parent = _git("rev-parse", "--verify", "HEAD^")
+        return parent.strip() if parent else None
+    return "HEAD" if _git("rev-parse", "--verify", "HEAD") else None
+
+
+def _changelog_top_version(plugin_dir: Path):
+    cl = plugin_dir / "CHANGELOG.md"
+    if not cl.exists():
+        return None
+    m = re.search(r"^##\s*\[(\d+\.\d+\.\d+)\]", cl.read_text(encoding="utf-8"), re.M)
+    return m.group(1) if m else None
+
+
+def check_release(rel: Path, plugin_dir: Path, version: str) -> None:
+    """Release-Hygiene: eine materielle Plugin-Änderung (alles außer CHANGELOG.md)
+    verlangt Semver-Bump UND passenden CHANGELOG-Top-Eintrag. CHANGELOG-only-Edits
+    triggern nicht (kein Chicken-Egg). Ohne git/Baseline: graceful skip."""
+    baseline = _release_baseline()
+    if baseline is None:
+        return
+    plugin_path = plugin_dir.relative_to(ROOT).as_posix()
+    if baseline == "HEAD":  # lokal: Working Tree gegen HEAD (inkl. untracked)
+        changed = ((_git("diff", "--name-only", "HEAD", "--", plugin_path) or "").splitlines()
+                   + (_git("ls-files", "--others", "--exclude-standard", "--", plugin_path) or "").splitlines())
+    else:  # CI: Commit-Bereich Baseline..HEAD
+        changed = (_git("diff", "--name-only", baseline, "HEAD", "--", plugin_path) or "").splitlines()
+    if not any(f and not f.endswith("CHANGELOG.md") for f in changed):
+        return
+    base_manifest = _git("show", f"{baseline}:{plugin_path}/.claude-plugin/plugin.json")
+    if base_manifest:  # fehlt -> neues Plugin, Bump-Check überspringen
+        try:
+            base_version = json.loads(base_manifest).get("version")
+        except Exception:  # noqa: BLE001
+            base_version = None
+        if base_version and base_version == version:
+            err(f"{rel}: geändert, aber version nicht gebumpt (noch {version}) — Semver-Bump + CHANGELOG nötig")
+    top = _changelog_top_version(plugin_dir)
+    if top is not None and top != version:
+        err(f"{rel}: CHANGELOG-Top [{top}] != plugin.json version {version}")
+
+
 def check_plugin(entry_name: str, plugin_dir: Path) -> None:
     rel = plugin_dir.relative_to(ROOT)
     manifest = plugin_dir / ".claude-plugin" / "plugin.json"
@@ -95,6 +158,8 @@ def check_plugin(entry_name: str, plugin_dir: Path) -> None:
     version = data.get("version", "")
     if not SEMVER.match(version):
         err(f"{rel}: version '{version}' ist kein Semver (X.Y.Z)")
+    else:
+        check_release(rel, plugin_dir, version)
     if not (plugin_dir / "CHANGELOG.md").exists():
         warn(f"{rel}: CHANGELOG.md fehlt")
 
