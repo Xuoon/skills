@@ -1,5 +1,11 @@
 # Changelog — load-context
 
+## [0.2.0] – 2026-06-30
+
+### Added
+
+- `.github/instructions/*.instructions.md` (Copilot-Workspace-Instruktionsdateien) werden jetzt mitgeladen.
+
 ## [0.1.0] – 2026-06-25
 
 ### Added

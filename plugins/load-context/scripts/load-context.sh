@@ -14,7 +14,7 @@ MAX_TOTAL_BYTES=131072
 # Datei-Muster als erweiterte Regex (ERE), gematcht gegen den relativen Pfad.
 # PRIMARY (hohes Signal) wird zuerst ausgegeben, README zuletzt — so trifft das
 # Gesamt-Budget zuerst die READMEs (niedrigstes Signal), nicht die Rules.
-PATTERNS_PRIMARY='(^|/)(CLAUDE|AGENTS|GEMINI)\.md$|(^|/)\.(cursorrules|windsurfrules|clinerules)$|(^|/)\.claude/rules/.+\.md$|(^|/)\.cursor/rules/.+\.mdc$|(^|/)\.github/copilot-instructions\.md$|(^|/)\.junie/guidelines\.md$'
+PATTERNS_PRIMARY='(^|/)(CLAUDE|AGENTS|GEMINI)\.md$|(^|/)\.(cursorrules|windsurfrules|clinerules)$|(^|/)\.claude/rules/.+\.md$|(^|/)\.cursor/rules/.+\.mdc$|(^|/)\.github/copilot-instructions\.md$|(^|/)\.github/instructions/.+\.instructions\.md$|(^|/)\.junie/guidelines\.md$'
 PATTERNS_LAST='(^|/)README\.md$'
 
 # Root-CLAUDE.md lädt Claude Code teils selbst. Auf true setzen, um nur die
