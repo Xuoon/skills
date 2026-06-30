@@ -1,10 +1,10 @@
 ---
-description: Read-only dependency health report — known CVEs (bun/npm audit), end-of-life runtimes and major versions (endoflife.date), plus a license summary. Never changes anything; fixes go through /deps:bump. Manual-only — invoke via /deps:audit.
+description: Read-only dependency health report — known CVEs (bun/npm audit), end-of-life runtimes and major versions (endoflife.date), plus a license summary. Never changes anything; fixes go through /deps:bump. Manual-only — invoke via /deps:health.
 disable-model-invocation: true
 allowed-tools: Bash(bun audit *) Bash(bun pm *) Bash(npm audit *) Bash(cat *) Bash(find *) Bash(git status *) WebFetch
 ---
 
-# Audit — CVEs, EOL, Lizenzen (nur Report)
+# Health Check — CVEs, EOL, Lizenzen (nur Report)
 
 Reiner Lese-Befehl: ein Bericht, keine Edits. Jede Empfehlung verweist auf `/deps:bump` oder einen manuellen Schritt — angewendet wird hier nichts.
 

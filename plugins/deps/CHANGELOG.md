@@ -1,5 +1,11 @@
 # Changelog — deps
 
+## [1.0.0] – 2026-06-30
+
+### Changed
+
+- **Breaking:** `/deps:audit` → `/deps:health` umbenannt (klarere Abgrenzung zum Doku-`/agent-docs:audit`). Read-only-Workflow (CVEs, EOL, Lizenzen) unverändert; Fixes weiter über `/deps:bump`.
+
 ## [0.2.0] – 2026-06-11
 
 ### Added
