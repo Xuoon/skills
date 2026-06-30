@@ -10,10 +10,11 @@ Persönlicher Plugin-Marketplace für [Claude Code](https://code.claude.com/docs
 
 | Plugin | Befehle / Verhalten |
 | --- | --- |
-| **agent-docs** | `/agent-docs:sync` · `:audit` · `:init` — Agent-Doku mit der Code-Realität konsistent halten |
+| **agent-docs** | `/agent-docs:sync` · `:audit` — Agent-Doku aktualisieren oder prüfen; `sync` routet Init/Sync/Review automatisch |
 | **git-work** | `/git-work:commit` · `:changelog` · `:pr` — Commits, Changelogs und PRs im Haus-Stil |
-| **deps** | `/deps:bump` · `:audit` — Dependencies aktuell, sicher und sauber lizenziert (bun-first) |
+| **deps** | `/deps:bump` · `:health` — Dependencies aktuell, sicher und sauber lizenziert (bun-first) |
 | **notify** | Hooks: Desktop-Benachrichtigung, wenn Claude fertig ist oder Input braucht |
+| **load-context** | Hooks: lädt repo-spezifische Doku (CLAUDE.md/AGENTS.md/Rules/AI-Instruktionen) bei Session-Start in den Kontext |
 
 ## Installation
 
@@ -23,6 +24,7 @@ Persönlicher Plugin-Marketplace für [Claude Code](https://code.claude.com/docs
 /plugin install git-work@labi
 /plugin install deps@labi
 /plugin install notify@labi
+/plugin install load-context@labi
 ```
 
 Updates kommen über `/plugin update` (bzw. Auto-Update), gesteuert über das `version`-Feld der jeweiligen `plugin.json`.
