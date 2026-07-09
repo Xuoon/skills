@@ -1,35 +1,61 @@
 # Changelog — agent-docs
 
+## [4.0.1] – 2026-07-09
+
+### Changed
+
+- **Slash Autocomplete / `argument-hint`:**
+  - `audit`: `[quick|prune] [pfad]` (vorher nur `[quick|prune]`)
+  - `sync`: neu `[main|branch|prune] [pfad]`
+- Beide Skills parsen **`$ARGUMENTS`** explizit (Mode, Git-Ref, Subtree, Freitext) mit Beispielen im Body — nicht nur Hint-Text ohne Verarbeitung.
+- Descriptions kürzer/scannbarer für Skill-Picker.
+
+## [4.0.0] – 2026-07-09
+
+### Why
+
+Sync/Audit neigten dazu, nach Feature-Arbeit **Implementation-Details und Inventare zu addieren** (Prefetch-Pads, UI-Chrome, Prop-Listen). Mehr Zeilen = mehr Drift. Agents brauchen **Verträge**, nicht Tutorials.
+
+### Changed (breaking behavioral)
+
+- **Asymmetrisches Edit-Gate** in `references/shared.md`: DELETE leicht, ADD schwer (agent-blocking ∧ non-obvious ∧ single home ∧ ≤3 Zeilen ∧ Netto-Budget).
+- **Sync** führt bei jedem Add-Kandidaten einen **Mini-Prune** mit; Deletes im Vorschlag **vor** Adds; valides Outcome `0 candidates`.
+- **Audit-Scoring:** Conciseness **25**, Completeness **15** — Aufblasen kann Completeness nicht „retten“.
+- Audit-Arg **`prune`**: nur Lösch-/Merge-Pass.
+- **style.md:** „Code owns implementation detail“; Größenrichtwerte Root/App/Domain; explizite Anti-Inventar-Tabelle.
+- **prune-sweep.md:** wann (Sync/Audit/User), Merge-Regel für kleine Rule-Dateien (≤~15 exklusive Zeilen), Netto-Ziel Δ&lt;0.
+- Verify meldet **Δ lines**.
+- Whole-file rewrite nur noch als **`rewrite-prune`** (Netto kürzer), nicht zum Erweitern.
+
+### Added
+
+- Sync-Trigger-Phrasen: „weniger doku“, „prune“, „unnötig“.
+- Claim-Kind `impl-detail` im Audit-Discovery.
+- Anti-Pattern: Session-Changelog / frisches Feature 1:1 in Rules spezifizieren.
+
 ## [3.0.0] – 2026-06-30
 
 ### Changed
 
-- `/agent-docs:sync` ist jetzt der smarte Alltags-Einstieg (Router): Der Skill erkennt, ob Agent-Doku fehlt (Init), ein Code-Diff synchronisiert werden muss (Sync) oder ein Quick-/Full-Review passend ist.
-- `sync` `allowed-tools` um `ls`/`find` erweitert — der Init-Modus braucht sie für den Recon, sonst Permission-Prompts beim Auto-Routing.
+- `/agent-docs:sync` ist smarter Alltags-Router (Init/Sync/Review).
+- `sync` `allowed-tools` um `ls`/`find` erweitert.
 
 ### Removed
 
-- **Breaking:** `/agent-docs:init` als eigener Befehl entfernt — der Init-Workflow läuft jetzt als Modus des `sync`-Routers (Branch „keine Doku im Scope"); die Prozedur liegt in `references/init.md`. Bootstrap-Aufrufe („leg mir eine CLAUDE.md an" etc.) triggern `sync`.
+- **Breaking:** `/agent-docs:init` als eigener Befehl — Init ist Sync-Modus (`references/init.md`).
 
 ## [2.0.0] – 2026-06-11
 
 ### Changed
 
-- Argumente vereinfacht: Subtree-Pfad (alle Skills), `solo` (audit) und Base-Branch (sync) als formale Argumente entfernt — Scope-Wünsche nennt man direkt im Aufruf-Text; `quick` (audit) bleibt.
+- Argumente vereinfacht; `quick` (audit) bleibt.
 
 ### Removed
 
-- **Breaking:** `/agent-docs:prune` entfernt — der Lösch-Pass läuft ohnehin in `sync` (diff-getrieben, Trigger-Gate "redundant geworden → löschen") und `audit` (Prune-Sweep) mit; die Prozedur bleibt in `references/prune-sweep.md`.
-- Plugin-README (Inhalte stehen kanonisch in den SKILL.mds bzw. im Root-README).
+- **Breaking:** `/agent-docs:prune` — Prune in Sync-Gate + Audit-Sweep; Prozedur in `references/prune-sweep.md`.
 
 ## [1.0.0] – 2026-06-10
 
 ### Added
 
-- Plugin-Struktur mit vier Skills: `sync`, `audit`, `prune`, `init` (Namespace `/agent-docs:*`).
-- `quick`- und `solo`-Flags für `audit`; freie Argumente (Base-Branch/Subtree) für `sync`.
-- Zentrales Vorschlags-Format (Diff/Delete/Create) in `references/shared.md`.
-
-### Changed
-
-- Umbenannt von `docs-maintain` zu `agent-docs`.
+- Plugin mit `sync`, `audit`, `prune`, `init`; zentrales Vorschlags-Format in `shared.md`.

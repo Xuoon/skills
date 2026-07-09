@@ -1,82 +1,125 @@
 ---
-description: Comprehensive scored review of all agent docs (CLAUDE.md/AGENTS.md plus rules directories) with bidirectional claim verification, coverage sweep, paths-glob validation and prune-sweep. Manual-only — invoke via /agent-docs:audit. Optional arg — `quick` skips scoring and coverage (red flags + below-B list only).
-argument-hint: "[quick]"
+description: >
+  Scored agent-docs review (CLAUDE.md/AGENTS.md + rules). Manual-only /agent-docs:audit.
+  Modes: (empty)=full scored · quick=red-flags+prune suspects · prune=delete-only.
+  Optional path scopes subtree. Delete-first, no bloat.
+argument-hint: "[quick|prune] [pfad]"
 disable-model-invocation: true
-allowed-tools: Bash(git status *) Bash(git diff *) Bash(git log *)
+allowed-tools: Bash(git status *) Bash(git diff *) Bash(git log *) Bash(wc *)
 ---
 
 # Audit — scored review (inkl. Prune-Sweep)
 
-Comprehensive Review aller Agent-Docs mit Scoring. Teuer und tokenintensiv — läuft nur auf expliziten Befehl.
+Teuer und tokenintensiv — nur auf expliziten Befehl. Completeness **ohne** Conciseness ist ein Fail-Modus: aufgeblähte korrekte Docs sind **nicht** A.
 
-**Zuerst lesen:** `${CLAUDE_SKILL_DIR}/../../references/shared.md` (Scope, Ground Rules, Subagenten, Vorschlags-Format, Verify, Anti-Patterns) und `${CLAUDE_SKILL_DIR}/../../references/style.md` (Qualitätsmaßstab). Für Sweep 1d: `${CLAUDE_SKILL_DIR}/../../references/prune-sweep.md`.
+**Zuerst lesen:** `shared.md`, `style.md`, `prune-sweep.md` (alle unter `${CLAUDE_SKILL_DIR}/../../references/`).
 
-## Argumente
+## Argumente (`$ARGUMENTS`)
 
-`quick` (optional) → Spar-Variante: Claim-Verifikation, Link-/Glob-Checks und Duplikat-Scan laufen, aber **kein** 6-Kriterien-Scoring, **keine** Per-File-Tabellen, **kein** Coverage-Sweep. Report = Red Flags + Below-B-Verdachtsliste (1 Zeile pro Datei) + Fix-Proposals nur für Red Flags.
+User-Eingabe nach dem Slash-Command (kann leer sein):
+
+```text
+$ARGUMENTS
+```
+
+**Parsen** (Tokens whitespace-getrennt, Reihenfolge egal):
+
+| Token | Bedeutung |
+| --- | --- |
+| *(leer / kein Mode-Token)* | **full** — Claims, Coverage, paths, Links, Prune, Scoring, Fix-Proposals |
+| `quick` | Claims + Links/Globs + Duplikat/Prune-Scan; **kein** 6er-Scoring, **keine** Per-File-Tabellen, **kein** Coverage. Report: Red Flags + Below-B (1 Zeile/Datei) + Proposals nur Red Flags **und** klare Deletes |
+| `prune` | Nur prune-sweep + Link-Check. Proposals fast nur Delete/Shorten/Merge |
+| Pfad (`apps/…`, `packages/…`, `.claude/rules/…`, Dateiname) | Scope auf diesen Subtree; Cross-Refs/kanonische Gegenstellen außerhalb trotzdem prüfen |
+| Freitext (`alles`, `dünner`, …) | Mode-Hint wenn kein explizites `quick`/`prune`; sonst ignorieren |
+
+**Beispiele (Autocomplete-Hilfe):**
+
+```text
+/agent-docs:audit                 → full, ganzes Repo
+/agent-docs:audit quick           → sparsam, Red Flags + Prune-Suspects
+/agent-docs:audit prune           → nur dünner machen
+/agent-docs:audit quick apps/dash → quick, nur Dash-Docs + gematchte Rules
+/agent-docs:audit prune .claude/rules/dash
+```
+
+Mode zu Beginn in **einem Satz** festnageln: `Mode=quick · Scope=apps/dash`.
 
 ## Workflow
 
-1. **Discovery.** Glob alle Scopes (laut shared.md). Parallel Subagenten (~1 pro 3–5 Files, Output-Format laut shared.md festnageln). Auftrag:
-   > *"Verifiziere jeden Claim **beidseitig** (Doku→Code UND Code→Doku) via Grep/Read. Output: `{file, line, claim, verified|stale|wrong|missing|duplicate|generic, evidence}`. Bei Unsicherheit `needs verification` statt raten."*
+1. **Discovery.** Glob Scope (shared.md). Parallel Subagenten (~1 pro 3–5 Files). Auftrag:
 
-   Plus separate Sweeps (je 1 Subagent):
-   - **a) Coverage** *(entfällt bei `quick`)* — non-triviale Code-Bereiche mit 0 Doc-Coverage. Kriterium "kritisch": Ein neuer Agent würde dort ohne Doku falsche Annahmen treffen oder lange suchen (non-obvious Invariants, Sicherheits-relevantes, überraschende Kopplungen, CI/Deploy-Pipelines, Test-Harnesses, Polyfills/Side-Effect-Imports, nicht-offensichtliche Datenformate). Triviale CRUD-Bereiche zählen NICHT.
-   - **b) Frontmatter-`paths:`-Validierung** — Verdicts: `ok|dead|too-broad|too-narrow` mit Beispiel-Treffern bzw. fehlenden erwarteten Treffern. Typische too-narrow-Lücke: Test-Suiten + Lib-Helfer.
-   - **c) Code-Kommentar-Refs** zu Doku-Files resolven; alle relativen Markdown-Links prüfen.
-   - **d) Prune-Sweep** laut prune-sweep.md.
+   > Beidseitig verifizieren (Doku→Code **und** Code→Doku).  
+   > Output: `{file,line,claim,verified|stale|wrong|missing|duplicate|generic|impl-detail,evidence}`.  
+   > `impl-detail` = Implementation die der Code allein tragen sollte.  
+   > Unsicher → `needs verification`.
 
-2. **Scoring** pro File (s.u.). *Entfällt bei `quick`.*
-3. **Report** ausgeben (Template s.u.; bei `quick` nur Summary-Zeile, Red Flags und Below-B-Verdachtsliste).
-4. **Fix-Proposals** für alle material Issues im Format laut shared.md; Files **< B** priorisieren (bei `quick`: nur Red Flags). Keine kosmetischen Vorschläge.
-5. **Approval-Gate.** Stop, auf User-Freigabe warten.
-6. **Verify.** Laut shared.md; betroffene Files re-scoren (bei `quick` nur Link-/Glob-Verify).
+   Separate Sweeps (je 1 Subagent; bei `prune` nur d + Links):
+
+   - **a) Coverage** *(nicht bei quick/prune)* — nur **kritisch** non-obvious (Security, Lifecycle, Kopplung, CI/Deploy, Harness, Side-Effect-Imports, Formate). Trivial-CRUD = 0 Coverage-Issue.
+   - **b) `paths:`** — `ok|dead|too-broad|too-narrow` + Beispiele.
+   - **c) Links + Code-Kommentar-Refs** resolven.
+   - **d) Prune-Sweep** — **immer** (auch full/quick), laut prune-sweep.md.
+
+2. **Scoring** pro File (s.u.) — entfällt bei `quick`/`prune`.
+3. **Report** (Template).
+4. **Fix-Proposals** (shared.md-Format). Priorität:
+   1. Broken/wrong/security  
+   2. **Deletes / Prune / Merge**  
+   3. missing-blocking (≤10 Zeilen Draft, existierende Datei)  
+   4. nie Kosmetik, nie Inventar-Auffüllung  
+   Bei `quick`: Red Flags + eindeutige Prunes. Bei `prune`: fast nur Deletes.
+5. **Approval-Gate.** Stop.
+6. **Verify** (shared.md); Full: re-score; bei Conciseness-Drop durch Add-only-Fixes → revert Add, Prune priorisieren.
 
 ## Scoring (6 Kriterien)
 
-| Kriterium | Gewicht | Voller Score = |
+| Kriterium | Gewicht | Voller Score |
 | --- | ---: | --- |
-| Accuracy | 25 | Pfade, Namen, Commands, beschriebene Behavior matchen Code. |
-| Completeness | 20 | Repo-spezifische, non-obvious Invariants vollständig. |
-| Conciseness | 20 | Keine Generics, kein Source-Duplikat, nichts Selbstverständliches, kein Cross-File-Duplikat. |
-| Actionability | 15 | Neue Session kann ohne Code-Reread arbeiten. |
-| Currency | 10 | Keine stale Refs, dead Links, removed/renamed Code. |
-| Cross-references | 10 | Interne Links resolven, keine Duplikation zwischen Files. |
+| Accuracy | 25 | Claims matchen Code |
+| Completeness | **15** | **Agent-blocking** Invarianten da — nicht „alles Erwähnenswerte“ |
+| Conciseness | **25** | Kein Generic, kein Source-Duplikat, kein Impl-Detail, kein Cross-File-Duplikat, Größe im style.md-Richtwert |
+| Actionability | 15 | Session kann ohne Code-Reread die **kritischen** Fehler vermeiden |
+| Currency | 10 | Keine stale Refs/Links |
+| Cross-references | 10 | Links ok; keine Mechanik-Duplikation |
 
-Grades: **A** 90+, **B** 70+, **C** 50+, **D** 30+, **F** <30.
-Brevity ≠ Fail. Bloated ≠ Pass. Akkurates Signal > Score-Padding.
+Grades: **A** 90+ · **B** 70+ · **C** 50+ · **D** 30+ · **F** <30.
+
+**Scoring-Regeln gegen Aufblasen:**
+
+- Completeness darf **nicht** steigen, indem man Impl-Detail oder Inventar ergänzt.
+- Datei über style-Richtwert (Overview ~40–50, Domain ~60, hard ~150) **ohne** Security-Rechtfertigung: Conciseness max. 15/25.
+- Echtes Cross-File-Duplikat: Cross-references und Conciseness abziehen.
+- Brevity ≠ Fail. Bloated korrekte Novelle ≠ A.
 
 ## Report-Template
 
 ```markdown
 ## Documentation Audit
-**Summary:** N audited · A:x B:x C:x D:x F:x · Below-B: x · Undocumented: x · Duplikate: x · Prune-Kandidaten: x
+**Summary:** N audited · A:x B:x C:x D:x F:x · Below-B: x · Undocumented-critical: x · Duplikate: x · Prune-Kandidaten: x · Σ lines: N (Δ vs start if known)
 
 **Red Flags**
-- <path:line> — <flag>: <stale-path|broken-link|wrong-behavior|duplicate|contradicts-<file>|security-mismatch|undocumented-critical>
+- <path:line> — <stale|broken-link|wrong|duplicate|impl-detail|contradicts-…|security|undocumented-critical>
 
-**Per-File**
+**Prune (priorisiert)**
+- <path:line> — <warum> — <delete|shorten|merge-into>
+
+**Per-File** *(full only; A = one-liner)*
 ### <path> — XX/100 (X)
 | Acc | Comp | Conc | Act | Curr | Cross | Notes |
 |---:|---:|---:|---:|---:|---:|---|
-| X/25 | X/20 | X/20 | X/15 | X/10 | X/10 | <kurz> |
+| … | … | … | … | … | … | … |
 
-Issues:
-- <doc:line> — <was falsch> — Evidence: <code:line>
+**Undocumented-critical** *(full only)*
+- <code path> — warum blocking — wohin (existierende Datei + Sektion) — Draft ≤10 Zeilen
 
-**Undocumented Areas**
-- <code path> — <Warum kritisch> — <wo dokumentieren (Datei + Sektion)>
-
-**Nebenbefunde (Code, nicht Doku)**
-- <code:line> — <Befund>
+**Nebenbefunde (Code)**
+- …
 ```
-
-A-Files: One-Liner statt Tabelle.
 
 ## Fix-Regeln
 
-- Nur Issues aus der Report-Phase. Kein Scope-Creep.
-- Lösch-Kandidaten zuerst: stale Refs, generischer Rat, Code-Paraphrase, Selbstverständliches, Cross-File-Duplikate (in eine Datei kanonisieren → andere verlinken).
-- Eine Zeile pro Konzept.
-- "Undocumented-critical" → vorschlagen **wo** (existierende Datei + Sektion) + Draft ≤ 10 Zeilen, **kein neues File** (außer es ist wirklich ein eigener Themenbereich).
-- Nichts dokumentieren, was nicht existiert. Wenn Fix nur durch Spekulation möglich wäre → Issue droppen.
+- Nur Report-Issues. Kein Scope-Creep.
+- **Lösch-Kandidaten zuerst** im Vorschlagspaket.
+- Eine Zeile pro Konzept; Add ≤3 Zeilen (blocking ≤10 nur undocumented-critical).
+- Neues File nur wenn eigener Themenbereich **und** Merge unzumutbar.
+- Nichts erfinden. Spekulation → drop.
