@@ -15,6 +15,7 @@ Persönlicher Plugin-Marketplace für [Claude Code](https://code.claude.com/docs
 | **deps** | `/deps:bump` · `:health` — Dependencies aktuell, sicher und sauber lizenziert (bun-first) |
 | **notify** | Hooks: Desktop-Benachrichtigung, wenn Claude fertig ist oder Input braucht |
 | **load-context** | Hooks: lädt repo-spezifische Doku (CLAUDE.md/AGENTS.md/Rules/AI-Instruktionen) bei Session-Start in den Kontext |
+| **claudex-installer** | `/claudex-installer:install` — Claude Code auf macOS mit GPT über CLIProxyAPI einrichten |
 
 ## Installation
 
@@ -25,6 +26,7 @@ Persönlicher Plugin-Marketplace für [Claude Code](https://code.claude.com/docs
 /plugin install deps@labi
 /plugin install notify@labi
 /plugin install load-context@labi
+/plugin install claudex-installer@labi
 ```
 
 Updates kommen über `/plugin update` (bzw. Auto-Update), gesteuert über das `version`-Feld der jeweiligen `plugin.json`.

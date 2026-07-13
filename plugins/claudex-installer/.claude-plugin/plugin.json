@@ -1,0 +1,16 @@
+{
+  "$schema": "https://json.schemastore.org/claude-code-plugin.json",
+  "name": "claudex-installer",
+  "displayName": "claudex Installer",
+  "version": "1.0.0",
+  "description": "Installiert und konfiguriert CLIProxyAPI und eine claudex-Funktion für Claude Code mit GPT auf macOS.",
+  "author": {
+    "name": "Sven Labitzki",
+    "email": "sven@labitzki.de",
+    "url": "https://github.com/Xuoon"
+  },
+  "homepage": "https://github.com/Xuoon/skills/tree/main/plugins/claudex-installer",
+  "repository": "https://github.com/Xuoon/skills",
+  "license": "MIT",
+  "keywords": ["claude-code", "cliproxyapi", "codex", "gpt", "macos"]
+}
