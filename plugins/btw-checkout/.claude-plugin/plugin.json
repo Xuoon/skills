@@ -1,6 +1,6 @@
 {
   "name": "btw-checkout",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "Destilliert am Ende eines Side-Chats einen kompakten Übergabe-Prompt für den Haupt-Chat — Entscheidungen, Fakten, Aufgaben; copy-paste-fertig als Codeblock.",
   "author": {
     "name": "Sven Labitzki"

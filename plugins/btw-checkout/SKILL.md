@@ -1,5 +1,7 @@
 ---
-description: Distill the current side chat into a compact German handoff prompt for the main chat, output as a copy-paste-ready code block. Manual-only — invoke via /btw-checkout at the end of a side chat.
+name: btw-checkout
+description: Side-Chat-Ergebnis als kompakten Übergabe-Prompt für den Haupt-Chat ausgeben — Codeblock zum Rüberkopieren.
+argument-hint: "[hinweise]"
 disable-model-invocation: true
 ---
 
