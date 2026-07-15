@@ -1,11 +1,9 @@
 ---
-name: install
+name: claudex-install
 description: >-
-  Installs, repairs, updates, or removes “claudex” on macOS: installs the correct CLIProxyAPI
-  build for Apple Silicon or Intel, verifies the official SHA-256 checksum, runs OpenAI/Codex
-  OAuth, configures a localhost-only authenticated proxy, and adds an idempotent zsh function
-  that runs Claude Code with GPT. Use whenever the user wants claudex, Claude Code with GPT,
-  CLIProxyAPI for Claude Code, or wants to transfer this setup to another Mac.
+  Install, repair, update, or remove "claudex" on macOS — Claude Code running on GPT via a
+  local, checksum-verified, localhost-only CLIProxyAPI with OAuth. Use whenever the user wants
+  claudex, Claude Code with GPT, or to transfer this setup to another Mac.
 argument-hint: "[--model gpt-…] [--port 8318] [--device-login]"
 user-invocable: true
 allowed-tools: Bash Read AskUserQuestion
@@ -170,4 +168,4 @@ Anmeldedaten löschen will:
 bash "$CLAUDE_PLUGIN_ROOT/scripts/uninstall.sh" --purge-auth
 ```
 
-Lies bei Fehlern oder Sonderfällen `${CLAUDE_SKILL_DIR}/../../references/troubleshooting.md`.
+Lies bei Fehlern oder Sonderfällen `${CLAUDE_SKILL_DIR}/references/troubleshooting.md`.
