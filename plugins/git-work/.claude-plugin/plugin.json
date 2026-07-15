@@ -1,8 +1,0 @@
-{
-  "name": "git-work",
-  "version": "0.3.0",
-  "description": "Git-Workflow im Haus-Stil: logisch geschnittene Commits, concise Changelogs, PRs via gh. Approval-gated.",
-  "author": {
-    "name": "Sven Labitzki"
-  }
-}
