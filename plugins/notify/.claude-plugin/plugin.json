@@ -1,6 +1,6 @@
 {
   "name": "notify",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "Desktop-Benachrichtigung via Hooks, wenn Claude fertig ist (Stop) oder Input/Permission braucht (Notification). macOS osascript, Linux notify-send, sonst still.",
   "author": {
     "name": "Sven Labitzki"
