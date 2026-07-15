@@ -1,5 +1,5 @@
 ---
-description: Update every dependency across all package.json files (workspace-aware) to the latest official stable release, bun-first. Shows a full from→to plan with breaking-change notes for majors before touching anything. Manual-only — invoke via /deps:bump. Optional args — package name(s), `minor` (hold back majors).
+description: Alle Dependencies aufs letzte stabile Release heben (bun-first, workspace-aware) — zeigt erst den from→to-Plan mit Breaking-Hinweisen. Optional Paketnamen oder minor (hält Majors zurück).
 argument-hint: "[paket] [minor]"
 disable-model-invocation: true
 allowed-tools: Bash(git status *) Bash(git diff *) Bash(bun outdated *) Bash(cat *) Bash(find *)
@@ -29,4 +29,4 @@ Der `latest`-Dist-Tag der Registry = letztes offizielles stabiles Release. **Kei
 
 ## Grenzen
 
-Kein `git commit` (dafür `/git-work:commit`), keine Engine-/Runtime-Felder ändern, keine peerDependency-Konflikte "wegforcen" (`--force`/Resolutions nur auf expliziten Wunsch, als eigener Vorschlag).
+Kein `git commit` (committen bleibt beim Nutzer), keine Engine-/Runtime-Felder ändern, keine peerDependency-Konflikte "wegforcen" (`--force`/Resolutions nur auf expliziten Wunsch, als eigener Vorschlag).

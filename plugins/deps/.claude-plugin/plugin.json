@@ -1,6 +1,6 @@
 {
   "name": "deps",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Dependency-Pflege, bun-first: /deps:bump bringt alles aufs letzte offizielle stabile Release, /deps:health meldet CVEs, EOL und Lizenz-Flags (read-only).",
   "author": {
     "name": "Sven Labitzki"
