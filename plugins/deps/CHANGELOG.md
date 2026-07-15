@@ -1,5 +1,13 @@
 # Changelog — deps
 
+## [1.0.1] – 2026-07-16
+
+### Changed
+
+- Descriptions von `bump` und `health` deutsch und kurz — reine Picker-UI
+  (`disable-model-invocation`).
+- `bump` verweist nicht mehr auf das entfernte git-work-Plugin (Committen bleibt beim Nutzer).
+
 ## [1.0.0] – 2026-06-30
 
 ### Changed
