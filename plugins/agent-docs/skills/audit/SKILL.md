@@ -1,8 +1,7 @@
 ---
 description: >
-  Scored agent-docs review (CLAUDE.md/AGENTS.md + rules). Manual-only /agent-docs:audit.
-  Modes: (empty)=full scored · quick=red-flags+prune suspects · prune=delete-only.
-  Optional path scopes subtree. Delete-first, no bloat.
+  Agent-Doku prüfen und bewerten (CLAUDE.md/AGENTS.md + Rules).
+  Modi: ohne Arg = voller Score · quick = nur Red-Flags · prune = nur löschen; Pfad begrenzt den Scope.
 argument-hint: "[quick|prune] [pfad]"
 disable-model-invocation: true
 allowed-tools: Bash(git status *) Bash(git diff *) Bash(git log *) Bash(wc *)

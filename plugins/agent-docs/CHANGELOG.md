@@ -1,5 +1,12 @@
 # Changelog — agent-docs
 
+## [4.0.2] – 2026-07-16
+
+### Changed
+
+- `audit`-Description deutsch und kurz — sie ist reine Picker-UI (`disable-model-invocation`).
+  Die `sync`-Description bleibt englisch (Auto-Invoke-Trigger).
+
 ## [4.0.1] – 2026-07-09
 
 ### Changed
