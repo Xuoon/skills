@@ -5,7 +5,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "${CLAUDE_PLUGIN_ROOT}/scripts/notify.sh stop",
+            "command": "bash \"${CLAUDE_PLUGIN_ROOT}/scripts/notify.sh\" stop",
             "timeout": 5
           }
         ]
@@ -16,7 +16,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "${CLAUDE_PLUGIN_ROOT}/scripts/notify.sh notification",
+            "command": "bash \"${CLAUDE_PLUGIN_ROOT}/scripts/notify.sh\" notification",
             "timeout": 5
           }
         ]
