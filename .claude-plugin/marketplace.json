@@ -35,6 +35,11 @@
       "name": "claudex-installer",
       "source": "./plugins/claudex-installer",
       "description": "Richtet Claude Code auf macOS mit GPT über einen lokalen, authentifizierten CLIProxyAPI ein."
+    },
+    {
+      "name": "btw-checkout",
+      "source": "./plugins/btw-checkout",
+      "description": "Destilliert am Ende eines Side-Chats einen kompakten Übergabe-Prompt für den Haupt-Chat — Entscheidungen, Fakten, Aufgaben; copy-paste-fertig als Codeblock."
     }
   ]
 }
