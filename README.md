@@ -11,11 +11,10 @@ Persönlicher Plugin-Marketplace für [Claude Code](https://code.claude.com/docs
 | Plugin | Befehle / Verhalten |
 | --- | --- |
 | **agent-docs** | `/agent-docs:sync` · `:audit` — Agent-Doku aktualisieren oder prüfen; `sync` routet Init/Sync/Review automatisch |
-| **git-work** | `/git-work:commit` · `:changelog` · `:pr` — Commits, Changelogs und PRs im Haus-Stil |
 | **deps** | `/deps:bump` · `:health` — Dependencies aktuell, sicher und sauber lizenziert (bun-first) |
-| **notify** | Hooks: Desktop-Benachrichtigung, wenn Claude fertig ist oder Input braucht |
+| **notify** | Hooks: Desktop-Benachrichtigung (macOS/Windows/Linux), wenn der Agent fertig ist oder Input braucht — auch standalone aus anderen Harnesses |
 | **load-context** | Hooks: lädt repo-spezifische Doku (CLAUDE.md/AGENTS.md/Rules/AI-Instruktionen) bei Session-Start in den Kontext |
-| **claudex-installer** | `/claudex-installer:install` — Claude Code auf macOS mit GPT über CLIProxyAPI einrichten |
+| **claudex-install** | `/claudex-install` — Claude Code auf macOS mit GPT über CLIProxyAPI einrichten |
 | **btw-checkout** | `/btw-checkout` — Side-Chat-Ergebnis als kompakten Übergabe-Prompt für den Haupt-Chat ausgeben |
 
 ## Installation
@@ -23,11 +22,10 @@ Persönlicher Plugin-Marketplace für [Claude Code](https://code.claude.com/docs
 ```
 /plugin marketplace add Xuoon/skills
 /plugin install agent-docs@labi
-/plugin install git-work@labi
 /plugin install deps@labi
 /plugin install notify@labi
 /plugin install load-context@labi
-/plugin install claudex-installer@labi
+/plugin install claudex-install@labi
 /plugin install btw-checkout@labi
 ```
 
