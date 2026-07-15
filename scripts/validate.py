@@ -55,6 +55,9 @@ def frontmatter(path: Path):
 
 def check_md_links(path: Path) -> None:
     text = path.read_text(encoding="utf-8")
+    # Code-Blöcke/-Spans enthalten Beispiel-Links, keine echten Referenzen
+    text = re.sub(r"```.*?```", "", text, flags=re.S)
+    text = re.sub(r"`[^`\n]*`", "", text)
     for link in re.findall(r"\]\((?!https?://)([^)#\s]+)\)", text):
         target = (path.parent / link).resolve()
         if not target.exists():
