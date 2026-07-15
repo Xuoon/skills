@@ -12,11 +12,6 @@
       "description": "Sync als smarter Router (Init/Sync/Review) plus Audit für Agent-Doku (CLAUDE.md/AGENTS.md + Rules). Approval-gated, evidenz-basiert, löschen-bevorzugt."
     },
     {
-      "name": "git-work",
-      "source": "./plugins/git-work",
-      "description": "Git-Workflow im Haus-Stil: logisch geschnittene Commits, concise Changelogs, PRs via gh."
-    },
-    {
       "name": "deps",
       "source": "./plugins/deps",
       "description": "Dependency-Pflege, bun-first: /deps:bump bringt alles aufs letzte stabile Release, /deps:health meldet CVEs/EOL/Lizenz-Flags."
@@ -24,7 +19,7 @@
     {
       "name": "notify",
       "source": "./plugins/notify",
-      "description": "Desktop-Benachrichtigung via Hooks, wenn Claude fertig ist oder Input braucht."
+      "description": "Desktop-Benachrichtigung (macOS/Windows/Linux), wenn der Agent fertig ist oder Input braucht — auch standalone für andere Harnesses nutzbar."
     },
     {
       "name": "load-context",
@@ -32,14 +27,14 @@
       "description": "Lädt repo-spezifische Doku (CLAUDE.md/AGENTS.md/README/.claude/rules + AI-Tool-Instruktionen) bei Session-Start und nach Compact in den Kontext."
     },
     {
-      "name": "claudex-installer",
-      "source": "./plugins/claudex-installer",
+      "name": "claudex-install",
+      "source": "./plugins/claudex-install",
       "description": "Richtet Claude Code auf macOS mit GPT über einen lokalen, authentifizierten CLIProxyAPI ein."
     },
     {
       "name": "btw-checkout",
       "source": "./plugins/btw-checkout",
-      "description": "Destilliert am Ende eines Side-Chats einen kompakten Übergabe-Prompt für den Haupt-Chat — Entscheidungen, Fakten, Aufgaben; copy-paste-fertig als Codeblock."
+      "description": "Side-Chat-Ergebnis als kompakten Übergabe-Prompt für den Haupt-Chat ausgeben — Codeblock zum Rüberkopieren."
     }
   ]
 }
