@@ -14,7 +14,7 @@ Aus den tatsächlichen Commits des Branches: Titel + concise Beschreibung, ein P
 
 1. **Branch-Check.** `git status` + aktueller Branch. Auf main/master → Stop, erst Branch vorschlagen. Uncommitted Änderungen → benennen, aber nicht committen (dafür `/git-work:commit`).
 2. **Basis bestimmen.** Default-Branch via `gh repo view` (Fallback: main). Commits seit `git merge-base <base> HEAD` lesen — sie sind die einzige Quelle für Titel und Beschreibung. Existiert für den Branch schon ein PR (`gh pr list --head`) → melden und stoppen; PR-Updates sind ein anderer Auftrag.
-3. **Entwurf.** Titel im Haus-Stil: imperativ, lowercase, ≤ 60 Zeichen, `type:`-Präfix nur wenn der Branch genau eine Sache tut. Beschreibung concise: 1–3 Sätze Was/Warum; Bullets nur bei echten Mehrfach-Punkten; kein Diff-Nacherzählen, keine Test-Plan-Boilerplate, keine Emojis.
+3. **Entwurf.** Titel im Haus-Stil: imperativ, lowercase, ≤ 60 Zeichen, `type:`-Präfix nur wenn der Branch genau eine Sache tut. Beschreibung nach dem Format aus `${CLAUDE_SKILL_DIR}/../../CLAUDE.md`: oben Was/Warum, `---`, technischer Changelog, `---`, „Manuelle Schritte" nur wenn nötig; kein Diff-Nacherzählen, keine Verifikations-/Test-Plan-Boilerplate, keine Emojis.
 4. **Plan zeigen.** `<base> ← <head>`, Titel, Beschreibung, draft ja/nein (Default: nein). **Stop, auf Freigabe warten.**
 5. **Ausführen.** `git push -u origin <branch>`, dann `gh pr create` mit bestätigtem Titel/Body. PR-URL ausgeben.
 6. **Verify.** `gh pr view` — Titel und Base wie geplant; Abweichung melden, nicht still reparieren.

@@ -1,5 +1,19 @@
 # Changelog — git-work
 
+## [0.3.0] – 2026-07-15
+
+### Added
+
+- Plugin-CLAUDE.md mit dem verbindlichen PR-Beschreibungsformat (Was/Warum · `---` ·
+  technischer Changelog · `---` · „Manuelle Schritte" nur bei Bedarf; kein
+  Verifikations-Block) — wird nach der Installation in jede Session geladen und gilt
+  damit geräteübergreifend.
+
+### Changed
+
+- `/git-work:pr` verweist für die Beschreibung auf das Format der Plugin-CLAUDE.md statt
+  auf den früheren 1–3-Sätze-Stil.
+
 ## [0.2.0] – 2026-06-11
 
 ### Added
