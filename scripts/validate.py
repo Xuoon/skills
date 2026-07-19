@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
-"""Validiert das Marketplace-Repo: marketplace.json, plugin.json, SKILL.md-Frontmatter,
-${CLAUDE_SKILL_DIR}-Referenzen und relative Markdown-Links.
+"""Validiert das Marketplace-Repo: marketplace.json, plugin.json, Root-Changelog,
+SKILL.md-Frontmatter, ${CLAUDE_SKILL_DIR}-Referenzen und relative Markdown-Links.
 
 Lokal:  pip install pyyaml && python scripts/validate.py
 CI:     läuft via .github/workflows/validate.yml bei jedem Push.
@@ -97,6 +97,18 @@ def _git(*args):
         return None
 
 
+def _is_executable(path: Path) -> bool:
+    """Executable-Bit portabel prüfen; Windows-``stat`` bildet ihn nicht ab."""
+    if os.name != "nt":
+        return bool(path.stat().st_mode & 0o111)
+    rel = path.relative_to(ROOT).as_posix()
+    staged = _git("ls-files", "--stage", "--", rel)
+    if not staged:
+        return False
+    mode = staged.split(maxsplit=1)[0]
+    return mode == "100755"
+
+
 def _release_baseline():
     """Vergleichs-Ref je Kontext (PR/Push/lokal). None -> Release-Regel überspringen."""
     if _git("rev-parse", "--git-dir") is None:
@@ -111,18 +123,28 @@ def _release_baseline():
     return "HEAD" if _git("rev-parse", "--verify", "HEAD") else None
 
 
-def _changelog_top_version(plugin_dir: Path):
-    cl = plugin_dir / "CHANGELOG.md"
+def _changelog_top_version(plugin_name: str):
+    """Neueste Version aus dem Abschnitt ``## <plugin>`` im Root-Changelog."""
+    cl = ROOT / "CHANGELOG.md"
     if not cl.exists():
         return None
-    m = re.search(r"^##\s*\[(\d+\.\d+\.\d+)\]", cl.read_text(encoding="utf-8"), re.M)
+    text = cl.read_text(encoding="utf-8")
+    plugin = re.search(rf"^##\s+{re.escape(plugin_name)}\s*$", text, re.M)
+    if not plugin:
+        return None
+    rest = text[plugin.end():]
+    next_plugin = re.search(r"^##\s+", rest, re.M)
+    section = rest[:next_plugin.start()] if next_plugin else rest
+    m = re.search(r"^###\s*\[(\d+\.\d+\.\d+)\]", section, re.M)
     return m.group(1) if m else None
 
 
 def check_release(rel: Path, plugin_dir: Path, version: str) -> None:
-    """Release-Hygiene: eine materielle Plugin-Änderung (alles außer CHANGELOG.md)
-    verlangt Semver-Bump UND passenden CHANGELOG-Top-Eintrag. CHANGELOG-only-Edits
-    triggern nicht (kein Chicken-Egg). Ohne git/Baseline: graceful skip."""
+    """Materielle Plugin-Änderungen verlangen einen SemVer-Bump.
+
+    Der passende Root-Changelog-Eintrag wird unabhängig davon in ``check_plugin``
+    geprüft. Ohne git/Baseline wird der Bump-Check übersprungen.
+    """
     baseline = _release_baseline()
     if baseline is None:
         return
@@ -132,6 +154,8 @@ def check_release(rel: Path, plugin_dir: Path, version: str) -> None:
                    + (_git("ls-files", "--others", "--exclude-standard", "--", plugin_path) or "").splitlines())
     else:  # CI: Commit-Bereich Baseline..HEAD
         changed = (_git("diff", "--name-only", baseline, "HEAD", "--", plugin_path) or "").splitlines()
+    # Das Entfernen historischer Plugin-CHANGELOGs bei der Root-Konsolidierung
+    # verändert kein ausgeliefertes Laufzeitverhalten.
     if not any(f and not f.endswith("CHANGELOG.md") for f in changed):
         return
     base_manifest = _git("show", f"{baseline}:{plugin_path}/.claude-plugin/plugin.json")
@@ -141,10 +165,7 @@ def check_release(rel: Path, plugin_dir: Path, version: str) -> None:
         except Exception:  # noqa: BLE001
             base_version = None
         if base_version and base_version == version:
-            err(f"{rel}: geändert, aber version nicht gebumpt (noch {version}) — Semver-Bump + CHANGELOG nötig")
-    top = _changelog_top_version(plugin_dir)
-    if top is not None and top != version:
-        err(f"{rel}: CHANGELOG-Top [{top}] != plugin.json version {version}")
+            err(f"{rel}: geändert, aber version nicht gebumpt (noch {version}) — SemVer-Bump + Root-CHANGELOG nötig")
 
 
 def check_plugin(entry_name: str, plugin_dir: Path) -> None:
@@ -160,11 +181,14 @@ def check_plugin(entry_name: str, plugin_dir: Path) -> None:
         err(f"{rel}: plugin.json name '{data.get('name')}' != Marketplace-Eintrag '{entry_name}'")
     version = data.get("version", "")
     if not SEMVER.match(version):
-        err(f"{rel}: version '{version}' ist kein Semver (X.Y.Z)")
+        err(f"{rel}: version '{version}' ist kein SemVer (X.Y.Z)")
     else:
         check_release(rel, plugin_dir, version)
-    if not (plugin_dir / "CHANGELOG.md").exists():
-        warn(f"{rel}: CHANGELOG.md fehlt")
+        top = _changelog_top_version(entry_name)
+        if top is None:
+            err(f"{rel}: Abschnitt '## {entry_name}' mit Version fehlt in Root-CHANGELOG.md")
+        elif top != version:
+            err(f"{rel}: Root-CHANGELOG-Top [{top}] != plugin.json version {version}")
 
     hooks_file = plugin_dir / "hooks" / "hooks.json"
     if hooks_file.exists():
@@ -174,7 +198,7 @@ def check_plugin(entry_name: str, plugin_dir: Path) -> None:
                 target = plugin_dir / ref.lstrip("/")
                 if not target.exists():
                     err(f"{rel}: hooks.json referenziert fehlende Datei -> {ref}")
-                elif not target.stat().st_mode & 0o111:
+                elif not _is_executable(target):
                     warn(f"{rel}: Hook-Script nicht ausführbar (chmod +x) -> {ref}")
 
     skills = sorted((plugin_dir / "skills").glob("*/SKILL.md")) if (plugin_dir / "skills").is_dir() else []
@@ -191,6 +215,8 @@ def check_plugin(entry_name: str, plugin_dir: Path) -> None:
 
 
 def main() -> int:
+    if not (ROOT / "CHANGELOG.md").exists():
+        err("CHANGELOG.md im Repo-Root fehlt")
     mp_path = ROOT / ".claude-plugin" / "marketplace.json"
     if not mp_path.exists():
         err(".claude-plugin/marketplace.json fehlt")

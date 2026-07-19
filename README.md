@@ -16,6 +16,7 @@ Persönlicher Plugin-Marketplace für [Claude Code](https://code.claude.com/docs
 | **load-context** | Hooks: lädt repo-spezifische Doku (CLAUDE.md/AGENTS.md/Rules/AI-Instruktionen) bei Session-Start in den Kontext |
 | **claudex-install** | `/claudex-install` — Claude Code auf macOS mit GPT über CLIProxyAPI einrichten |
 | **btw-checkout** | `/btw-checkout` — Side-Chat-Ergebnis als kompakten Übergabe-Prompt für den Haupt-Chat ausgeben |
+| **windev** | `/windev:setup` · `:optimize` — Windows-Dev-Umgebung einrichten (auch frisches Windows) bzw. vermessen und bereinigen; approval-gated |
 
 ## Installation
 
@@ -27,8 +28,11 @@ Persönlicher Plugin-Marketplace für [Claude Code](https://code.claude.com/docs
 /plugin install load-context@labi
 /plugin install claudex-install@labi
 /plugin install btw-checkout@labi
+/plugin install windev@labi
 ```
 
 Updates kommen über `/plugin update` (bzw. Auto-Update), gesteuert über das `version`-Feld der jeweiligen `plugin.json`.
+
+Alle Release-Notizen stehen gesammelt in der [CHANGELOG.md](CHANGELOG.md); jedes Plugin wird unabhängig nach SemVer versioniert.
 
 Neues Plugin anlegen, testen, releasen: [CONTRIBUTING.md](CONTRIBUTING.md)

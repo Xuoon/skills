@@ -11,9 +11,10 @@
 ```
 plugins/<name>/
 ├── .claude-plugin/plugin.json   # name (= Ordnername!), version "0.1.0", description, author
-├── CHANGELOG.md
 └── SKILL.md, skills/… oder hooks/hooks.json
 ```
+
+Die Änderungshistorie liegt zentral in der Root-`CHANGELOG.md`: pro Plugin ein `## <name>`-Abschnitt, neueste Version zuerst als `### [X.Y.Z] – YYYY-MM-DD`. Claude Code verlangt keine Changelog-Datei zum Laden eines Plugins; die [offizielle Plugin-Referenz](https://code.claude.com/docs/en/plugins-reference#version-management) empfiehlt sie als Release-Dokumentation. In diesem Multi-Plugin-Repository erfüllt die zentrale Datei diesen Zweck ohne redundante Einzeldateien.
 
 ## 3. Frontmatter-Entscheidungen pro Skill
 
@@ -27,7 +28,7 @@ Eintrag in `.claude-plugin/marketplace.json` (`"source": "./plugins/<name>"`), d
 
 ## 5. Lokal testen, dann releasen
 
-Im Repo-Ordner: `/plugin marketplace add .` → `/plugin install <name>@labi` → Befehle testen. SKILL.md-Änderungen greifen live, alles andere braucht `/reload-plugins`. Beim Release: Version bumpen + CHANGELOG, pushen — Geräte ziehen es per `/plugin update`. Semver-Faustregel: Befehls-/Argument-Änderungen = minor, reine Instruktions-Verbesserungen = patch, Umbenennungen/Entfernungen = major.
+Im Repo-Ordner: `/plugin marketplace add .` → `/plugin install <name>@labi` → Befehle testen. SKILL.md-Änderungen greifen live, alles andere braucht `/reload-plugins`. Beim Release: Version bumpen + Eintrag im Plugin-Abschnitt der Root-`CHANGELOG.md`, dann pushen — Geräte ziehen es per `/plugin update`. SemVer-Faustregel: Befehls-/Argument-Änderungen = minor, reine Instruktions-Verbesserungen = patch, Umbenennungen/Entfernungen = major.
 
 ## 6. Externe Plugins
 
