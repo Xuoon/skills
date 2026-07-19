@@ -35,6 +35,11 @@
       "name": "btw-checkout",
       "source": "./plugins/btw-checkout",
       "description": "Side-Chat-Ergebnis als kompakten Übergabe-Prompt für den Haupt-Chat ausgeben — Codeblock zum Rüberkopieren."
+    },
+    {
+      "name": "windev",
+      "source": "./plugins/windev",
+      "description": "Windows-Dev-Umgebung: /windev:setup richtet PowerShell/Terminal nach Best Practice ein (auch auf frischem Windows), /windev:optimize vermisst und bereinigt die bestehende Umgebung — beides approval-gated."
     }
   ]
 }
