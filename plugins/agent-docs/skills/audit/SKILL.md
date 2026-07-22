@@ -1,8 +1,9 @@
 ---
 description: >
   Agent-Doku prüfen und bewerten (CLAUDE.md/AGENTS.md + Rules).
-  Modi: ohne Arg = voller Score · quick = nur Red-Flags · prune = nur löschen; Pfad begrenzt den Scope.
-argument-hint: "[quick|prune] [pfad]"
+  Ohne Flag = voller Score · --schnell = nur Red-Flags · --kürzen = nur löschen.
+  Standard nur Report, Schreiben erst mit --anwenden.
+argument-hint: "[--schnell | --kürzen] [--anwenden]"
 disable-model-invocation: true
 allowed-tools: Bash(git status *) Bash(git diff *) Bash(git log *) Bash(wc *)
 ---
@@ -15,33 +16,27 @@ Teuer und tokenintensiv — nur auf expliziten Befehl. Completeness **ohne** Con
 
 ## Argumente (`$ARGUMENTS`)
 
-User-Eingabe nach dem Slash-Command (kann leer sein):
+Alle optional:
 
-```text
-$ARGUMENTS
-```
-
-**Parsen** (Tokens whitespace-getrennt, Reihenfolge egal):
-
-| Token | Bedeutung |
+| Flag | Bedeutung |
 | --- | --- |
-| *(leer / kein Mode-Token)* | **full** — Claims, Coverage, paths, Links, Prune, Scoring, Fix-Proposals |
-| `quick` | Claims + Links/Globs + Duplikat/Prune-Scan; **kein** 6er-Scoring, **keine** Per-File-Tabellen, **kein** Coverage. Report: Red Flags + Below-B (1 Zeile/Datei) + Proposals nur Red Flags **und** klare Deletes |
-| `prune` | Nur prune-sweep + Link-Check. Proposals fast nur Delete/Shorten/Merge |
-| Pfad (`apps/…`, `packages/…`, `.claude/rules/…`, Dateiname) | Scope auf diesen Subtree; Cross-Refs/kanonische Gegenstellen außerhalb trotzdem prüfen |
-| Freitext (`alles`, `dünner`, …) | Mode-Hint wenn kein explizites `quick`/`prune`; sonst ignorieren |
+| *(ohne Flag)* | **full** — Claims, Coverage, paths, Links, Prune, Scoring, Fix-Proposals |
+| `--schnell` | Claims + Links/Globs + Duplikat/Prune-Scan; **kein** 6er-Scoring, **keine** Per-File-Tabellen, **kein** Coverage. Report: Red Flags + Below-B (1 Zeile/Datei) + Proposals nur Red Flags **und** klare Deletes |
+| `--kürzen` | Nur prune-sweep + Link-Check. Proposals fast nur Delete/Shorten/Merge |
+| `--anwenden` | Fix-Proposals direkt schreiben. **Ohne dieses Flag nur Report** — kein Edit |
 
-**Beispiele (Autocomplete-Hilfe):**
+Scope ist immer das aktuelle Verzeichnis. Einen Subtree bei Bedarf im **Fließtext** nennen („nur apps/dash"); Cross-Refs/kanonische Gegenstellen außerhalb trotzdem prüfen.
+
+**Beispiele:**
 
 ```text
-/agent-docs:audit                 → full, ganzes Repo
-/agent-docs:audit quick           → sparsam, Red Flags + Prune-Suspects
-/agent-docs:audit prune           → nur dünner machen
-/agent-docs:audit quick apps/dash → quick, nur Dash-Docs + gematchte Rules
-/agent-docs:audit prune .claude/rules/dash
+/agent-docs:audit             → full, ganzes Repo, nur Report
+/agent-docs:audit --schnell   → sparsam, Red Flags + Prune-Suspects
+/agent-docs:audit --kürzen    → nur dünner machen (Vorschlag)
+/agent-docs:audit --kürzen --anwenden   → dünner machen + direkt schreiben
 ```
 
-Mode zu Beginn in **einem Satz** festnageln: `Mode=quick · Scope=apps/dash`.
+Modus zu Beginn in **einem Satz** festnageln: `Mode=schnell · Scope=apps/dash`.
 
 ## Workflow
 
@@ -52,23 +47,23 @@ Mode zu Beginn in **einem Satz** festnageln: `Mode=quick · Scope=apps/dash`.
    > `impl-detail` = Implementation die der Code allein tragen sollte.  
    > Unsicher → `needs verification`.
 
-   Separate Sweeps (je 1 Subagent; bei `prune` nur d + Links):
+   Separate Sweeps (je 1 Subagent; bei `--kürzen` nur d + Links):
 
-   - **a) Coverage** *(nicht bei quick/prune)* — nur **kritisch** non-obvious (Security, Lifecycle, Kopplung, CI/Deploy, Harness, Side-Effect-Imports, Formate). Trivial-CRUD = 0 Coverage-Issue.
+   - **a) Coverage** *(nicht bei `--schnell`/`--kürzen`)* — nur **kritisch** non-obvious (Security, Lifecycle, Kopplung, CI/Deploy, Harness, Side-Effect-Imports, Formate). Trivial-CRUD = 0 Coverage-Issue.
    - **b) `paths:`** — `ok|dead|too-broad|too-narrow` + Beispiele.
    - **c) Links + Code-Kommentar-Refs** resolven.
    - **d) Prune-Sweep** — **immer** (auch full/quick), laut prune-sweep.md.
 
-2. **Scoring** pro File (s.u.) — entfällt bei `quick`/`prune`.
+2. **Scoring** pro File (s.u.) — entfällt bei `--schnell`/`--kürzen`.
 3. **Report** (Template).
 4. **Fix-Proposals** (shared.md-Format). Priorität:
    1. Broken/wrong/security  
    2. **Deletes / Prune / Merge**  
    3. missing-blocking (≤10 Zeilen Draft, existierende Datei)  
    4. nie Kosmetik, nie Inventar-Auffüllung  
-   Bei `quick`: Red Flags + eindeutige Prunes. Bei `prune`: fast nur Deletes.
-5. **Approval-Gate.** Stop.
-6. **Verify** (shared.md); Full: re-score; bei Conciseness-Drop durch Add-only-Fixes → revert Add, Prune priorisieren.
+   Bei `--schnell`: Red Flags + eindeutige Prunes. Bei `--kürzen`: fast nur Deletes.
+5. **Ende ohne `--anwenden`** — Report + Proposals sind das Ergebnis, kein Edit.
+6. **Anwenden + Verify (nur mit `--anwenden`).** Proposals schreiben, dann Verify (shared.md); Full: re-score; bei Conciseness-Drop durch Add-only-Fixes → revert Add, Prune priorisieren.
 
 ## Scoring (6 Kriterien)
 

@@ -93,18 +93,11 @@ Nach der Bestätigung:
 bash "$CLAUDE_PLUGIN_ROOT/scripts/install.sh" --yes [gewählte Optionen]
 ```
 
-Der Installer erledigt deterministisch:
-
-1. native Mac-Architektur einschließlich Rosetta erkennen,
-2. offizielles Release und `checksums.txt` über HTTPS laden,
-3. nur die passende SHA-256-Zeile verifizieren,
-4. Binary unter `~/.local/share/cliproxyapi/bin/` installieren,
-5. sichere Localhost-Config und zufälligen Client-Key mit Dateimodus `600` anlegen,
-6. Codex/OpenAI-OAuth mit derselben Config und demselben `auth-dir` durchführen,
-7. Proxy starten und `/v1/models` authentifiziert abfragen,
-8. ein tatsächlich verfügbares GPT-Modell wählen,
-9. den verwalteten `claudex()`-Block idempotent in `~/.zshrc` eintragen,
-10. `zsh -n ~/.zshrc` ausführen und bei Fehlern das Backup zurückspielen.
+Der Installer läuft deterministisch durch (Architektur-Erkennung inkl. Rosetta, verifizierte
+Binary-Installation, Localhost-Config mit zufälligem Client-Key, OAuth, Proxy-Start,
+Modellwahl, idempotenter `.zshrc`-Block mit Backup und Syntaxprüfung). Die Sicherheitszusagen
+oben gelten dabei durchgehend: nur die passende SHA-256-Zeile wird verifiziert, gebunden wird
+ausschließlich an `127.0.0.1`, Client-Key und OAuth-Dateien erscheinen nie im Chat oder Log.
 
 OAuth ist eine Benutzerinteraktion. Bitte den Benutzer, den Browser- oder Device-Code-Schritt
 selbst abzuschließen; behaupte erst danach, der Login sei erfolgreich.

@@ -1,9 +1,12 @@
 ---
 description: >
-  Everyday agent-docs router (init / diff-sync / prune-first / review).
-  Delete-first, asymmetric add-gate, mini-prune on growth.
-  Triggers: code changed, "sync docs", "weniger doku", "prune", bootstrap CLAUDE.md.
-argument-hint: "[main|branch|prune] [pfad]"
+  Hält die Agent-Doku (CLAUDE.md/AGENTS.md, .claude/rules) am Code — wählt selbst den
+  kleinsten passenden Modus: neu anlegen wenn keine da ist, sonst Diff-Sync nach
+  Code-Änderungen, kürzen oder prüfen. Löschen-bevorzugt, strenges Add-Gate; 0 Änderungen
+  ist ein gültiges Ergebnis. Standard nur Vorschlag, Schreiben erst mit `--anwenden`.
+  AUSLÖSER: Code geändert, "Doku syncen", "kürzen"/"weniger Doku", oder ein Repo ohne
+  CLAUDE.md, das eine braucht. NICHT wenn die Änderung kein dokumentiertes Verhalten berührt.
+argument-hint: "[--kürzen | --prüfen] [--anwenden]"
 allowed-tools: Bash(git status *) Bash(git diff *) Bash(git log *) Bash(git merge-base *) Bash(git ls-files *) Bash(ls *) Bash(find *) Bash(wc *)
 ---
 
@@ -19,53 +22,45 @@ Alltags-Einstieg für Agent-Doku. Kleinster passender Modus. **Sync ist kein Fre
 
 ## Argumente (`$ARGUMENTS`)
 
-```text
-$ARGUMENTS
-```
+Alle optional:
 
-Alle optional, whitespace-getrennt, Reihenfolge egal:
-
-| Token | Bedeutung |
+| Flag | Bedeutung |
 | --- | --- |
-| `prune` / `dünner` / `weniger` | **Prune-first** erzwingen (auch mit Code-Diff) |
-| `review` / `quick` | Review-Modus → Audit `quick` (auch ohne Diff) |
-| `full` / `audit` / `alles` / `komplett` | Nach Diff-Sync optional Full-/Quick-Review der betroffenen Docs vorschlagen; ohne Diff → Audit full bzw. quick je nach Wort |
-| Git-Ref (`main`, `origin/main`, Tag, SHA-ähnlich) | Diff-Basis = `merge-base <ref> HEAD` statt nur Working Tree |
-| Pfad (`apps/dash`, `.claude/rules/…`) | Doc-/Discovery-Scope auf Subtree; Cross-Refs außerhalb trotzdem prüfen |
-| Freitext | Routing-Hint („bootstrap“, „init“, …) |
+| `--kürzen` | Delete-first als Hauptpass erzwingen (auch mit Code-Diff) |
+| `--prüfen` | Statt syncen prüfen → Audit `--schnell`; „gründlich"/„full" im Fließtext eskaliert auf Full-Audit |
+| `--anwenden` | Vorschlag direkt schreiben. **Ohne dieses Flag wird nichts geändert** — nur analysiert und vorgeschlagen |
+
+Ohne Modus-Flag: **Auto-Route** (neu anlegen, wenn keine Doku da ist; sonst Diff-Sync). Scope ist immer das aktuelle Verzeichnis. Diff-Basis oder Subtree bei Bedarf im **Fließtext** nennen („gegen main", „nur apps/dash"); ohne Angabe = Working Tree.
 
 **Beispiele:**
 
 ```text
-/agent-docs:sync                      → Auto-Route (Init | Diff-Sync | Review)
-/agent-docs:sync prune                → nur dünner (delete-first)
-/agent-docs:sync main                 → Diff gegen main
-/agent-docs:sync prune apps/dash      → Prune nur Dash-Docs
-/agent-docs:sync origin/main packages/backend
+/agent-docs:sync                       → Auto-Route, nur Vorschlag
+/agent-docs:sync --anwenden            → Vorschlag + direkt schreiben
+/agent-docs:sync --kürzen              → nur dünner (delete-first), Vorschlag
+/agent-docs:sync --prüfen              → prüfen statt syncen
+/agent-docs:sync --kürzen  nur apps/dash gegen main
 ```
 
-Mode + Scope + Diff-Basis in **einem Satz** festnageln, dann Routing-Gate.
+Modus + (freeform) Diff-Basis/Subtree in **einem Satz** festnageln, dann Routing-Gate.
 
 ## Routing-Gate
 
-Snapshot: `git status --short`, `git diff --stat` (ggf. gegen Ref aus Args), `git ls-files` für `CLAUDE.md`/`AGENTS.md`/Rules (oder Arg-Subtree).
+Snapshot: `git status --short`, `git diff --stat` (ggf. gegen freeform Ref), `git ls-files` für `CLAUDE.md`/`AGENTS.md`/Rules (oder freeform Subtree).
 
 | Situation | Modus |
 | --- | --- |
 | Keine Agent-Doku im Scope | **Init** → `${CLAUDE_SKILL_DIR}/../../references/init.md` |
-| Args `prune`/`dünner`/`weniger` | **Prune-first Sync**: prune-sweep als Hauptpass; Adds nur mit Add-Gate |
-| Code-Diff / Session-Code-Änderungen | **Sync** (unten); Diff-Basis aus Ref-Arg wenn gesetzt |
-| Args `review`/`quick` oder kein Diff + User will prüfen | **Review** → Audit `quick` (`../audit/SKILL.md`) |
-| Args `full`/`alles`/`komplett` ohne Diff | **Review** → Audit full |
-| Code-Diff **und** `full`/`audit`/`alles` | Zuerst Sync-Kandidaten zum Diff; danach Review der **betroffenen** Dateien vorschlagen |
+| `--kürzen` | **Prune-first Sync**: prune-sweep als Hauptpass; Adds nur mit Add-Gate |
+| Code-Diff / Session-Code-Änderungen | **Sync** (unten); Diff-Basis aus freeform Ref wenn genannt |
+| `--prüfen` (oder kein Diff + User will prüfen) | **Review** → Audit `--schnell`; „gründlich"/„full" → Full-Audit (`../audit/SKILL.md`) |
+| Code-Diff **und** `--prüfen` | Zuerst Sync-Kandidaten zum Diff; danach Review der **betroffenen** Dateien vorschlagen |
 
-Routing in **einem Satz** begründen, dann ausführen. Approval + Verify aus `shared.md` immer verbindlich.
+Routing in **einem Satz** begründen, dann ausführen. Standard nur Vorschlag; Schreiben/Verify nur mit `--anwenden` (siehe `shared.md`).
 
-## Asymmetrisches Gate (Kurzform — Details shared.md)
+## Asymmetrisches Gate
 
-- **DELETE/Kürzen:** niedrig — stale, Duplikat, generisch, Implementation-Detail, Historie.  
-- **ADD:** hoch — agent-blocking **und** non-obvious **und** single home **und** ≤3 Zeilen **und** Netto-Budget (Add ⇒ Prune-Mitvorschlag oder Ausnahmebegründung).  
-- Unsicher bei ADD → **nicht** vorschlagen. Unsicher bei klarem Müll → **löschen** vorschlagen.
+Kanonisch in `shared.md`. Essenz: DELETE billig (stale, Duplikat, generisch, Impl-Detail, Historie) — ADD teuer (agent-blocking ∧ non-obvious ∧ single home ∧ ≤3 Zeilen ∧ Netto-Budget). Unsicher → ADD nicht vorschlagen, klaren Müll löschen.
 
 ## Sync-Workflow (Diff-getrieben)
 
@@ -86,9 +81,9 @@ Routing in **einem Satz** begründen, dann ausführen. Approval + Verify aus `sh
 4. **Mini-Prune (Pflicht wenn irgendein ADD übrig ist).**  
    Kurzer prune-sweep auf **dieselben** Dateien + offensichtliche Cross-Duplikate des Themas. Mindestens ein Delete/Shorten-Kandidat im Paket **oder** schriftlich: warum Netto-Wachstum unvermeidlich (neue Domain-Invariante).
 
-5. **Vorschlag + Approval.** Blöcke laut shared.md — **Deletes zuerst**, dann Adds. `Netto:` schätzen. Stop, warten, nur Bestätigtes applyen.
+5. **Vorschlag.** Blöcke laut shared.md — **Deletes zuerst**, dann Adds. `Netto:` schätzen. **Ohne `--anwenden` endet der Lauf hier — kein Edit.**
 
-6. **Verify.** shared.md inkl. **Δ lines** melden. Reines Wachstum ohne genehmigte Ausnahme im Report markieren.
+6. **Anwenden + Verify (nur mit `--anwenden`).** Bestätigte Blöcke schreiben, dann Verify laut shared.md inkl. **Δ lines** melden. Reines Wachstum ohne genehmigte Ausnahme im Report markieren.
 
 ## Sonderfälle
 

@@ -1,6 +1,6 @@
 {
   "name": "agent-docs",
-  "version": "4.0.2",
+  "version": "5.0.0",
   "description": "Sync/Init/Review/Audit for agent docs. Asymmetric add-gate, delete-first, mini-prune on growth. Slash args: audit [quick|prune] [path], sync [ref|prune] [path].",
   "author": {
     "name": "Sven Labitzki"
