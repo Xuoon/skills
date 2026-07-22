@@ -1,0 +1,8 @@
+{
+  "name": "ship",
+  "version": "1.0.0",
+  "description": "Arbeit abschließen: committen, PR auf main im Hausformat, optional direkt mergen — mit Public-Repo-Check vorab. Schreibende Schritte erst nach Freigabe.",
+  "author": {
+    "name": "Sven Labitzki"
+  }
+}

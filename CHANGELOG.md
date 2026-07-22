@@ -77,6 +77,23 @@ Sync/Audit neigten dazu, nach Feature-Arbeit **Implementation-Details und Invent
 
 - Plugin mit `sync`, `audit`, `prune`, `init`; zentrales Vorschlags-Format in `shared.md`.
 
+## cleanup
+
+### [1.0.0] – 2026-07-23
+
+#### Hinzugefügt
+
+- `/cleanup:code` — findet nachweislich toten/Legacy-/Fallback-Code und verwaiste Dateien, verifiziert jede Löschung gegen dynamische Nutzung. Standard nur analysieren; mit `--anwenden` direkt entfernen samt aller Rest-Erwähnungen, danach Build/Test. Delete-first.
+- `/cleanup:skills` — sortiert repo-lokale Skills/Commands in löschen (Plugin/Built-in deckt ab) / hochziehen (in den Marketplace) / behalten (projektspezifisch); löscht mit `--anwenden`.
+
+## ship
+
+### [1.0.0] – 2026-07-23
+
+#### Hinzugefügt
+
+- `/ship` — committen → PR auf `main` im Hausformat → optional mergen, mit read-only Recon, Public-Repo-Guard (prüft den Diff auf Sensibles) und Freigabe-Gate vor jedem schreibenden Schritt. Bare `/ship` = committen + PR (nur falls keiner offen ist), **kein** Merge; `--mergen` mergt zusätzlich, `--nur-commit` lässt den PR weg.
+
 ## claudex-install
 
 ### [3.0.0] – 2026-07-23

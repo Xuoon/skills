@@ -11,6 +11,8 @@ Persönlicher Plugin-Marketplace für [Claude Code](https://code.claude.com/docs
 | Plugin | Befehle / Verhalten |
 | --- | --- |
 | **agent-docs** | `/agent-docs:sync` · `:audit` — Agent-Doku aktualisieren oder prüfen; `sync` routet Init/Sync/Review automatisch |
+| **cleanup** | `/cleanup:code` · `:skills` — toten/Legacy-Code + verwaiste Dateien entfernen; repo-lokale Skills sortieren (löschen/hochziehen/behalten) |
+| **ship** | `/ship` — committen, PR auf main im Hausformat, optional direkt mergen; Public-Repo-Check vorab |
 | **load-context** | Hooks: lädt repo-spezifische Doku (CLAUDE.md/AGENTS.md/Rules/AI-Instruktionen) bei Session-Start in den Kontext |
 | **claudex-install** | `/claudex-install` — Claude Code auf macOS mit GPT über CLIProxyAPI einrichten |
 | **btw-checkout** | `/btw-checkout` — Side-Chat-Ergebnis als kompakten Übergabe-Prompt für den Haupt-Chat ausgeben |
@@ -21,6 +23,8 @@ Persönlicher Plugin-Marketplace für [Claude Code](https://code.claude.com/docs
 ```
 /plugin marketplace add Xuoon/skills
 /plugin install agent-docs@labi
+/plugin install cleanup@labi
+/plugin install ship@labi
 /plugin install load-context@labi
 /plugin install claudex-install@labi
 /plugin install btw-checkout@labi

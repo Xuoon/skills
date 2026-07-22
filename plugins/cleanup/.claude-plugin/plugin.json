@@ -1,0 +1,8 @@
+{
+  "name": "cleanup",
+  "version": "1.0.0",
+  "description": "Aufräum-Skills, löschen-bevorzugt: /cleanup:code findet toten/Legacy-Code + verwaiste Dateien, /cleanup:skills sortiert repo-lokale Skills. Standard nur analysieren, --anwenden führt aus.",
+  "author": {
+    "name": "Sven Labitzki"
+  }
+}
