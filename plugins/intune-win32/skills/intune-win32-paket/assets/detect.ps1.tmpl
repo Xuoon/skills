@@ -1,0 +1,23 @@
+<#
+    Intune Detection-Skript fuer {{PKGNAME}}
+    Regel: Ausgabe auf STDOUT + Exit 0  => "installiert"
+           Keine Ausgabe / Exit 1       => "nicht installiert"
+    In Intune: "Skript mit 64-Bit ausfuehren" = Ja, Signaturpruefung = Nein
+
+    TODO pruefen: Suchmuster {{DISPLAYNAME}} nach der ersten Testinstallation
+    gegen den echten Anzeigenamen in der Registry abgleichen. Zu unscharf =
+    Fehlerkennung, zu scharf = 0x87D1041C ("nicht erkannt nach Installation").
+#>
+$uninstPaths = @(
+    'HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall\*',
+    'HKLM:\SOFTWARE\WOW6432Node\Microsoft\Windows\CurrentVersion\Uninstall\*'
+)
+$app = Get-ItemProperty $uninstPaths -ErrorAction SilentlyContinue |
+       Where-Object { $_.DisplayName -like '{{DISPLAYNAME}}' } |
+       Select-Object -First 1
+
+if ($app) {
+    Write-Output "$($app.DisplayName) $($app.DisplayVersion) installiert"
+    exit 0
+}
+exit 1

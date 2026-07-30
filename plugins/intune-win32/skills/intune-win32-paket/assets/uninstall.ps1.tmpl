@@ -1,0 +1,36 @@
+<#
+    {{PKGNAME}} - Intune Win32 Uninstall
+    Sucht die Installation ueber den Anzeigenamen in der Uninstall-Registry
+    und deinstalliert silent (MSI per Produktcode, sonst UninstallString).
+#>
+$ErrorActionPreference = 'Continue'
+$LogDir  = '{{LOGDIR}}'
+$LogFile = Join-Path $LogDir '{{PKGNAME}}-uninstall.log'
+New-Item -ItemType Directory -Path $LogDir -Force | Out-Null
+function Log($m) { "$(Get-Date -f 'yyyy-MM-dd HH:mm:ss')  $m" | Tee-Object -FilePath $LogFile -Append }
+
+Log '=== Uninstall-Start {{PKGNAME}} ==='
+
+$uninstPaths = @(
+    'HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall\*',
+    'HKLM:\SOFTWARE\WOW6432Node\Microsoft\Windows\CurrentVersion\Uninstall\*'
+)
+$existing = Get-ItemProperty $uninstPaths -ErrorAction SilentlyContinue |
+            Where-Object { $_.DisplayName -like '{{DISPLAYNAME}}' }
+if (-not $existing) { Log 'Keine Installation gefunden.'; exit 0 }
+
+foreach ($e in $existing) {
+    Log "Deinstalliere: $($e.DisplayName) $($e.DisplayVersion)"
+    if ($e.PSChildName -match '^\{[0-9A-Fa-f-]+\}$') {
+        Start-Process msiexec.exe -ArgumentList "/x $($e.PSChildName) /qn /norestart" -Wait
+        Start-Sleep 5
+    } elseif ($e.UninstallString) {
+        if ($e.UninstallString -match '"([^"]+)"') { $exe = $matches[1] }
+        else { $exe = ($e.UninstallString -split '\s+')[0] }
+        try { Start-Process -FilePath $exe -ArgumentList '{{UNINSTALLARGS}}' -Wait -ErrorAction Stop }
+        catch { Log "WARN: $_" }
+    }
+}
+
+Log '=== Uninstall-Ende ==='
+exit 0

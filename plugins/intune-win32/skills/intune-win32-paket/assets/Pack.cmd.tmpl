@@ -1,0 +1,30 @@
+@echo off
+setlocal
+set "BASE=%~dp0"
+
+if not exist "%BASE%App\{{SETUPFILE}}" (
+  echo FEHLER: App\{{SETUPFILE}} fehlt.
+  echo Quellen in App\ pruefen ^(bei neuer Version Dateinamen in Pack.cmd
+  echo und App\install.ps1 anpassen^).
+  pause
+  exit /b 1
+)
+
+echo Packe {{PKGNAME}}-Paket ...
+"%BASE%IntuneWinAppUtil.exe" -c "%BASE%App" -s "{{SETUPFILE}}" -o "%BASE%Output" -q >"%BASE%pack.log" 2>&1
+if errorlevel 1 (
+  echo.
+  echo Packen fehlgeschlagen - siehe pack.log
+  pause
+  exit /b 1
+)
+if not exist "%BASE%Output\*.intunewin" (
+  echo.
+  echo FEHLER: Es wurde keine .intunewin erzeugt - siehe pack.log
+  pause
+  exit /b 1
+)
+echo.
+echo FERTIG. Die .intunewin liegt in:  %BASE%Output
+echo Diese Datei in Intune als Win32-App hochladen.
+pause

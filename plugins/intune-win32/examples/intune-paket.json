@@ -1,0 +1,18 @@
+{
+  "packagePrefix": "C_",
+  "logDir": "C:\\ProgramData\\Intune-Logs",
+  "docFile": "CLAUDE.md",
+  "utilSearchRoots": ["."],
+  "requirements": {
+    "architecture": "x64",
+    "minWindows": "Windows 10 1607"
+  },
+  "assignment": {
+    "groupPattern": "SG_Intune_<App>",
+    "memberType": "Geraet",
+    "intent": "Required"
+  },
+  "networkImageRoot": "",
+  "trashFolder": "_to_delete",
+  "language": "de"
+}

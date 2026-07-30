@@ -1,0 +1,27 @@
+<#
+    {{PKGNAME}} - Intune Win32 Install-Wrapper (MSI mit Zusatzparametern)
+    Nur noetig, wenn das MSI Properties/Transforms braucht. Reine MSIs ohne
+    Sonderparameter besser ohne Wrapper paketieren - Intune fuellt Befehle
+    und Erkennung dann selbst aus.
+#>
+$ErrorActionPreference = 'Continue'
+
+$Msi     = Join-Path $PSScriptRoot '{{SETUPFILE}}'
+$LogDir  = '{{LOGDIR}}'
+$LogFile = Join-Path $LogDir '{{PKGNAME}}-install.log'
+New-Item -ItemType Directory -Path $LogDir -Force | Out-Null
+function Log($m) { "$(Get-Date -f 'yyyy-MM-dd HH:mm:ss')  $m" | Tee-Object -FilePath $LogFile -Append }
+
+Log '=== Install-Start {{PKGNAME}} ==='
+if (-not (Test-Path $Msi)) { Log "FEHLER: $Msi nicht gefunden."; exit 1 }
+
+$args = @('/i', "`"$Msi`"", '/qn', '/norestart', "/l*v `"$LogDir\{{PKGNAME}}-msi.log`"")
+# Zusaetzliche Properties hier ergaenzen, z.B.: $args += 'ALLUSERS=1'
+
+$proc = Start-Process msiexec.exe -ArgumentList $args -Wait -PassThru
+$code = $proc.ExitCode
+Log "msiexec-Exitcode: $code"
+if ($code -eq 3010) { Log 'Hinweis: 3010 = Erfolg, Neustart ausstehend.'; $code = 0 }
+
+Log '=== Install-Ende ==='
+exit $code

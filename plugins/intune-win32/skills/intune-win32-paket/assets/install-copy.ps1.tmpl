@@ -1,0 +1,71 @@
+<#
+    {{PKGNAME}} - Intune Win32 Install (Modus "copy")
+    Fuer portable Programme ohne Setup: Dateien nach Program Files kopieren
+    und eine Startmenue-Verknuepfung fuer alle Benutzer anlegen.
+    Ausfuehrung: System-Kontext, 64-bit.
+
+    Abhaengigkeiten (falls vorhanden) VOR dem Kopieren installieren und bei
+    Fehlschlag hart abbrechen - eine halbe Installation, die als Erfolg
+    gemeldet wird, ist schlimmer als ein sichtbarer Fehlschlag.
+#>
+
+$ErrorActionPreference = 'Continue'
+
+$Target  = Join-Path $env:ProgramFiles '{{TARGETFOLDER}}'
+$LogDir  = '{{LOGDIR}}'
+$LogFile = Join-Path $LogDir '{{PKGNAME}}-install.log'
+New-Item -ItemType Directory -Path $LogDir -Force | Out-Null
+function Log($m) { "$(Get-Date -f 'yyyy-MM-dd HH:mm:ss')  $m" | Tee-Object -FilePath $LogFile -Append }
+
+Log '=== Install-Start {{PKGNAME}} ==='
+
+# --- 1) Optionale Windows-Feature-Abhaengigkeit -----------------------------
+# $fx = Get-WindowsOptionalFeature -Online -FeatureName NetFx3 -ErrorAction Stop
+# if ($fx.State -ne 'Enabled') {
+#     Log 'Aktiviere .NET Framework 3.5 ...'
+#     try { Enable-WindowsOptionalFeature -Online -FeatureName NetFx3 -All -NoRestart -ErrorAction Stop | Out-Null }
+#     catch { Log "FEHLER: .NET 3.5 konnte nicht aktiviert werden: $_"; exit 1 }
+# }
+
+# --- 2) Optionale mitgelieferte Abhaengigkeit (z.B. Ghostscript) ------------
+# $uninstPaths = @(
+#     'HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall\*',
+#     'HKLM:\SOFTWARE\WOW6432Node\Microsoft\Windows\CurrentVersion\Uninstall\*'
+# )
+# $dep = Get-ItemProperty $uninstPaths -ErrorAction SilentlyContinue |
+#        Where-Object { $_.DisplayName -like '{{DEPENDENCY}}' }
+# if (-not $dep) {
+#     $depSetup = Get-ChildItem -Path $PSScriptRoot -Filter '{{DEPFILE}}' -File | Select-Object -First 1
+#     if (-not $depSetup) { Log 'FEHLER: Abhaengigkeit fehlt und kein Setup in App\ vorhanden.'; exit 1 }
+#     $p = Start-Process -FilePath $depSetup.FullName -ArgumentList '/S' -Wait -PassThru
+#     if ($p.ExitCode -ne 0 -and $p.ExitCode -ne 3010) { Log "FEHLER: Abhaengigkeit Exitcode $($p.ExitCode)"; exit $p.ExitCode }
+# }
+
+# --- 3) Programmdateien kopieren -------------------------------------------
+$src = Join-Path $PSScriptRoot '{{PAYLOAD}}'
+if (-not (Test-Path $src)) { Log "FEHLER: $src nicht gefunden."; exit 1 }
+
+New-Item -ItemType Directory -Path $Target -Force | Out-Null
+try   { Copy-Item $src -Destination $Target -Recurse -Force -ErrorAction Stop }
+catch { Log "FEHLER beim Kopieren: $_"; exit 1 }
+Log "Kopiert nach: $Target"
+
+# --- 4) Startmenue-Verknuepfung fuer alle Benutzer --------------------------
+$exe = Join-Path $Target '{{EXEFILE}}'
+if (Test-Path $exe) {
+    $lnk = Join-Path $env:ProgramData 'Microsoft\Windows\Start Menu\Programs\{{DISPLAYNAME}}.lnk'
+    try {
+        $ws = New-Object -ComObject WScript.Shell
+        $s  = $ws.CreateShortcut($lnk)
+        $s.TargetPath       = $exe
+        $s.WorkingDirectory = $Target
+        $s.Description      = '{{DISPLAYNAME}}'
+        $s.Save()
+        Log "Verknuepfung: $lnk"
+    } catch { Log "WARN: Verknuepfung fehlgeschlagen: $_" }
+} else {
+    Log "FEHLER: $exe nach dem Kopieren nicht vorhanden."; exit 1
+}
+
+Log '=== Install-Ende ==='
+exit 0

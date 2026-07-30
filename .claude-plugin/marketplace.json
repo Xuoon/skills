@@ -40,6 +40,11 @@
       "name": "windev",
       "source": "./plugins/windev",
       "description": "Windows-Dev-Umgebung: /windev:setup richtet PowerShell/Terminal nach Best Practice ein (auch auf frischem Windows), /windev:optimize vermisst und bereinigt die bestehende Umgebung — beides approval-gated."
+    },
+    {
+      "name": "intune-win32",
+      "source": "./plugins/intune-win32",
+      "description": "Intune-Win32-Pakete bauen: aus MSI/EXE ein in sich geschlossenes Paket (App\\ + Pack.cmd + install/uninstall/detect), Installer analysieren statt Silent-Schalter raten, Werte für den Intune-Assistenten nennen."
     }
   ]
 }

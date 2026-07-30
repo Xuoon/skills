@@ -1,0 +1,30 @@
+<#
+    {{PKGNAME}} - Intune Win32 Uninstall (Modus "copy")
+    Entfernt den Programmordner und die Startmenue-Verknuepfung.
+    Mitinstallierte Abhaengigkeiten (Ghostscript, Redist, Windows-Features)
+    bleiben bewusst stehen - sie koennen von anderer Software genutzt werden.
+#>
+$ErrorActionPreference = 'Continue'
+$Target  = Join-Path $env:ProgramFiles '{{TARGETFOLDER}}'
+$LogDir  = '{{LOGDIR}}'
+$LogFile = Join-Path $LogDir '{{PKGNAME}}-uninstall.log'
+New-Item -ItemType Directory -Path $LogDir -Force | Out-Null
+function Log($m) { "$(Get-Date -f 'yyyy-MM-dd HH:mm:ss')  $m" | Tee-Object -FilePath $LogFile -Append }
+
+Log '=== Uninstall-Start {{PKGNAME}} ==='
+
+Get-Process -Name '{{PROCESSNAME}}' -ErrorAction SilentlyContinue |
+    ForEach-Object { Log "Beende Prozess: $($_.Name)"; $_ | Stop-Process -Force -ErrorAction SilentlyContinue }
+
+$lnk = Join-Path $env:ProgramData 'Microsoft\Windows\Start Menu\Programs\{{DISPLAYNAME}}.lnk'
+if (Test-Path $lnk) { Remove-Item $lnk -Force -ErrorAction SilentlyContinue; Log "Entfernt: $lnk" }
+
+if (Test-Path $Target) {
+    try   { Remove-Item $Target -Recurse -Force -ErrorAction Stop; Log "Entfernt: $Target" }
+    catch { Log "WARN: $Target konnte nicht entfernt werden: $_" }
+} else {
+    Log 'Programmordner war nicht vorhanden.'
+}
+
+Log '=== Uninstall-Ende ==='
+exit 0

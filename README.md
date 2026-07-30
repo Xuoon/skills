@@ -17,6 +17,7 @@ Persönlicher Plugin-Marketplace für [Claude Code](https://code.claude.com/docs
 | **claudex-install** | `/claudex-install` — Claude Code auf macOS mit GPT über CLIProxyAPI einrichten |
 | **btw-checkout** | `/btw-checkout` — Side-Chat-Ergebnis als kompakten Übergabe-Prompt für den Haupt-Chat ausgeben |
 | **windev** | `/windev:setup` · `:optimize` — Windows-Dev-Umgebung einrichten (auch frisches Windows) bzw. vermessen und bereinigen; approval-gated |
+| **intune-win32** | `/intune-paket` · `/intune-analyse` · `/intune-fehler` — aus MSI/EXE ein in sich geschlossenes Intune-Win32-Paket bauen; Installer analysieren, Rollout-Fehler eingrenzen |
 
 ## Installation
 
@@ -29,6 +30,7 @@ Persönlicher Plugin-Marketplace für [Claude Code](https://code.claude.com/docs
 /plugin install claudex-install@labi
 /plugin install btw-checkout@labi
 /plugin install windev@labi
+/plugin install intune-win32@labi
 ```
 
 Updates kommen über `/plugin update` (bzw. Auto-Update), gesteuert über das `version`-Feld der jeweiligen `plugin.json`.

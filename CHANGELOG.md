@@ -4,6 +4,18 @@ Alle nennenswerten Änderungen an diesem Claude-Code-Plugin-Marketplace werden i
 
 Das Format ist angelehnt an [Keep a Changelog](https://keepachangelog.com/de/1.1.0/). Die einzelnen Plugins werden unabhängig voneinander nach [Semantic Versioning](https://semver.org/lang/de/) versioniert.
 
+## intune-win32
+
+### [1.0.0] – 2026-07-30
+
+#### Hinzugefügt
+
+- `/intune-paket` — aus einem Ordner mit MSI/EXE ein in sich geschlossenes Win32-Paket bauen (`App\` + `Output\` + eigene `IntuneWinAppUtil.exe` + `Pack.cmd` + install/uninstall/detect-PowerShell).
+- `/intune-analyse` — Installer analysieren statt Silent-Schalter zu raten (Framework, SFX, Downloader, Schalter).
+- `/intune-fehler` — fehlgeschlagene Rollouts eingrenzen (u. a. `0x87D1041C`, 1603, 3010).
+- Scaffolding über `scripts/new_package.py`, Vorlagen unter `assets/`, optionale Umgebungskonventionen via `intune-paket.json`.
+- Kein Plugin-README — Katalog im Root-`README.md`, Arbeitsablauf kanonisch in der SKILL.md.
+
 ## agent-docs
 
 ### [5.0.0] – 2026-07-23

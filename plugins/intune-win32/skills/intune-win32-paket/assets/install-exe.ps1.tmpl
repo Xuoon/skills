@@ -1,0 +1,27 @@
+<#
+    {{PKGNAME}} - Intune Win32 Install-Wrapper (EXE-Setup)
+    Ausfuehrung: System-Kontext, 64-bit
+    Exitcode des Setups wird durchgereicht; 3010 = Erfolg mit Neustart.
+    TODO pruefen: Silent-Parameter unten ({{SILENTARGS}}) gegen die
+    Hersteller-Doku verifizieren und auf einem Testgeraet testen.
+#>
+
+$ErrorActionPreference = 'Continue'
+
+$Installer = Join-Path $PSScriptRoot '{{SETUPFILE}}'
+$LogDir    = '{{LOGDIR}}'
+$LogFile   = Join-Path $LogDir '{{PKGNAME}}-install.log'
+New-Item -ItemType Directory -Path $LogDir -Force | Out-Null
+function Log($m) { "$(Get-Date -f 'yyyy-MM-dd HH:mm:ss')  $m" | Tee-Object -FilePath $LogFile -Append }
+
+Log '=== Install-Start {{PKGNAME}} ==='
+
+if (-not (Test-Path $Installer)) { Log "FEHLER: $Installer nicht gefunden."; exit 1 }
+
+$proc = Start-Process -FilePath $Installer -ArgumentList {{SILENTARGS}} -Wait -PassThru
+$code = $proc.ExitCode
+Log "Installer-Exitcode: $code"
+if ($code -eq 3010) { Log 'Hinweis: 3010 = Erfolg, Neustart ausstehend.'; $code = 0 }
+
+Log '=== Install-Ende ==='
+exit $code
