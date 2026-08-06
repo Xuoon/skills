@@ -127,8 +127,8 @@ python3 "${CLAUDE_SKILL_DIR}/scripts/new_package.py" "<Paketordner>" \
   --silent-args "'/S'" --util-search "<Wurzel der Intune-Apps>"
 ```
 
-Fällt das Skript aus (kein `python3`, Sonderfall den `--mode` nicht abdeckt),
-dieselben vier Schritte von Hand:
+Fällt das Skript aus (kein `python3`, oder ein Sonderfall den `--mode` nicht
+abdeckt), dieselben vier Schritte von Hand:
 
 1. `mkdir -p "<Ordner>/App" "<Ordner>/Output"` und den Installer nach `App/`
    verschieben. Klammern/Leerzeichen im Dateinamen dabei entfernen

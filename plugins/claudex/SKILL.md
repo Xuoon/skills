@@ -50,8 +50,9 @@ korrekt zwischen `darwin_aarch64` und `darwin_amd64`.
 
 ### 2. Aktion und Optionen klären
 
-Der Skill nimmt keine Argumente — was zu tun ist, ergibt die Vorprüfung plus **eine**
-AskUserQuestion-Runde. Frage nur, was die Vorprüfung offen lässt:
+Der Skill hat keine Flags — was zu tun ist, ergibt die Vorprüfung plus **eine**
+AskUserQuestion-Runde. Sagt der Benutzer es schon im Fließtext („entfernen", „auf Port 9000"),
+das übernehmen und die Frage weglassen. Sonst fragen, aber nur was die Vorprüfung offen lässt:
 
 1. **Aktion** (immer): installieren · aktualisieren · reparieren · entfernen. Empfehlung ist,
    was der Ist-Zustand nahelegt — kein Setup gefunden → installieren, Setup gefunden →
@@ -71,6 +72,8 @@ Ohne Rückfrage gelten diese Standardwerte:
 
 Die Wahl wird in Installer-Flags übersetzt: `--model`, `--port`, bei Browser- oder
 Callback-Problemen `--device-login`, für eine manuell zu öffnende OAuth-URL `--no-browser`.
+Bei **entfernen** direkt zum Abschnitt „Aktualisieren und Entfernen" springen; installieren,
+aktualisieren und reparieren laufen alle über den Ablauf ab Schritt 3.
 
 ### 3. Dry-Run zeigen
 
