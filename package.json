@@ -6,6 +6,7 @@
   },
   "scripts": {
     "check": "ultracite check",
-    "fix": "ultracite fix"
+    "fix": "ultracite fix",
+    "validate": "uv run --with pyyaml scripts/validate.py"
   }
 }
