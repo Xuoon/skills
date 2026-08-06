@@ -4,7 +4,36 @@ Alle nennenswerten Änderungen an diesem Claude-Code-Plugin-Marketplace werden i
 
 Das Format ist angelehnt an [Keep a Changelog](https://keepachangelog.com/de/1.1.0/). Die einzelnen Plugins werden unabhängig voneinander nach [Semantic Versioning](https://semver.org/lang/de/) versioniert.
 
+## Marketplace
+
+### 2026-08-06
+
+#### Entfernt
+
+- **ship**, **btw-checkout** und **load-context** aus dem Katalog genommen. Auf den Geräten einmalig `claude plugin uninstall ship btw-checkout load-context` (bzw. `claudex-install` wegen der Umbenennung).
+
+#### Geändert
+
+- **Ein Befehl pro Plugin.** Alle Plugins liegen jetzt als Root-`SKILL.md`; die `skills/`-Unterebene und die drei `commands/`-Dateien von intune-win32 sind weg. Aus 13 Befehlen werden 5.
+- **Argumente englisch, Texte deutsch.** Einheitlich `--fix` fürs Schreiben, dazu `--audit`, `--skills`, `--setup`. Die alten `--anwenden`/`--kürzen`/`--schnell`/`--prüfen` entfallen.
+- **`claudex-install` heißt jetzt `claudex`.** Die `claudex-installer`-Marker in `.zshrc` und Config bleiben unverändert — bestehende Installationen werden weiter erkannt.
+- Referenzen zeigen nirgends mehr aus dem Plugin heraus (`${CLAUDE_SKILL_DIR}/references/…` statt `../../`).
+
+#### Hinzugefügt
+
+- `scripts/validate.py` (`bun run validate`) prüft die Invarianten, die vorher nur in der CLAUDE.md standen: Ordnername gegen `plugin.json`, Katalog-Vollständigkeit, `name:` in jeder Root-`SKILL.md`, keine Pfade aus dem Plugin heraus.
+- GitHub-Actions-CI mit Format-, Struktur- und Release-Gate-Prüfung (geändertes Plugin → Versions-Bump + Changelog-Eintrag).
+
 ## intune-win32
+
+### [2.0.0] – 2026-08-06
+
+#### Geändert
+
+- **Breaking:** Befehl heißt jetzt `/intune-win32` (vorher `/intune-win32:intune-win32-paket` plus die Slash-Commands `/intune-paket`, `/intune-analyse`, `/intune-fehler`). Skill und Bundle liegen im Plugin-Root.
+- **Keine Argumente mehr.** Was gemeint ist, steht im Fließtext: Ordner/Installer → Paket bauen, Fehlercode → Rollout eingrenzen. Ohne Text kommt genau eine Rückfrage.
+- Nur noch auf Zuruf (`disable-model-invocation`), Description entsprechend auf einen Satz gekürzt.
+- Der Abschnitt zur Device-Bridge (Cloud-Sessions ohne lokalen Dateizugriff) ist entfernt — der Skill setzt lokalen Dateizugriff voraus.
 
 ### [1.0.0] – 2026-07-30
 
@@ -17,6 +46,15 @@ Das Format ist angelehnt an [Keep a Changelog](https://keepachangelog.com/de/1.1
 - Kein Plugin-README — Katalog im Root-`README.md`, Arbeitsablauf kanonisch in der SKILL.md.
 
 ## agent-docs
+
+### [6.0.0] – 2026-08-06
+
+#### Geändert
+
+- **Breaking:** ein Befehl `/agent-docs` statt `:sync` und `:audit`. Ohne Flag der Diff-Sync als Vorschlag, `--audit` der volle Report, `--fix` schreibt.
+- **Breaking:** Flags heißen jetzt `--fix` und `--audit`. `--anwenden`, `--kürzen`, `--prüfen` und `--schnell` sind weg.
+- Der Audit läuft nur noch in einem Umfang — voll, mit Scoring, Coverage und Prune-Sweep, verteilt über parallele Subagenten. Der Sparmodus war mit Fan-out nicht mehr nötig.
+- Der Prune-Sweep ist damit Pflichtbestandteil jedes Laufs statt eines eigenen Flags.
 
 ### [5.0.0] – 2026-07-23
 
@@ -91,6 +129,19 @@ Sync/Audit neigten dazu, nach Feature-Arbeit **Implementation-Details und Invent
 
 ## cleanup
 
+### [2.0.0] – 2026-08-06
+
+#### Geändert
+
+- **Breaking:** ein Befehl `/cleanup` statt `:code` und `:skills`. Standard ist der Code-Lauf, `--skills` prüft stattdessen die repo-lokalen Skills; `--anwenden` heißt jetzt `--fix`.
+- Darf sich jetzt selbst ziehen (kein `disable-model-invocation` mehr) — von selbst aber immer nur analysierend, nie mit `--fix`.
+
+#### Hinzugefügt
+
+- **Beweis in der Wegwerf-Kopie.** `--fix` löscht die Kandidaten erst in einem `git worktree` außerhalb des Repos und lässt dort typecheck/build/test laufen. Was bricht, wird zurückgestuft statt gelöscht.
+- **Dreistufiges Urteil** `SICHER LÖSCHEN` / `PRÜFEN` / `BEHALTEN` mit Confidence und Risiko je Kandidat. `PRÜFEN` wird auch mit `--fix` nicht gelöscht.
+- **Baseline-Zahlen** im Report-Kopf: Dateien, Zeilen, Bytes und der löschbare Anteil.
+
 ### [1.0.0] – 2026-07-23
 
 #### Hinzugefügt
@@ -98,7 +149,7 @@ Sync/Audit neigten dazu, nach Feature-Arbeit **Implementation-Details und Invent
 - `/cleanup:code` — findet nachweislich toten/Legacy-/Fallback-Code und verwaiste Dateien, verifiziert jede Löschung gegen dynamische Nutzung. Standard nur analysieren; mit `--anwenden` direkt entfernen samt aller Rest-Erwähnungen, danach Build/Test. Delete-first.
 - `/cleanup:skills` — sortiert repo-lokale Skills/Commands in löschen (Plugin/Built-in deckt ab) / hochziehen (in den Marketplace) / behalten (projektspezifisch); löscht mit `--anwenden`.
 
-## ship
+## ship *(entfernt am 2026-08-06)*
 
 ### [1.0.0] – 2026-07-23
 
@@ -106,7 +157,15 @@ Sync/Audit neigten dazu, nach Feature-Arbeit **Implementation-Details und Invent
 
 - `/ship` — committen → PR auf `main` im Hausformat → optional mergen, mit read-only Recon, Public-Repo-Guard (prüft den Diff auf Sensibles) und Freigabe-Gate vor jedem schreibenden Schritt. Bare `/ship` = committen + PR (nur falls keiner offen ist), **kein** Merge; `--mergen` mergt zusätzlich, `--nur-commit` lässt den PR weg.
 
-## claudex-install
+## claudex
+
+### [4.0.0] – 2026-08-06
+
+#### Geändert
+
+- **Breaking:** Plugin und Befehl heißen jetzt `claudex` (vorher `claudex-install`). Auf den Geräten einmalig `claudex-install` deinstallieren und `claudex@labi` installieren. Die `claudex-installer`-Marker in `.zshrc` und Config sind **unverändert** — bestehende Setups werden weiter erkannt, Update und Uninstall funktionieren.
+- **Keine Argumente mehr.** Aktion, Port, Modell und Login-Art klärt eine AskUserQuestion-Runde nach der read-only Vorprüfung; gefragt wird nur, was die Vorprüfung offen lässt. Die Installer-Flags (`--model`, `--port`, `--device-login`, `--no-browser`) bleiben intern erhalten.
+- Description auf Deutsch und auf einen Satz gekürzt, Skill nur noch auf Zuruf (`disable-model-invocation`).
 
 ### [3.0.0] – 2026-07-23
 
@@ -136,7 +195,7 @@ Sync/Audit neigten dazu, nach Feature-Arbeit **Implementation-Details und Invent
 - Idempotente `claudex()`-Funktion mit `.zshrc`-Backup, Syntaxprüfung und Auto-Start des Proxys.
 - Deinstallationsskript und Troubleshooting für OAuth, Portkonflikte, Sandbox und Modellverfügbarkeit.
 
-## btw-checkout
+## btw-checkout *(entfernt am 2026-08-06)*
 
 ### [1.0.0] – 2026-07-23
 
@@ -162,7 +221,7 @@ Erstes stabiles Release — Funktionsumfang ansonsten unverändert.
 
 - `/btw-checkout` — destilliert den Side-Chat-Verlauf in einen Übergabe-Prompt für den Haupt-Chat (Entscheidungen, Fakten/Pfade, offene Fragen + nummerierte Aufgaben bzw. „Keine Aktion nötig"), eine Rückfrage, dann finale Fassung als Codeblock.
 
-## load-context
+## load-context *(entfernt am 2026-08-06)*
 
 ### [1.0.0] – 2026-07-23
 
@@ -181,6 +240,14 @@ Erstes stabiles Release — Funktionsumfang unverändert.
 - Hook-Plugin ohne Befehle: lädt repo-spezifische Doku via `SessionStart`-Hook in den Kontext — bei jedem Session-Start und nach jedem Compact (`source=compact`). Geladen werden `CLAUDE.md`, `AGENTS.md`, `README.md`, `.claude/rules/**/*.md` sowie Instruktionsdateien anderer AI-Tools (`.cursorrules`, `.cursor/rules/**/*.mdc`, `.github/copilot-instructions.md`, `GEMINI.md`, `.windsurfrules`, `.clinerules`, `.junie/guidelines.md`). Git-tracked (überspringt `node_modules`/`.gitignore`), mit Pro-Datei- und Gesamt-Budget gegen Kontext-Flut.
 
 ## windev
+
+### [2.0.0] – 2026-08-06
+
+#### Geändert
+
+- **Breaking:** ein Befehl `/windev` statt `:setup` und `:optimize`. Ohne Flag wird nur vermessen (read-only), `--fix` behebt die Befunde, `--setup` richtet ein.
+- `--fix` arbeitet die Befunde ohne vorherige Freigaberunde ab — **aber nie ohne datiertes Backup**. Echte Nutzer-Entscheidungen (Admin-Module, UAC-Prompt für den Machine-PATH, „brauchst du X noch?") werden weiterhin gefragt.
+- Skript- und Referenzpfade laufen jetzt über `${CLAUDE_SKILL_DIR}` statt `$CLAUDE_PLUGIN_ROOT`/`../../`.
 
 ### [1.0.0] – 2026-07-19
 

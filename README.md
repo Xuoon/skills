@@ -8,16 +8,15 @@
 
 Persönlicher Plugin-Marketplace für [Claude Code](https://code.claude.com/docs/en/plugins). Philosophie: Evidenz statt Vermutung, Vorschlag vor Edit, löschen bevorzugt, concise Output.
 
-| Plugin | Befehle / Verhalten |
-| --- | --- |
-| **agent-docs** | `/agent-docs:sync` · `:audit` — Agent-Doku aktualisieren oder prüfen; `sync` routet Init/Sync/Review automatisch |
-| **cleanup** | `/cleanup:code` · `:skills` — toten/Legacy-Code + verwaiste Dateien entfernen; repo-lokale Skills sortieren (löschen/hochziehen/behalten) |
-| **ship** | `/ship` — committen, PR auf main im Hausformat, optional direkt mergen; Public-Repo-Check vorab |
-| **load-context** | Hooks: lädt repo-spezifische Doku (CLAUDE.md/AGENTS.md/Rules/AI-Instruktionen) bei Session-Start in den Kontext |
-| **claudex-install** | `/claudex-install` — Claude Code auf macOS mit GPT über CLIProxyAPI einrichten |
-| **btw-checkout** | `/btw-checkout` — Side-Chat-Ergebnis als kompakten Übergabe-Prompt für den Haupt-Chat ausgeben |
-| **windev** | `/windev:setup` · `:optimize` — Windows-Dev-Umgebung einrichten (auch frisches Windows) bzw. vermessen und bereinigen; approval-gated |
-| **intune-win32** | `/intune-paket` · `/intune-analyse` · `/intune-fehler` — aus MSI/EXE ein in sich geschlossenes Intune-Win32-Paket bauen; Installer analysieren, Rollout-Fehler eingrenzen |
+Jedes Plugin hat genau einen Befehl. Ohne Argument wird nur analysiert und vorgeschlagen — geschrieben wird erst mit `--fix`.
+
+| Befehl | Argumente | Verhalten |
+| --- | --- | --- |
+| `/agent-docs` | `--audit` · `--fix` | Agent-Doku am Code halten. Standard = Diff-Sync als Vorschlag, `--audit` = voller Report mit Scoring und Subagent-Fan-out |
+| `/cleanup` | `--skills` · `--fix` | Toten/Legacy-Code und verwaiste Dateien finden, mit `--skills` stattdessen repo-lokale Skills. `--fix` beweist jede Löschung erst in einer Wegwerf-Kopie |
+| `/windev` | `--fix` · `--setup` | Windows-Umgebung vermessen (read-only), `--fix` behebt die Befunde mit Backups, `--setup` richtet nach Best Practice ein |
+| `/claudex` | – | Claude Code auf macOS mit GPT über CLIProxyAPI einrichten, aktualisieren, reparieren oder entfernen |
+| `/intune-win32` | freier Text | Intune-Win32-Paket aus MSI/EXE bauen, oder einen fehlgeschlagenen Rollout eingrenzen — was gemeint ist, steht im Text |
 
 ## Installation
 
@@ -25,14 +24,20 @@ Persönlicher Plugin-Marketplace für [Claude Code](https://code.claude.com/docs
 /plugin marketplace add Xuoon/skills
 /plugin install agent-docs@labi
 /plugin install cleanup@labi
-/plugin install ship@labi
-/plugin install load-context@labi
-/plugin install claudex-install@labi
-/plugin install btw-checkout@labi
 /plugin install windev@labi
+/plugin install claudex@labi
 /plugin install intune-win32@labi
 ```
 
 Updates kommen über `/plugin update` (bzw. Auto-Update), gesteuert über das `version`-Feld der jeweiligen `plugin.json`.
+
+## Entwicklung
+
+```
+bun run fix        # JSON/Markdown formatieren
+bun run validate   # Marktplatz-Invarianten prüfen
+```
+
+`bun run validate` prüft, was sonst still bricht: Ordnername gegen `plugin.json`, Katalog-Vollständigkeit, `name:` in jeder Root-`SKILL.md` und Pfade, die aus dem Plugin herauszeigen. In der CI läuft zusätzlich das Release-Gate — geänderte Plugins brauchen einen Versions-Bump und einen Changelog-Eintrag.
 
 Alle Release-Notizen stehen gesammelt in der [CHANGELOG.md](CHANGELOG.md); jedes Plugin wird unabhängig nach SemVer versioniert.

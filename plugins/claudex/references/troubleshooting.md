@@ -20,13 +20,13 @@ einen anderen Port über `--port` wählen. Config, Env-Datei und Tests müssen d
 Verwende Device-Code-Flow:
 
 ```bash
-bash "$CLAUDE_PLUGIN_ROOT/scripts/install.sh" --device-login
+bash "${CLAUDE_SKILL_DIR}/scripts/install.sh" --device-login
 ```
 
 Oder lasse die URL nur ausgeben:
 
 ```bash
-bash "$CLAUDE_PLUGIN_ROOT/scripts/install.sh" --no-browser
+bash "${CLAUDE_SKILL_DIR}/scripts/install.sh" --no-browser
 ```
 
 Der normale Codex-Callback verwendet standardmäßig Port 1455; auch dieser Port muss frei sein.
@@ -50,7 +50,7 @@ curl -fsS "http://127.0.0.1:${CLIPROXY_PORT}/v1/models" \
 Installer mit einem tatsächlich gelieferten Namen erneut ausführen:
 
 ```bash
-bash "$CLAUDE_PLUGIN_ROOT/scripts/install.sh" --model '<modellname>'
+bash "${CLAUDE_SKILL_DIR}/scripts/install.sh" --model '<modellname>'
 ```
 
 ## `claude.ai connectors are disabled`

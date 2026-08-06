@@ -1,0 +1,33 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          # Das Release-Gate diffed gegen den Basis-Branch — ohne dessen Historie
+          # findet git den Merge-Base nicht.
+          fetch-depth: 0
+
+      - uses: oven-sh/setup-bun@v2
+      - run: bun install --frozen-lockfile
+      - run: bun run check
+
+      - uses: astral-sh/setup-uv@v5
+      - run: bun run validate
+
+      - name: Release-Gate
+        if: github.event_name == 'pull_request'
+        # base_ref über env statt inline — ein Branchname darf $ und Backticks
+        # enthalten und würde inline in der Shell ausgewertet.
+        env:
+          BASE_REF: ${{ github.base_ref }}
+        run: |
+          git fetch --no-tags origin "$BASE_REF"
+          uv run --with pyyaml scripts/validate.py --release-gate "origin/$BASE_REF"

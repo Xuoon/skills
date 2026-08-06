@@ -1,7 +1,7 @@
 {
   "name": "windev",
-  "version": "1.0.0",
-  "description": "Windows-Dev-Umgebung: /windev:setup richtet PowerShell/Terminal nach Best Practice ein (auch auf frischem Windows), /windev:optimize vermisst und bereinigt die bestehende Umgebung — beides approval-gated.",
+  "version": "2.0.0",
+  "description": "Windows-Dev-Umgebung: /windev vermisst read-only, --fix behebt die Befunde mit Backups, --setup richtet PowerShell/Terminal nach Best Practice ein (auch auf frischem Windows).",
   "author": {
     "name": "Sven Labitzki"
   }

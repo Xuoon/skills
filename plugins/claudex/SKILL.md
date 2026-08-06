@@ -1,15 +1,11 @@
 ---
-name: claudex-install
-description: >-
-  Install, repair, update, or remove "claudex" on macOS — Claude Code running on GPT via a
-  local, checksum-verified, localhost-only CLIProxyAPI with OAuth. Use whenever the user wants
-  claudex, Claude Code with GPT, or to transfer this setup to another Mac.
-argument-hint: "[--model gpt-…] [--port 8318] [--device-login]"
-user-invocable: true
+name: claudex
+description: claudex auf macOS einrichten, reparieren, aktualisieren oder entfernen — Claude Code auf GPT über einen lokalen CLIProxyAPI.
+disable-model-invocation: true
 allowed-tools: Bash Read AskUserQuestion
 ---
 
-# claudex installieren
+# claudex
 
 Richte Claude Code so ein, dass `claudex` dasselbe Claude-Code-Harness mit denselben MCPs,
 Skills, Hooks, Settings und Projektdaten startet, aber die Modellanfragen über einen lokalen
@@ -52,9 +48,20 @@ Brich mit einer klaren Erklärung ab, wenn das Betriebssystem nicht macOS ist od
 nicht im `PATH` liegt. Unter Rosetta entscheidet der Installer über `sysctl.proc_translated`
 korrekt zwischen `darwin_aarch64` und `darwin_amd64`.
 
-### 2. Optionen bestimmen
+### 2. Aktion und Optionen klären
 
-Standardwerte:
+Der Skill nimmt keine Argumente — was zu tun ist, ergibt die Vorprüfung plus **eine**
+AskUserQuestion-Runde. Frage nur, was die Vorprüfung offen lässt:
+
+1. **Aktion** (immer): installieren · aktualisieren · reparieren · entfernen. Empfehlung ist,
+   was der Ist-Zustand nahelegt — kein Setup gefunden → installieren, Setup gefunden →
+   aktualisieren.
+2. **Port** — nur wenn `8318` belegt ist.
+3. **Modell** — nur wenn die automatische Auswahl scheitert oder der Benutzer einen Wunsch
+   geäußert hat.
+4. **Login-Art** — nur wenn Browser oder Callback erkennbar nicht funktionieren.
+
+Ohne Rückfrage gelten diese Standardwerte:
 
 - Port: `8318`
 - CLIProxyAPI-Version: `latest`, mit strenger GitHub-Redirect-Prüfung und offizieller SHA-256-Datei
@@ -62,16 +69,15 @@ Standardwerte:
   verfügbare GPT-Modelle
 - OAuth: Browser-Callback (`--codex-login`)
 
-Übernimm Modell, Port oder Login-Art aus den Argumenten des Benutzers. Frage nur nach einer
-Entscheidung, wenn ein erkannter Konflikt sie wirklich nötig macht. Verwende bei Browser- oder
-Callback-Problemen `--device-login`; für eine manuell zu öffnende OAuth-URL `--no-browser`.
+Die Wahl wird in Installer-Flags übersetzt: `--model`, `--port`, bei Browser- oder
+Callback-Problemen `--device-login`, für eine manuell zu öffnende OAuth-URL `--no-browser`.
 
 ### 3. Dry-Run zeigen
 
-Der Plugin-Root steht in `$CLAUDE_PLUGIN_ROOT`. Führe zunächst aus:
+Der Plugin-Root steht in `${CLAUDE_SKILL_DIR}`. Führe zunächst aus:
 
 ```bash
-bash "$CLAUDE_PLUGIN_ROOT/scripts/install.sh" --dry-run [gewählte Optionen]
+bash "${CLAUDE_SKILL_DIR}/scripts/install.sh" --dry-run [gewählte Optionen]
 ```
 
 Fasse danach knapp zusammen, was geschrieben wird:
@@ -90,7 +96,7 @@ dem Dry-Run erfolgen, weil Download, OAuth und Shell-Änderung echte Systemaktio
 Nach der Bestätigung:
 
 ```bash
-bash "$CLAUDE_PLUGIN_ROOT/scripts/install.sh" --yes [gewählte Optionen]
+bash "${CLAUDE_SKILL_DIR}/scripts/install.sh" --yes [gewählte Optionen]
 ```
 
 Der Installer läuft deterministisch durch (Architektur-Erkennung inkl. Rosetta, verifizierte
@@ -151,14 +157,14 @@ und erneuert den markierten `.zshrc`-Block.
 Vor einer Deinstallation wieder Bestätigung einholen:
 
 ```bash
-bash "$CLAUDE_PLUGIN_ROOT/scripts/uninstall.sh"
+bash "${CLAUDE_SKILL_DIR}/scripts/uninstall.sh"
 ```
 
 OAuth-Daten bleiben standardmäßig erhalten. Nur wenn der Benutzer ausdrücklich auch die
 Anmeldedaten löschen will:
 
 ```bash
-bash "$CLAUDE_PLUGIN_ROOT/scripts/uninstall.sh" --purge-auth
+bash "${CLAUDE_SKILL_DIR}/scripts/uninstall.sh" --purge-auth
 ```
 
 Lies bei Fehlern oder Sonderfällen `${CLAUDE_SKILL_DIR}/references/troubleshooting.md`.

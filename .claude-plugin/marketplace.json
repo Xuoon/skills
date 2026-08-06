@@ -9,42 +9,27 @@
     {
       "name": "agent-docs",
       "source": "./plugins/agent-docs",
-      "description": "Sync als smarter Router (Init/Sync/Review) plus Audit für Agent-Doku (CLAUDE.md/AGENTS.md + Rules). Approval-gated, evidenz-basiert, löschen-bevorzugt."
+      "description": "Hält die Agent-Doku (CLAUDE.md/AGENTS.md + Rules) am Code. Standard nur Vorschlag, --audit für den vollen Report, --fix schreibt. Evidenz-basiert, löschen-bevorzugt."
     },
     {
       "name": "cleanup",
       "source": "./plugins/cleanup",
-      "description": "Aufräumen, löschen-bevorzugt: /cleanup:code findet toten/Legacy-Code + verwaiste Dateien, /cleanup:skills sortiert repo-lokale Skills (löschen/hochziehen/behalten). Standard nur analysieren, --anwenden führt aus."
+      "description": "Findet toten/Legacy-Code und verwaiste Dateien, mit --skills stattdessen repo-lokale Skills. --fix beweist jede Löschung in einer Wegwerf-Kopie, bevor sie ausgeführt wird."
     },
     {
-      "name": "ship",
-      "source": "./plugins/ship",
-      "description": "Arbeit abschließen: committen, PR auf main im Hausformat, optional direkt mergen — mit Public-Repo-Check vorab."
-    },
-    {
-      "name": "load-context",
-      "source": "./plugins/load-context",
-      "description": "Lädt repo-spezifische Doku (CLAUDE.md/AGENTS.md/README/.claude/rules + AI-Tool-Instruktionen) bei Session-Start und nach Compact in den Kontext."
-    },
-    {
-      "name": "claudex-install",
-      "source": "./plugins/claudex-install",
-      "description": "Richtet Claude Code auf macOS mit GPT über einen lokalen, authentifizierten CLIProxyAPI ein."
-    },
-    {
-      "name": "btw-checkout",
-      "source": "./plugins/btw-checkout",
-      "description": "Side-Chat-Ergebnis als kompakten Übergabe-Prompt für den Haupt-Chat ausgeben — Codeblock zum Rüberkopieren."
+      "name": "claudex",
+      "source": "./plugins/claudex",
+      "description": "Richtet Claude Code auf macOS mit GPT über einen lokalen, authentifizierten CLIProxyAPI ein — installieren, aktualisieren, reparieren, entfernen."
     },
     {
       "name": "windev",
       "source": "./plugins/windev",
-      "description": "Windows-Dev-Umgebung: /windev:setup richtet PowerShell/Terminal nach Best Practice ein (auch auf frischem Windows), /windev:optimize vermisst und bereinigt die bestehende Umgebung — beides approval-gated."
+      "description": "Windows-Dev-Umgebung vermessen (read-only), mit --fix bereinigen oder mit --setup nach Best Practice einrichten — auch auf frischem Windows."
     },
     {
       "name": "intune-win32",
       "source": "./plugins/intune-win32",
-      "description": "Intune-Win32-Pakete bauen: aus MSI/EXE ein in sich geschlossenes Paket (App\\ + Pack.cmd + install/uninstall/detect), Installer analysieren statt Silent-Schalter raten, Werte für den Intune-Assistenten nennen."
+      "description": "Intune-Win32-Pakete bauen: aus MSI/EXE ein in sich geschlossenes Paket (App\\ + Pack.cmd + install/uninstall/detect), Installer analysieren statt Silent-Schalter raten, fehlgeschlagene Rollouts eingrenzen."
     }
   ]
 }

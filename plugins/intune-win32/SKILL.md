@@ -1,11 +1,21 @@
 ---
-name: intune-win32-paket
-description: Baut aus einer MSI/EXE ein fertiges, in sich geschlossenes Intune-Win32-Paket (App\ + Output\ + eigene IntuneWinAppUtil.exe + Pack.cmd + install/uninstall/detect-PowerShell) und nennt die passenden Werte für den Intune-Assistenten. Immer verwenden, wenn von Intune-Paketen, .intunewin, IntuneWinAppUtil, Win32-App, Softwareverteilung, Pack.cmd, Detect-/Erkennungsskript oder "Programm über Intune verteilen" die Rede ist – auch wenn der User nur sagt, er habe einen neuen Ordner mit einem Installer angelegt und der solle jetzt fertiggemacht werden, oder wenn ein Rollout mit 0x87D1041C bzw. Erkennungsproblemen fehlschlägt.
+name: intune-win32
+description: Intune-Win32-Pakete aus MSI/EXE bauen und fehlgeschlagene Rollouts eingrenzen.
+argument-hint: "[Ordner, Installer oder Fehlerbeschreibung]"
+disable-model-invocation: true
 ---
 
-# Intune-Win32-Paket bauen
+# intune-win32
 
-Ziel: aus einem Ordner, in dem nur ein Installer liegt, ein vollständiges
+Zwei Aufgaben, kein Flag: **was gemeint ist, steht in `$ARGUMENTS`.**
+
+| Im Text steht | Aufgabe |
+| --- | --- |
+| Ein Ordner, ein Installer, ein Programmname | **Paket bauen** — Ablauf unten ab Schritt 0 |
+| Ein Fehlercode, „geht nicht", „schlägt fehl", ein Gerät | **Problem eingrenzen** — Abschnitt „Fehlerbilder", dann gezielt beheben |
+| Nichts | Genau **eine** Rückfrage stellen: Paket bauen oder Problem lösen? Kein Raten. |
+
+Ziel beim Bauen: aus einem Ordner, in dem nur ein Installer liegt, ein vollständiges
 Win32-Paket machen, das per Doppelklick auf `Pack.cmd` gepackt und direkt in
 Intune hochgeladen werden kann.
 
@@ -19,8 +29,8 @@ Abhängigkeit eingebaut.
 
 Ordnerpräfix, Log-Pfad, Doku-Datei, Zuweisungsgruppen und Anforderungen sind
 pro Umgebung verschieden. Sie stehen in einer optionalen `intune-paket.json`
-(Fundort, Schlüssel und Standardwerte in `references/konfiguration.md`). Diese
-Datei **zuerst suchen und lesen**. Fehlt sie, mit den dort dokumentierten
+(Fundort, Schlüssel und Standardwerte in `${CLAUDE_SKILL_DIR}/references/konfiguration.md`).
+Diese Datei **zuerst suchen und lesen**. Fehlt sie, mit den dort dokumentierten
 Standardwerten arbeiten und beim User nachfragen, sobald etwas davon
 offensichtlich nicht passt – nicht eine Konvention erfinden und stillschweigend
 durchziehen.
@@ -69,24 +79,10 @@ Den Ordner auflisten, den der User meint (meist frisch angelegt, ein Installer
 drin). Prüfen: MSI oder EXE, wie groß, liegen mehrere Dateien da (Setup +
 Sprachpakete + Redist), gibt es schon `App\`/`Pack.cmd` aus einem früheren Lauf.
 
-**Wo die Dateien liegen, entscheidet über das Werkzeug:**
-
-| Lage | Werkzeug |
-|---|---|
-| lokal erreichbar (Claude Code, Cowork auf dem eigenen Rechner) | `Read`, `Write`, `Bash`, `scripts/new_package.py` |
-| nur über die Device-Bridge (Cloud-Session mit verbundenem Ordner) | `device_list_dir`, `device_bash` – das Helferskript liegt dann im falschen Dateisystem |
-
-**Analyse-Ausnahme:** In einer Cloud-Session darf ein Installer zur *Analyse*
-in den Container gestagt werden (`device_stage_files`, bis 400 MB) – dort stehen
-`7z`, `file`, `strings` und `python3` zur Verfügung, auf dem Gerät oft nicht.
-Das Ergebnis der Analyse fließt in die Skripte; die entpackten Dateien bleiben
-im Container (zurückschreiben scheitert am 20-MB-Limit von
-`device_commit_files`).
-
 ### 2. Installer analysieren, statt Schalter zu raten
 
 Das ist der Teil, der Denkarbeit braucht – der Rest ist Mechanik. Vollständige
-Kommandos und Beispiele in `references/installer-analyse.md`.
+Kommandos und Beispiele in `${CLAUDE_SKILL_DIR}/references/installer-analyse.md`.
 
 Kurzfassung:
 
@@ -122,17 +118,17 @@ Modus wählen:
 | `msi-wrapper` | MSI mit Properties/Transforms | `install-msi.ps1.tmpl` |
 | `copy` | portable EXE ohne Setup – nach `Program Files` kopieren + Startmenü-Verknüpfung | `install-copy.ps1.tmpl`, `uninstall-copy.ps1.tmpl` |
 
-**Wenn die Dateien direkt erreichbar sind**, erledigt das Helferskript die
-Mechanik (liest `intune-paket.json` selbst, falls vorhanden):
+Die Mechanik erledigt das Helferskript (liest `intune-paket.json` selbst, falls
+vorhanden):
 
 ```bash
-python3 <skill>/scripts/new_package.py "<Paketordner>" \
+python3 "${CLAUDE_SKILL_DIR}/scripts/new_package.py" "<Paketordner>" \
   --mode auto --name <Paketname> --display-name "<Produkt>*<Version>*" \
   --silent-args "'/S'" --util-search "<Wurzel der Intune-Apps>"
 ```
 
-**Wenn die Dateien nur über die Device-Bridge erreichbar sind**, die Schritte
-direkt mit `device_bash` ausführen:
+Fällt das Skript aus (kein `python3`, Sonderfall den `--mode` nicht abdeckt),
+dieselben vier Schritte von Hand:
 
 1. `mkdir -p "<Ordner>/App" "<Ordner>/Output"` und den Installer nach `App/`
    verschieben. Klammern/Leerzeichen im Dateinamen dabei entfernen
@@ -142,11 +138,11 @@ direkt mit `device_bash` ausführen:
    einem Nachbarpaket suchen (`find <Wurzel> -name IntuneWinAppUtil.exe`).
    Findet sich keine: beim User anfragen bzw. von
    github.com/microsoft/Microsoft-Win32-Content-Prep-Tool holen.
-3. Die Vorlagen aus `assets/` lesen, die `{{...}}`-Platzhalter ersetzen und die
-   Dateien schreiben. Platzhalter: `PKGNAME`, `SETUPFILE`, `DISPLAYNAME`,
-   `SILENTARGS` (PowerShell-Argumentliste, z. B. `'/S','/norestart'`),
-   `UNINSTALLARGS`, `LOGDIR`, bei `copy` zusätzlich `TARGETFOLDER`, `EXEFILE`,
-   `PAYLOAD`, `PROCESSNAME`.
+3. Die Vorlagen aus `${CLAUDE_SKILL_DIR}/assets/` lesen, die
+   `{{...}}`-Platzhalter ersetzen und die Dateien schreiben. Platzhalter:
+   `PKGNAME`, `SETUPFILE`, `DISPLAYNAME`, `SILENTARGS` (PowerShell-Argumentliste,
+   z. B. `'/S','/norestart'`), `UNINSTALLARGS`, `LOGDIR`, bei `copy` zusätzlich
+   `TARGETFOLDER`, `EXEFILE`, `PAYLOAD`, `PROCESSNAME`.
    In `Pack.cmd` ist `-s` die Datei, die Intune startet: bei Wrapper-Paketen
    `install.ps1`, bei reinem MSI der MSI-Dateiname.
 4. Zeilenenden auf CRLF setzen, sonst stolpern cmd und PowerShell.
@@ -176,7 +172,7 @@ erst ansehen, ob dort schon angepasste Logik drinsteht.
 Manche Hersteller liefern keinen fertigen Offline-Installer, sondern einen
 Download-Bootstrapper oder ein Selbstentpacker-Archiv. Dafür ein
 `01_Image-erzeugen.cmd` bzw. `01_Image-entpacken.cmd` in die **Paketwurzel**
-legen (Vorlage `assets/prepare.cmd.tmpl`). Regeln:
+legen (Vorlage `${CLAUDE_SKILL_DIR}/assets/prepare.cmd.tmpl`). Regeln:
 
 - **Mehrere Wege nacheinander probieren**, nicht auf ein Werkzeug verlassen:
   erst der herstellereigene Schalter (z. B. `-suppresslaunch -d <Ziel>`), dann
@@ -273,8 +269,8 @@ copy-paste-fertig, nicht als Prosa: Name, Version, Hersteller,
 Installations- und Deinstallationsbefehl, Installationsverhalten, Anforderungen,
 Erkennungsregel mit dem Pfad zum Detect-Skript, Rückgabecodes, Zuweisungsgruppe
 nach `assignment.groupPattern`. Werte und Fallstricke stehen in
-`references/intune-portal.md`; die Datei lesen, statt die Werte aus dem
-Gedächtnis zu rekonstruieren.
+`${CLAUDE_SKILL_DIR}/references/intune-portal.md`; die Datei lesen, statt die
+Werte aus dem Gedächtnis zu rekonstruieren.
 
 Zuweisungen, Gruppen und Richtlinien werden **nicht** selbst angelegt, sondern
 nur benannt – Schreibzugriffe auf Intune, Entra ID oder AD gehören in eine
@@ -310,9 +306,9 @@ Doku – sie wird typischerweise mitgesichert und weitergegeben.
 
 ## Aufräumen
 
-Lässt sich am Zielort nicht löschen (typisch über die Device-Bridge), nicht mehr
-benötigte Dateien nach `<trashFolder>` (Standard `_to_delete\`) im Wurzelordner
-verschieben und dem User sagen, was dort liegt – er löscht es selbst.
+Lässt sich am Zielort nicht löschen, nicht mehr benötigte Dateien nach
+`<trashFolder>` (Standard `_to_delete\`) im Wurzelordner verschieben und dem
+User sagen, was dort liegt – er löscht es selbst.
 
 Nach erfolgreichem Rollout können auch die Beschaffungsdateien in der
 Paketwurzel (Bootstrapper, SFX-Archiv) dorthin – das Image in `App\` reicht

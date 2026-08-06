@@ -4,11 +4,9 @@ Ziel: Setup-Typ, Silent-Schalter, Standard-Zielordner und Registry-Anzeigename
 aus dem Installer selbst ermitteln, statt sie zu raten oder aus dem Gedächtnis
 zu rekonstruieren.
 
-Die Kommandos laufen im **Cloud-Container** (dort gibt es `file`, `strings`,
-`7z`, `python3`), nicht auf dem Gerät des Users. Installer dafür mit
-`device_stage_files` stagen (bis 400 MB). Die entpackten Dateien bleiben im
-Container – zurückschreiben scheitert am 20-MB-Limit von
-`device_commit_files`, wird aber auch nicht gebraucht.
+Die Kommandos brauchen `file`, `strings`, `7z` und `python3`. Fehlt eins davon,
+das nachinstallieren statt den Schalter zu raten — die Analyse ist der Teil, der
+den Rollout rettet.
 
 ## 1. Grundtyp
 

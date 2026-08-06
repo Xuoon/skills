@@ -14,7 +14,7 @@ Wird von jedem agent-docs-Skill zuerst geladen. Qualitätsmaßstab: [style.md](s
 
 ## Ground Rules (alle Modi)
 
-- **Kein Silent-Fix, kein Auto-Apply.** Standard ist **nur der Vorschlag**; geschrieben wird erst mit `--anwenden` (oder auf ausdrückliches OK). Die Kontrolle bleibt immer beim Nutzer.
+- **Kein Silent-Fix, kein Auto-Apply.** Standard ist **nur der Vorschlag**; geschrieben wird erst mit `--fix` (oder auf ausdrückliches OK). Die Kontrolle bleibt immer beim Nutzer.
 - **Evidence Pflicht.** Jeder Claim mit `file:line` in Doku **und** Code. Unsicher → `needs verification`, nicht raten.
 - **Löschen > umschreiben > ergänzen.** Kürzere Doku ist bessere Doku. Mehr Zeilen = mehr Drift- und Fehlerfläche.
 - **One Source of Truth.** Jede Mechanik/Zahl/Invariante **eine** kanonische Stelle; woanders max. ein Pointer-Satz mit Link. Niemals dieselbe Mechanik zweimal ausführen.
@@ -87,9 +87,9 @@ Neue Datei: `**Create:** <pfad>` + voller Inhalt; Evidence pro Aussage; **Gate: 
 
 Whole-file rewrite: nur **`Gate: rewrite-prune`** (Netto kürzer, gleiche Fakten). **Verboten:** rewrite zum Aufblasen oder „while we're here“.
 
-Danach: **ohne `--anwenden` ist hier Schluss — kein Edit.** Mit `--anwenden` (oder ausdrücklichem OK) die Blöcke direkt schreiben.
+Danach: **ohne `--fix` ist hier Schluss — kein Edit.** Mit `--fix` (oder ausdrücklichem OK) die Blöcke direkt schreiben.
 
-## Verify (nach jedem Apply mit `--anwenden`)
+## Verify (nach jedem Apply mit `--fix`)
 
 1. Grep alter Strings/Pfade in geänderten Files → 0.
 2. Relative Markdown-Links in geänderten Files → 0 broken.
