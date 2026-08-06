@@ -14,14 +14,15 @@ Das Format ist angelehnt an [Keep a Changelog](https://keepachangelog.com/de/1.1
 
 #### Geändert
 
-- **Ein Befehl pro Plugin.** Alle Plugins liegen jetzt als Root-`SKILL.md`; die `skills/`-Unterebene und die drei `commands/`-Dateien von intune-win32 sind weg. Aus 13 Befehlen werden 5.
+- **Layout nach [Agent Plugins 1.0.0](https://agent-plugins.org/).** Jedes Plugin hat ein standardkonformes `plugin.json` im Root und seinen Skill unter `skills/<plugin>/SKILL.md` samt Bundle. Die `.claude-plugin/plugin.json` bleibt daneben bestehen — Claude Code findet ein Manifest im Plugin-Root nicht, der Standard sucht ausschließlich dort. Die Befehle ändern sich dadurch nicht.
+- **Ein Befehl pro Plugin.** Genau ein Skill je Plugin, gleich benannt; die drei `commands/`-Dateien von intune-win32 sind weg. Aus 13 Befehlen werden 5.
 - **Argumente englisch, Texte deutsch.** Einheitlich `--fix` fürs Schreiben, dazu `--audit`, `--skills`, `--setup`. Die alten `--anwenden`/`--kürzen`/`--schnell`/`--prüfen` entfallen.
 - **`claudex-install` heißt jetzt `claudex`.** Die `claudex-installer`-Marker in `.zshrc` und Config bleiben unverändert — bestehende Installationen werden weiter erkannt.
 - Referenzen zeigen nirgends mehr aus dem Plugin heraus (`${CLAUDE_SKILL_DIR}/references/…` statt `../../`).
 
 #### Hinzugefügt
 
-- `scripts/validate.py` (`bun run validate`) prüft die Invarianten, die vorher nur in der CLAUDE.md standen: Ordnername gegen `plugin.json`, Katalog-Vollständigkeit, `name:` in jeder Root-`SKILL.md`, keine Pfade aus dem Plugin heraus.
+- `scripts/validate.py` (`bun run validate`) prüft die Invarianten, die vorher nur in der CLAUDE.md standen: beide Manifeste gegeneinander (Name/Version/Description) und gegen das geschlossene Standard-Schema, Ordnername, Katalog-Vollständigkeit, `name:` in jeder `SKILL.md`, keine Pfade aus dem Skill heraus.
 - GitHub-Actions-CI mit Format-, Struktur- und Release-Gate-Prüfung (geändertes Plugin → Versions-Bump + Changelog-Eintrag).
 
 ## intune-win32

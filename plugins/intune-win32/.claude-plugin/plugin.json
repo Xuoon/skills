@@ -10,5 +10,10 @@
     "packaging",
     "powershell",
     "windows"
-  ]
+  ],
+  "author": {
+    "name": "Sven Labitzki",
+    "email": "sven@labitzki.de",
+    "url": "https://labi.dev"
+  }
 }

@@ -20,12 +20,27 @@ REPO_ROOT = Path(__file__).resolve().parent.parent
 PLUGINS_DIR = REPO_ROOT / "plugins"
 MARKETPLACE_FILE = REPO_ROOT / ".claude-plugin" / "marketplace.json"
 CHANGELOG_FILE = REPO_ROOT / "CHANGELOG.md"
-PLUGIN_MANIFEST = Path(".claude-plugin") / "plugin.json"
 
-# Pfade in SKILL.md-Bodies. ${CLAUDE_SKILL_DIR} zeigt auf das Verzeichnis der
-# SKILL.md — ein ../ darin verlässt das Plugin und bricht nach der Installation,
-# weil Plugins in einen Cache kopiert werden.
-SKILL_DIR_PATH = re.compile(r"\$\{CLAUDE_SKILL_DIR\}(/[^\s`)]*)")
+# Zwei Manifeste, weil zwei Ökosysteme: Claude Code liest ausschließlich
+# .claude-plugin/plugin.json, der Agent-Plugins-Standard ausschließlich das im
+# Plugin-Root. Sie müssen inhaltlich übereinstimmen — siehe check_manifests.
+STANDARD_MANIFEST = Path("plugin.json")
+CLAUDE_MANIFEST = Path(".claude-plugin") / "plugin.json"
+
+AGENT_PLUGINS_SCHEMA = "https://agent-plugins.org/schemas/1.0.0/plugin.schema.json"
+# Schema 1.0.0 ist geschlossen (additionalProperties: false); alles
+# Client-Spezifische gehört unter "extensions".
+STANDARD_FIELDS = {
+    "$schema", "name", "version", "description", "author",
+    "homepage", "repository", "license", "keywords", "extensions",
+}
+STANDARD_NAME = re.compile(r"^(?!.*(?:--|\.\.))[a-z0-9](?:[a-z0-9.-]*[a-z0-9])?$")
+SHARED_FIELDS = ("name", "version", "description")
+
+# ${CLAUDE_SKILL_DIR} zeigt auf das Verzeichnis der SKILL.md. Ein ../ darin
+# verlässt das Plugin und bricht nach der Installation, weil Plugins in einen
+# Cache kopiert werden.
+SKILL_DIR_PATH = re.compile(r"\$\{CLAUDE_SKILL_DIR\}(/[^\s`)\"]*)")
 FRONTMATTER = re.compile(r"\A---\r?\n(.*?)\r?\n---\r?\n", re.DOTALL)
 SEMVER = re.compile(r"\A\d+\.\d+\.\d+\Z")
 
@@ -59,67 +74,76 @@ def rel(path: Path) -> str:
     return str(path.relative_to(REPO_ROOT))
 
 
-def check_skill_paths(report: Report, skill_file: Path) -> None:
-    for path in SKILL_DIR_PATH.findall(skill_file.read_text(encoding="utf-8")):
+def check_manifests(report: Report, plugin_dir: Path) -> dict | None:
+    """Beide Manifeste vorhanden, standardkonform und untereinander gleich."""
+    name = plugin_dir.name
+    standard_file = plugin_dir / STANDARD_MANIFEST
+    claude_file = plugin_dir / CLAUDE_MANIFEST
+
+    ok = report.check(standard_file.is_file(), f"{name}: {STANDARD_MANIFEST} fehlt (Agent-Plugins-Standard)")
+    ok &= report.check(claude_file.is_file(), f"{name}: {CLAUDE_MANIFEST} fehlt (Claude Code lädt sonst nicht)")
+    if not ok:
+        return None
+
+    standard = read_json(standard_file)
+    claude = read_json(claude_file)
+
+    report.check(
+        standard.get("$schema") == AGENT_PLUGINS_SCHEMA,
+        f"{name}: plugin.json $schema muss {AGENT_PLUGINS_SCHEMA} sein",
+    )
+    for field in sorted(set(standard) - STANDARD_FIELDS):
+        report.fail(f"{name}: plugin.json Feld {field!r} ist im Schema 1.0.0 nicht erlaubt (gehört unter extensions)")
+    report.check(
+        bool(STANDARD_NAME.match(str(standard.get("name", "")))),
+        f"{name}: plugin.json name {standard.get('name')!r} verletzt das Namensmuster des Standards",
+    )
+
+    for field in SHARED_FIELDS:
         report.check(
-            "../" not in path,
-            f"{rel(skill_file)}: ${{CLAUDE_SKILL_DIR}}{path} zeigt aus dem Plugin heraus",
+            standard.get(field) == claude.get(field),
+            f"{name}: {field} läuft zwischen den beiden Manifesten auseinander "
+            f"({standard.get(field)!r} vs. {claude.get(field)!r})",
         )
 
+    report.check(claude.get("name") == name, f"{name}: plugin.json name muss dem Ordnernamen entsprechen")
+    report.check(bool(SEMVER.match(str(claude.get("version", "")))), f"{name}: version {claude.get('version')!r} ist kein Semver")
+    report.check(bool(claude.get("description")), f"{name}: plugin.json ohne description")
+    return claude
 
-def check_plugin(report: Report, plugin_dir: Path) -> None:
+
+def check_skill(report: Report, plugin_dir: Path) -> None:
+    """Genau ein Skill, gleich benannt wie das Plugin — sonst ändert sich der Befehl."""
     name = plugin_dir.name
-    manifest_file = plugin_dir / PLUGIN_MANIFEST
+    skills = sorted(p for p in (plugin_dir / "skills").glob("*/SKILL.md"))
 
-    if not report.check(manifest_file.is_file(), f"{name}: {PLUGIN_MANIFEST} fehlt"):
+    if not report.check(skills, f"{name}: kein skills/<name>/SKILL.md gefunden"):
         return
-
-    manifest = read_json(manifest_file)
     report.check(
-        manifest.get("name") == name,
-        f"{name}: plugin.json name ist {manifest.get('name')!r}, muss dem Ordnernamen entsprechen",
+        not (plugin_dir / "SKILL.md").is_file(),
+        f"{name}: SKILL.md im Plugin-Root — der Standard entdeckt nur skills/<name>/SKILL.md",
     )
     report.check(
-        bool(SEMVER.match(str(manifest.get("version", "")))),
-        f"{name}: version {manifest.get('version')!r} ist kein Semver",
+        len(skills) == 1 and skills[0].parent.name == name,
+        f"{name}: erwartet genau skills/{name}/SKILL.md, gefunden {[rel(s) for s in skills]}",
     )
-    report.check(bool(manifest.get("description")), f"{name}: plugin.json ohne description")
 
-    root_skill = plugin_dir / "SKILL.md"
-    sub_skills = sorted((plugin_dir / "skills").glob("*/SKILL.md"))
-
-    if not report.check(
-        not (root_skill.is_file() and sub_skills),
-        f"{name}: Root-SKILL.md und skills/ gleichzeitig — die beiden Muster nicht mischen",
-    ):
-        return
-
-    if root_skill.is_file():
-        frontmatter = read_frontmatter(root_skill)
-        if report.check(frontmatter is not None, f"{name}: SKILL.md ohne Frontmatter"):
-            # Ohne name: leitet Claude Code den Befehl aus dem Cache-Versionsverzeichnis
-            # ab und der Skill heißt /name:1-0-0 statt /name.
-            report.check(
-                frontmatter.get("name") == name,
-                f"{name}: Root-SKILL.md braucht name: {name} (ist {frontmatter.get('name')!r})",
-            )
-            report.check(bool(frontmatter.get("description")), f"{name}: SKILL.md ohne description")
-        check_skill_paths(report, root_skill)
-        return
-
-    for skill_file in sub_skills:
+    for skill_file in skills:
         frontmatter = read_frontmatter(skill_file)
         if report.check(frontmatter is not None, f"{rel(skill_file)}: ohne Frontmatter"):
-            # Der Unterordnername ist der Befehl; ein name: würde ihn still ersetzen.
-            report.check("name" not in frontmatter, f"{rel(skill_file)}: Sub-Skill trägt name:")
+            # Ohne name: fiele der Befehl auf den Ordnernamen zurück — hier
+            # identisch, aber explizit ist es gegen Umbenennungen robust.
+            report.check(
+                frontmatter.get("name") == skill_file.parent.name,
+                f"{rel(skill_file)}: name: muss {skill_file.parent.name} sein (ist {frontmatter.get('name')!r})",
+            )
             report.check(bool(frontmatter.get("description")), f"{rel(skill_file)}: ohne description")
-        check_skill_paths(report, skill_file)
 
-    hooks = plugin_dir / "hooks" / "hooks.json"
-    report.check(
-        bool(sub_skills) or hooks.is_file(),
-        f"{name}: weder SKILL.md noch skills/ noch hooks/hooks.json",
-    )
+        for path in SKILL_DIR_PATH.findall(skill_file.read_text(encoding="utf-8")):
+            report.check(
+                "../" not in path,
+                f"{rel(skill_file)}: ${{CLAUDE_SKILL_DIR}}{path} zeigt aus dem Skill heraus",
+            )
 
 
 def check_marketplace(report: Report, plugin_dirs: list[Path]) -> None:
@@ -163,12 +187,12 @@ def check_release_gate(report: Report, base_ref: str) -> None:
     changelog = CHANGELOG_FILE.read_text(encoding="utf-8")
 
     for name in sorted(touched):
-        manifest_file = PLUGINS_DIR / name / PLUGIN_MANIFEST
+        manifest_file = PLUGINS_DIR / name / CLAUDE_MANIFEST
         if not manifest_file.is_file():
             continue  # gelöscht
 
         try:
-            base_manifest = json.loads(git("show", f"{base_ref}:plugins/{name}/{PLUGIN_MANIFEST}"))
+            base_manifest = json.loads(git("show", f"{base_ref}:plugins/{name}/{CLAUDE_MANIFEST}"))
         except subprocess.CalledProcessError:
             continue  # neu
 
@@ -197,7 +221,8 @@ def main() -> int:
     plugin_dirs = sorted(p for p in PLUGINS_DIR.iterdir() if p.is_dir())
 
     for plugin_dir in plugin_dirs:
-        check_plugin(report, plugin_dir)
+        if check_manifests(report, plugin_dir) is not None:
+            check_skill(report, plugin_dir)
     check_marketplace(report, plugin_dirs)
     if args.release_gate:
         check_release_gate(report, args.release_gate)

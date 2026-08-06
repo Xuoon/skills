@@ -1,4 +1,5 @@
 {
+  "$schema": "https://agent-plugins.org/schemas/1.0.0/plugin.schema.json",
   "name": "windev",
   "version": "2.0.0",
   "description": "Windows-Dev-Umgebung: /windev vermisst read-only, --fix behebt die Befunde mit Backups, --setup richtet PowerShell/Terminal nach Best Practice ein (auch auf frischem Windows).",
@@ -6,5 +7,8 @@
     "name": "Sven Labitzki",
     "email": "sven@labitzki.de",
     "url": "https://labi.dev"
-  }
+  },
+  "homepage": "https://github.com/Xuoon/skills/tree/main/plugins/windev",
+  "repository": "https://github.com/Xuoon/skills",
+  "keywords": ["claude-code", "windows", "powershell", "developer-environment"]
 }

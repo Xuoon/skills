@@ -77,7 +77,7 @@ aktualisieren und reparieren laufen alle über den Ablauf ab Schritt 3.
 
 ### 3. Dry-Run zeigen
 
-Der Plugin-Root steht in `${CLAUDE_SKILL_DIR}`. Führe zunächst aus:
+Die gebündelten Skripte liegen unter `${CLAUDE_SKILL_DIR}/scripts/`. Führe zunächst aus:
 
 ```bash
 bash "${CLAUDE_SKILL_DIR}/scripts/install.sh" --dry-run [gewählte Optionen]

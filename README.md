@@ -31,6 +31,19 @@ Jedes Plugin hat genau einen Befehl. Ohne Argument wird nur analysiert und vorge
 
 Updates kommen über `/plugin update` (bzw. Auto-Update), gesteuert über das `version`-Feld der jeweiligen `plugin.json`.
 
+## Aufbau
+
+Die Plugins folgen [Agent Plugins 1.0.0](https://agent-plugins.org/):
+
+```
+plugins/<name>/
+├── plugin.json                  # Agent-Plugins-Standard
+├── .claude-plugin/plugin.json   # Claude Code
+└── skills/<name>/SKILL.md       # plus references/, scripts/, assets/
+```
+
+Zwei Manifeste, weil Claude Code ausschließlich `.claude-plugin/plugin.json` liest und der Standard ausschließlich das im Plugin-Root. Beide tragen denselben Namen, dieselbe Version und dieselbe Beschreibung.
+
 ## Entwicklung
 
 ```
@@ -38,6 +51,6 @@ bun run fix        # JSON/Markdown formatieren
 bun run validate   # Marktplatz-Invarianten prüfen
 ```
 
-`bun run validate` prüft, was sonst still bricht: Ordnername gegen `plugin.json`, Katalog-Vollständigkeit, `name:` in jeder Root-`SKILL.md` und Pfade, die aus dem Plugin herauszeigen. In der CI läuft zusätzlich das Release-Gate — geänderte Plugins brauchen einen Versions-Bump und einen Changelog-Eintrag.
+`bun run validate` prüft, was sonst still bricht: beide Manifeste gegeneinander, Ordnername gegen `plugin.json`, Katalog-Vollständigkeit, `name:` in jeder `SKILL.md` und Pfade, die aus dem Skill herauszeigen. In der CI läuft zusätzlich das Release-Gate — geänderte Plugins brauchen einen Versions-Bump und einen Changelog-Eintrag.
 
 Alle Release-Notizen stehen gesammelt in der [CHANGELOG.md](CHANGELOG.md); jedes Plugin wird unabhängig nach SemVer versioniert.
