@@ -11,8 +11,11 @@ gewinnt:
 
 ```
 <Wurzel der Intune-Apps>\intune-paket.json      <- der Normalfall
-<Paketordner>\intune-paket.json                 <- Ausnahme fuer ein Paket
+<Paketordner>\intune-paket.json                 <- Ausnahme für ein Paket
 ```
+
+Eine ausgefüllte Vorlage zum Kopieren liegt in
+`${CLAUDE_SKILL_DIR}/examples/intune-paket.json`.
 
 Fehlt die Datei, gelten die Standardwerte. Es ist **kein** Fehler, ohne sie zu
 arbeiten – dann bei ungewöhnlichen Umgebungen einmal beim User nachfragen,
