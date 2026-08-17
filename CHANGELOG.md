@@ -6,6 +6,12 @@ Das Format ist angelehnt an [Keep a Changelog](https://keepachangelog.com/de/1.1
 
 ## Marketplace
 
+### 2026-08-18
+
+#### Hinzugefügt
+
+- **handoff** in den Katalog aufgenommen.
+
 ### 2026-08-06
 
 #### Entfernt
@@ -24,6 +30,14 @@ Das Format ist angelehnt an [Keep a Changelog](https://keepachangelog.com/de/1.1
 
 - `scripts/validate.py` (`bun run validate`) prüft die Invarianten, die vorher nur in der CLAUDE.md standen: beide Manifeste gegeneinander (Name/Version/Description) und gegen das geschlossene Standard-Schema, Ordnername, Katalog-Vollständigkeit, `name:` in jeder `SKILL.md`, keine Pfade aus dem Skill heraus.
 - GitHub-Actions-CI mit Format-, Struktur- und Release-Gate-Prüfung (geändertes Plugin → Versions-Bump + Changelog-Eintrag).
+
+## handoff
+
+### [1.0.0] – 2026-08-18
+
+#### Hinzugefügt
+
+- Erste Version: `/handoff` destilliert die laufende Session in ein provider-neutrales Übergabe-Dokument (Auftrag, Entscheidungen, Tretminen, Stand, nächste Schritte). Git-Faktencheck vor dem Schreiben, Unverifiziertes wird markiert. Die letzte Antwort ist das Dokument selbst; zusätzlich landet es als `HANDOFF.md` im Arbeitsverzeichnis. Keine Argumente — Sonderwünsche als Fließtext.
 
 ## intune-win32
 

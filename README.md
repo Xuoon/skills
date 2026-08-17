@@ -15,6 +15,7 @@ Jedes Plugin hat genau einen Befehl. Ohne Argument wird nur analysiert und vorge
 | `/agent-docs` | `--audit` · `--fix` | Agent-Doku am Code halten. Standard = Diff-Sync als Vorschlag, `--audit` = voller Report mit Scoring und Subagent-Fan-out |
 | `/cleanup` | `--skills` · `--fix` | Toten/Legacy-Code und verwaiste Dateien finden, mit `--skills` stattdessen repo-lokale Skills. `--fix` beweist jede Löschung erst in einer Wegwerf-Kopie |
 | `/windev` | `--fix` · `--setup` | Windows-Umgebung vermessen (read-only), `--fix` behebt die Befunde mit Backups, `--setup` richtet nach Best Practice ein |
+| `/handoff` | freier Text | Session in ein Übergabe-Dokument destillieren, mit dem ein anderer Agent direkt weiterarbeitet — die letzte Antwort ist das Dokument selbst |
 | `/claudex` | – | Claude Code auf macOS mit GPT über CLIProxyAPI einrichten, aktualisieren, reparieren oder entfernen |
 | `/intune-win32` | freier Text | Intune-Win32-Paket aus MSI/EXE bauen, oder einen fehlgeschlagenen Rollout eingrenzen — was gemeint ist, steht im Text |
 
@@ -25,6 +26,7 @@ Jedes Plugin hat genau einen Befehl. Ohne Argument wird nur analysiert und vorge
 /plugin install agent-docs@labi
 /plugin install cleanup@labi
 /plugin install windev@labi
+/plugin install handoff@labi
 /plugin install claudex@labi
 /plugin install intune-win32@labi
 ```
