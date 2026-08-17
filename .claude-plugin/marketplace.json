@@ -17,6 +17,11 @@
       "description": "Findet toten/Legacy-Code und verwaiste Dateien, mit --skills stattdessen repo-lokale Skills. --fix beweist jede Löschung in einer Wegwerf-Kopie, bevor sie ausgeführt wird."
     },
     {
+      "name": "handoff",
+      "source": "./plugins/handoff",
+      "description": "Destilliert die laufende Session in ein Übergabe-Dokument, mit dem ein anderer Agent direkt weiterarbeiten kann. Die letzte Antwort ist das Dokument selbst — bereit zum Kopieren."
+    },
+    {
       "name": "claudex",
       "source": "./plugins/claudex",
       "description": "Richtet Claude Code auf macOS mit GPT über einen lokalen, authentifizierten CLIProxyAPI ein — installieren, aktualisieren, reparieren, entfernen."
