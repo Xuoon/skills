@@ -1,35 +1,76 @@
 # Changelog
 
-Alle nennenswerten Änderungen an diesem Claude-Code-Plugin-Marketplace werden in dieser Datei dokumentiert.
-
-Das Format ist angelehnt an [Keep a Changelog](https://keepachangelog.com/de/1.1.0/). Die einzelnen Plugins werden unabhängig voneinander nach [Semantic Versioning](https://semver.org/lang/de/) versioniert.
+Was sich an den Plugins ändert, aus Sicht dessen, der sie benutzt. Jedes Plugin wird nach [Semantic Versioning](https://semver.org/lang/de/) versioniert; ältere Einträge stehen in der Git-Historie.
 
 ## Marketplace
 
-### 2026-08-18
+### 2026-08-19
+
+Die Befehle sind nach Anlass gruppiert. Statt acht einzelner Plugins gibt es fünf: `code`, `setup`, `windows`, `handoff` und `bruh`. Jeder Skill ist weiterhin auch bar erreichbar — `/ship` funktioniert wie `/code:ship`.
+
+**Einmalig auf jedem Gerät:**
+
+```
+claude plugin uninstall agent-docs cleanup windev claudex intune-win32
+/plugin install code@labi
+/plugin install setup@labi
+/plugin install windows@labi
+/plugin install bruh@labi
+```
+
+`handoff` bleibt unverändert installiert.
+
+## code
+
+### [1.0.0] – 2026-08-19
+
+Bündelt die Arbeit am Code: `/code:planning`, `/code:cleanup`, `/code:agent-docs` und `/code:ship`.
 
 #### Hinzugefügt
 
-- **handoff** in den Katalog aufgenommen.
-
-### 2026-08-06
-
-#### Entfernt
-
-- **ship**, **btw-checkout** und **load-context** aus dem Katalog genommen. Auf den Geräten einmalig `claude plugin uninstall ship btw-checkout load-context` (bzw. `claudex-install` wegen der Umbenennung).
+- **`/code:planning`** — plant ein Vorhaben durch, bevor etwas geschrieben wird. Fragerunde über das Frage-Tool, bis nichts mehr offen ist, dann ein nummerierter Plan zum einzelnen Abnicken. Umgesetzt wird erst nach dem Go, danach ohne Zwischenfragen.
+- **`/code:ship`** — committen und PR öffnen. `--merge` mergt zusätzlich und wechselt zurück auf den Default-Branch, `--clean` räumt gemergte Branches und verwaiste Worktrees auf. Allein aufgerufen räumt `--clean` nur auf. Bei öffentlichen Repos prüft ship den Diff vorab auf Secrets und interne Daten.
 
 #### Geändert
 
-- **Layout nach [Agent Plugins 1.0.0](https://agent-plugins.org/).** Jedes Plugin hat ein standardkonformes `plugin.json` im Root und seinen Skill unter `skills/<plugin>/SKILL.md` samt Bundle. Die `.claude-plugin/plugin.json` bleibt daneben bestehen — Claude Code findet ein Manifest im Plugin-Root nicht, der Standard sucht ausschließlich dort. Die Befehle ändern sich dadurch nicht.
-- **Ein Befehl pro Plugin.** Genau ein Skill je Plugin, gleich benannt; die drei `commands/`-Dateien von intune-win32 sind weg. Aus 13 Befehlen werden 5.
-- **Argumente englisch, Texte deutsch.** Einheitlich `--fix` fürs Schreiben, dazu `--audit`, `--skills`, `--setup`. Die alten `--anwenden`/`--kürzen`/`--schnell`/`--prüfen` entfallen.
-- **`claudex-install` heißt jetzt `claudex`.** Die `claudex-installer`-Marker in `.zshrc` und Config bleiben unverändert — bestehende Installationen werden weiter erkannt.
-- Referenzen zeigen nirgends mehr aus dem Plugin heraus (`${CLAUDE_SKILL_DIR}/references/…` statt `../../`).
+- **`/cleanup` heißt `/code:cleanup`**, **`/agent-docs` heißt `/code:agent-docs`**. Argumente und Verhalten bleiben.
+- **`/code:agent-docs` pflegt jetzt auch Changelog-Dateien.** Ein Changelog ist für Endnutzer geschrieben: was neu, geändert oder entfernt ist. Keine Migrations- oder Baugeschichte, keine Verifikationsblöcke. Bei mehreren Changelogs im Monorepo nur der zum geänderten Bereich.
+
+## setup
+
+### [1.0.0] – 2026-08-19
+
+Bündelt die Einrichtung: `/setup:windev`, `/setup:claudex` und `/setup:labi-defaults`.
 
 #### Hinzugefügt
 
-- `scripts/validate.py` (`bun run validate`) prüft die Invarianten, die vorher nur in der CLAUDE.md standen: beide Manifeste gegeneinander (Name/Version/Description) und gegen das geschlossene Standard-Schema, Ordnername, Katalog-Vollständigkeit, `name:` in jeder `SKILL.md`, keine Pfade aus dem Skill heraus.
-- GitHub-Actions-CI mit Format-, Struktur- und Release-Gate-Prüfung (geändertes Plugin → Versions-Bump + Changelog-Eintrag).
+- **`/setup:labi-defaults`** — analysiert die globale `CLAUDE.md` und schärft sie gemeinsam mit dir. Zeigt erst den Befund, fragt dann über das Frage-Tool durch, schreibt erst danach und nur das Zugestimmte. `settings.json` und Hooks werden gelesen und gemeldet, aber nie geändert.
+
+#### Geändert
+
+- **`/windev` heißt `/setup:windev`**, **`/claudex` heißt `/setup:claudex`**. Argumente und Verhalten bleiben.
+
+## windows
+
+### [1.0.0] – 2026-08-19
+
+Bündelt die Windows-Werkzeuge: `/windows:intune-win32` und `/windows:irm-skript`.
+
+#### Hinzugefügt
+
+- **`/windows:irm-skript`** — erzeugt ein self-contained PowerShell-Tool im labi.dev-Hausstil, aufrufbar per `irm labi.dev/route | iex`: interaktive Oberfläche mit Status-Badges, tastengesteuertem Menü, mehrseitiger Hilfe und Headless-Fallback.
+
+#### Geändert
+
+- **`/intune-win32` heißt `/windows:intune-win32`.** Verhalten bleibt.
+
+## bruh
+
+### [1.0.0] – 2026-08-19
+
+#### Hinzugefügt
+
+- **`/bruh`** — erklärt die letzte Antwort noch einmal in einfacher Sprache. Keine neuen Informationen, keine Recherche; Pfade, Befehle und Zahlen bleiben wörtlich, Tabellen werden zu Fließtext.
 
 ## handoff
 
@@ -37,239 +78,4 @@ Das Format ist angelehnt an [Keep a Changelog](https://keepachangelog.com/de/1.1
 
 #### Hinzugefügt
 
-- Erste Version: `/handoff` destilliert die laufende Session in ein provider-neutrales Übergabe-Dokument (Auftrag, Entscheidungen, Tretminen, Stand, nächste Schritte). Git-Faktencheck vor dem Schreiben, Unverifiziertes wird markiert. Die letzte Antwort ist das Dokument selbst; zusätzlich landet es als `HANDOFF.md` im Arbeitsverzeichnis. Keine Argumente — Sonderwünsche als Fließtext.
-
-## intune-win32
-
-### [2.0.0] – 2026-08-06
-
-#### Geändert
-
-- **Breaking:** Befehl heißt jetzt `/intune-win32` (vorher `/intune-win32:intune-win32-paket` plus die Slash-Commands `/intune-paket`, `/intune-analyse`, `/intune-fehler`). Skill und Bundle liegen im Plugin-Root.
-- **Keine Argumente mehr.** Was gemeint ist, steht im Fließtext: Ordner/Installer → Paket bauen, Fehlercode → Rollout eingrenzen. Ohne Text kommt genau eine Rückfrage.
-- Nur noch auf Zuruf (`disable-model-invocation`), Description entsprechend auf einen Satz gekürzt.
-- Der Abschnitt zur Device-Bridge (Cloud-Sessions ohne lokalen Dateizugriff) ist entfernt — der Skill setzt lokalen Dateizugriff voraus.
-
-### [1.0.0] – 2026-07-30
-
-#### Hinzugefügt
-
-- `/intune-paket` — aus einem Ordner mit MSI/EXE ein in sich geschlossenes Win32-Paket bauen (`App\` + `Output\` + eigene `IntuneWinAppUtil.exe` + `Pack.cmd` + install/uninstall/detect-PowerShell).
-- `/intune-analyse` — Installer analysieren statt Silent-Schalter zu raten (Framework, SFX, Downloader, Schalter).
-- `/intune-fehler` — fehlgeschlagene Rollouts eingrenzen (u. a. `0x87D1041C`, 1603, 3010).
-- Scaffolding über `scripts/new_package.py`, Vorlagen unter `assets/`, optionale Umgebungskonventionen via `intune-paket.json`.
-- Kein Plugin-README — Katalog im Root-`README.md`, Arbeitsablauf kanonisch in der SKILL.md.
-
-## agent-docs
-
-### [6.0.0] – 2026-08-06
-
-#### Geändert
-
-- **Breaking:** ein Befehl `/agent-docs` statt `:sync` und `:audit`. Ohne Flag der Diff-Sync als Vorschlag, `--audit` der volle Report, `--fix` schreibt.
-- **Breaking:** Flags heißen jetzt `--fix` und `--audit`. `--anwenden`, `--kürzen`, `--prüfen` und `--schnell` sind weg.
-- Der Audit läuft nur noch in einem Umfang — voll, mit Scoring, Coverage und Prune-Sweep, verteilt über parallele Subagenten. Der Sparmodus war mit Fan-out nicht mehr nötig.
-- Der Prune-Sweep ist damit Pflichtbestandteil jedes Laufs statt eines eigenen Flags.
-
-### [5.0.0] – 2026-07-23
-
-#### Geändert
-
-- **Standard = nur Vorschlag.** `sync` und `audit` schreiben nichts mehr ungefragt — erst mit `--anwenden`. Auto-Invoke von `sync` schlägt also nur vor.
-- **Deutsche Flag-Argumente:** `sync` `--kürzen`/`--prüfen`/`--anwenden`, `audit` `--schnell`/`--kürzen`/`--anwenden`. Pfad-Argument entfernt — Scope ist immer das aktuelle Verzeichnis, Subtree/Diff-Basis bei Bedarf im Fließtext.
-- **Descriptions auf Deutsch** (auch die model-invocable `sync`-Description).
-- `sync` wendet One Source of Truth auf sich selbst an: die Gate-Kurzform ist ein Pointer auf `shared.md` statt einer zweiten Kopie der Mechanik.
-- Scope erweitert um `CLAUDE.local.md`/`.claude.local.md` (gitignorierte persönliche Overrides); Inhalte von dort werden nie in geteilte Docs gespiegelt.
-
-### [4.0.2] – 2026-07-16
-
-#### Geändert
-
-- `audit`-Description deutsch und kurz — reine Picker-UI (`disable-model-invocation`).
-
-### [4.0.1] – 2026-07-09
-
-#### Geändert
-
-- `argument-hint` + explizites `$ARGUMENTS`-Parsing (Mode, Git-Ref, Subtree, Freitext) für beide Skills, mit Beispielen im Body.
-- Descriptions kürzer/scannbarer für den Skill-Picker.
-
-### [4.0.0] – 2026-07-09
-
-Sync/Audit neigten dazu, nach Feature-Arbeit **Implementation-Details und Inventare zu addieren** (Prefetch-Pads, UI-Chrome, Prop-Listen). Mehr Zeilen = mehr Drift. Agents brauchen **Verträge**, nicht Tutorials.
-
-#### Geändert
-
-- **Breaking behavioral:** Asymmetrisches Edit-Gate in `references/shared.md`: DELETE leicht, ADD schwer (agent-blocking ∧ non-obvious ∧ single home ∧ ≤3 Zeilen ∧ Netto-Budget).
-- **Sync** führt bei jedem Add-Kandidaten einen **Mini-Prune** mit; Deletes im Vorschlag **vor** Adds; valides Outcome `0 candidates`.
-- **Audit-Scoring:** Conciseness **25**, Completeness **15** — Aufblasen kann Completeness nicht „retten".
-- Neuer Audit-Modus nur für Lösch-/Merge-Pass.
-- **style.md:** „Code owns implementation detail"; Größenrichtwerte Root/App/Domain; explizite Anti-Inventar-Tabelle.
-- **prune-sweep.md:** wann (Sync/Audit/User), Merge-Regel für kleine Rule-Dateien (≤~15 exklusive Zeilen), Netto-Ziel Δ<0.
-- Verify meldet **Δ lines**.
-- Whole-file rewrite nur noch als **`rewrite-prune`** (Netto kürzer), nicht zum Erweitern.
-
-#### Hinzugefügt
-
-- Sync-Trigger-Phrasen: „weniger doku", „prune", „unnötig".
-- Claim-Kind `impl-detail` im Audit-Discovery.
-- Anti-Pattern: Session-Changelog / frisches Feature 1:1 in Rules spezifizieren.
-
-### [3.0.0] – 2026-06-30
-
-#### Geändert
-
-- `/agent-docs:sync` ist smarter Alltags-Router (Init/Sync/Review).
-- `sync` `allowed-tools` um `ls`/`find` erweitert.
-
-#### Entfernt
-
-- **Breaking:** `/agent-docs:init` als eigener Befehl — Init ist Sync-Modus (`references/init.md`).
-
-### [2.0.0] – 2026-06-11
-
-#### Geändert
-
-- Argumente vereinfacht; `quick` (audit) bleibt.
-
-#### Entfernt
-
-- **Breaking:** `/agent-docs:prune` — Prune in Sync-Gate + Audit-Sweep; Prozedur in `references/prune-sweep.md`.
-
-### [1.0.0] – 2026-06-10
-
-#### Hinzugefügt
-
-- Plugin mit `sync`, `audit`, `prune`, `init`; zentrales Vorschlags-Format in `shared.md`.
-
-## cleanup
-
-### [2.0.0] – 2026-08-06
-
-#### Geändert
-
-- **Breaking:** ein Befehl `/cleanup` statt `:code` und `:skills`. Standard ist der Code-Lauf, `--skills` prüft stattdessen die repo-lokalen Skills; `--anwenden` heißt jetzt `--fix`.
-- Darf sich jetzt selbst ziehen (kein `disable-model-invocation` mehr) — von selbst aber immer nur analysierend, nie mit `--fix`.
-
-#### Hinzugefügt
-
-- **Beweis in der Wegwerf-Kopie.** `--fix` löscht die Kandidaten erst in einem `git worktree` außerhalb des Repos und lässt dort typecheck/build/test laufen. Was bricht, wird zurückgestuft statt gelöscht.
-- **Dreistufiges Urteil** `SICHER LÖSCHEN` / `PRÜFEN` / `BEHALTEN` mit Confidence und Risiko je Kandidat. `PRÜFEN` wird auch mit `--fix` nicht gelöscht.
-- **Baseline-Zahlen** im Report-Kopf: Dateien, Zeilen, Bytes und der löschbare Anteil.
-
-### [1.0.0] – 2026-07-23
-
-#### Hinzugefügt
-
-- `/cleanup:code` — findet nachweislich toten/Legacy-/Fallback-Code und verwaiste Dateien, verifiziert jede Löschung gegen dynamische Nutzung. Standard nur analysieren; mit `--anwenden` direkt entfernen samt aller Rest-Erwähnungen, danach Build/Test. Delete-first.
-- `/cleanup:skills` — sortiert repo-lokale Skills/Commands in löschen (Plugin/Built-in deckt ab) / hochziehen (in den Marketplace) / behalten (projektspezifisch); löscht mit `--anwenden`.
-
-## ship *(entfernt am 2026-08-06)*
-
-### [1.0.0] – 2026-07-23
-
-#### Hinzugefügt
-
-- `/ship` — committen → PR auf `main` im Hausformat → optional mergen, mit read-only Recon, Public-Repo-Guard (prüft den Diff auf Sensibles) und Freigabe-Gate vor jedem schreibenden Schritt. Bare `/ship` = committen + PR (nur falls keiner offen ist), **kein** Merge; `--mergen` mergt zusätzlich, `--nur-commit` lässt den PR weg.
-
-## claudex
-
-### [4.0.0] – 2026-08-06
-
-#### Geändert
-
-- **Breaking:** Plugin und Befehl heißen jetzt `claudex` (vorher `claudex-install`). Auf den Geräten einmalig `claudex-install` deinstallieren und `claudex@labi` installieren. Die `claudex-installer`-Marker in `.zshrc` und Config sind **unverändert** — bestehende Setups werden weiter erkannt, Update und Uninstall funktionieren.
-- **Keine Argumente mehr.** Aktion, Port, Modell und Login-Art klärt eine AskUserQuestion-Runde nach der read-only Vorprüfung; gefragt wird nur, was die Vorprüfung offen lässt. Die Installer-Flags (`--model`, `--port`, `--device-login`, `--no-browser`) bleiben intern erhalten.
-- Description auf Deutsch und auf einen Satz gekürzt, Skill nur noch auf Zuruf (`disable-model-invocation`).
-
-### [3.0.0] – 2026-07-23
-
-#### Geändert
-
-- SKILL.md gestrafft: die deterministischen Installer-Schritte werden nicht mehr einzeln nacherzählt (der Code trägt sie), die Sicherheitszusagen bleiben wörtlich stehen.
-- `license`-Feld aus der `plugin.json` entfernt.
-
-### [2.0.0] – 2026-07-16
-
-#### Geändert
-
-- **Breaking:** Plugin heißt jetzt `claudex-install`, der Befehl schlicht `/claudex-install` (Root-SKILL.md statt `skills/install/`; vorher `/claudex-installer:install`). Auf den Geräten einmalig `claudex-installer` deinstallieren und `claudex-install@labi` installieren.
-- Description gestrafft. Die `claudex-installer`-Marker in `.zshrc`/Config bleiben unverändert — bestehende Installationen werden weiter erkannt (Update/Uninstall funktionieren).
-
-#### Entfernt
-
-- Plugin-README (Inhalte stehen kanonisch in der SKILL.md bzw. im Root-README).
-
-### [1.0.0] – 2026-07-13
-
-#### Hinzugefügt
-
-- Skill `/claudex-installer:install` mit read-only Vorprüfung, Dry-Run und explizitem Freigabe-Gate.
-- Architektur-Erkennung für Apple Silicon, Intel und Rosetta sowie SHA-256-Prüfung offizieller CLIProxyAPI-Releases.
-- Sicheres Localhost-Setup mit zufälligem Client-Key, Codex/OAuth, Modellermittlung und End-to-End-Test.
-- Idempotente `claudex()`-Funktion mit `.zshrc`-Backup, Syntaxprüfung und Auto-Start des Proxys.
-- Deinstallationsskript und Troubleshooting für OAuth, Portkonflikte, Sandbox und Modellverfügbarkeit.
-
-## btw-checkout *(entfernt am 2026-08-06)*
-
-### [1.0.0] – 2026-07-23
-
-#### Hinzugefügt
-
-- Direkt-Modus (`--direkt`): überspringt die eine Rückfrage-Runde und gibt sofort den finalen Codeblock aus.
-
-Erstes stabiles Release — Funktionsumfang ansonsten unverändert.
-
-### [0.2.0] – 2026-07-16
-
-#### Behoben
-
-- `name: btw-checkout` im Frontmatter — ohne das Feld leitete Claude Code den Befehlsnamen aus dem Versions-Verzeichnis im Plugin-Cache ab (`/btw-checkout:0-1-0` statt `/btw-checkout`).
-
-#### Geändert
-
-- Description deutsch und kurz (reine Picker-UI, da `disable-model-invocation`); `argument-hint` für optionale inhaltliche Hinweise.
-
-### [0.1.0] – 2026-07-16
-
-#### Hinzugefügt
-
-- `/btw-checkout` — destilliert den Side-Chat-Verlauf in einen Übergabe-Prompt für den Haupt-Chat (Entscheidungen, Fakten/Pfade, offene Fragen + nummerierte Aufgaben bzw. „Keine Aktion nötig"), eine Rückfrage, dann finale Fassung als Codeblock.
-
-## load-context *(entfernt am 2026-08-06)*
-
-### [1.0.0] – 2026-07-23
-
-Erstes stabiles Release — Funktionsumfang unverändert.
-
-### [0.2.0] – 2026-06-30
-
-#### Hinzugefügt
-
-- `.github/instructions/*.instructions.md` (Copilot-Workspace-Instruktionsdateien) werden jetzt mitgeladen.
-
-### [0.1.0] – 2026-06-25
-
-#### Hinzugefügt
-
-- Hook-Plugin ohne Befehle: lädt repo-spezifische Doku via `SessionStart`-Hook in den Kontext — bei jedem Session-Start und nach jedem Compact (`source=compact`). Geladen werden `CLAUDE.md`, `AGENTS.md`, `README.md`, `.claude/rules/**/*.md` sowie Instruktionsdateien anderer AI-Tools (`.cursorrules`, `.cursor/rules/**/*.mdc`, `.github/copilot-instructions.md`, `GEMINI.md`, `.windsurfrules`, `.clinerules`, `.junie/guidelines.md`). Git-tracked (überspringt `node_modules`/`.gitignore`), mit Pro-Datei- und Gesamt-Budget gegen Kontext-Flut.
-
-## windev
-
-### [2.0.0] – 2026-08-06
-
-#### Geändert
-
-- **Breaking:** ein Befehl `/windev` statt `:setup` und `:optimize`. Ohne Flag wird nur vermessen (read-only), `--fix` behebt die Befunde, `--setup` richtet ein.
-- `--fix` arbeitet die Befunde ohne vorherige Freigaberunde ab — **aber nie ohne datiertes Backup**. Echte Nutzer-Entscheidungen (Admin-Module, UAC-Prompt für den Machine-PATH, „brauchst du X noch?") werden weiterhin gefragt.
-- Skript- und Referenzpfade laufen jetzt über `${CLAUDE_SKILL_DIR}` statt `$CLAUDE_PLUGIN_ROOT`/`../../`.
-
-### [1.0.0] – 2026-07-19
-
-#### Hinzugefügt
-
-- `/windev:setup` (Einrichtung inklusive PowerShell-7-Bootstrap auf frischem Windows) und `/windev:optimize` (Vollanalyse und Bereinigung), beide approval-gated.
-- Read-only-Inventur mit aktiver OMP-Konfiguration, expandiertem PATH-Audit sowie Erkennung von VS-Code-User- und System-Installationen.
-- Schlankes OMP-Basistheme und deterministische Theme-Erzeugung mit expliziter Quellkonfiguration.
-- HKLM-PATH-Bereinigung mit Rohwert-Backup, Deduplizierung und sicherer Array-Übergabe durch einen elevierten Wrapper.
-- Best-Practice-Referenz und PowerShell-Profilvorlage mit Guard und Lazy-Loading.
+- **`/handoff`** — destilliert die laufende Session in ein Übergabe-Dokument, mit dem ein anderer Agent direkt weiterarbeitet: Auftrag, Entscheidungen, Tretminen, Stand, nächste Schritte. Die letzte Antwort ist das Dokument selbst, zusätzlich landet es als `HANDOFF.md` im Arbeitsverzeichnis.

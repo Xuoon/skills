@@ -1,0 +1,14 @@
+{
+  "$schema": "https://agent-plugins.org/schemas/1.0.0/plugin.schema.json",
+  "name": "windows",
+  "version": "1.0.0",
+  "description": "Windows-Werkzeuge: intune-win32 baut Intune-Win32-Pakete aus MSI und EXE, irm-skript erzeugt gehostete PowerShell-Tools für den Aufruf per Einzeiler.",
+  "author": {
+    "name": "Sven Labitzki",
+    "email": "sven@labitzki.de",
+    "url": "https://labi.dev"
+  },
+  "homepage": "https://github.com/Xuoon/skills/tree/main/plugins/windows",
+  "repository": "https://github.com/Xuoon/skills",
+  "keywords": ["claude-code", "windows", "intune", "powershell", "packaging"]
+}

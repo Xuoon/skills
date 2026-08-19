@@ -112,27 +112,23 @@ def check_manifests(report: Report, plugin_dir: Path) -> dict | None:
     return claude
 
 
-def check_skill(report: Report, plugin_dir: Path) -> None:
-    """Genau ein Skill, gleich benannt wie das Plugin — sonst ändert sich der Befehl."""
+def check_skills(report: Report, plugin_dir: Path) -> set[str]:
+    """Jeder Skill trägt seinen Ordnernamen — daraus entsteht sein Befehl."""
     name = plugin_dir.name
     skills = sorted(p for p in (plugin_dir / "skills").glob("*/SKILL.md"))
 
-    if not report.check(skills, f"{name}: kein skills/<name>/SKILL.md gefunden"):
-        return
+    if not report.check(skills, f"{name}: kein skills/<skill>/SKILL.md gefunden"):
+        return set()
     report.check(
         not (plugin_dir / "SKILL.md").is_file(),
-        f"{name}: SKILL.md im Plugin-Root — der Standard entdeckt nur skills/<name>/SKILL.md",
-    )
-    report.check(
-        len(skills) == 1 and skills[0].parent.name == name,
-        f"{name}: erwartet genau skills/{name}/SKILL.md, gefunden {[rel(s) for s in skills]}",
+        f"{name}: SKILL.md im Plugin-Root — der Standard entdeckt nur skills/<skill>/SKILL.md",
     )
 
     for skill_file in skills:
         frontmatter = read_frontmatter(skill_file)
         if report.check(frontmatter is not None, f"{rel(skill_file)}: ohne Frontmatter"):
-            # Ohne name: fiele der Befehl auf den Ordnernamen zurück — hier
-            # identisch, aber explizit ist es gegen Umbenennungen robust.
+            # name: bestimmt das letzte Segment des Befehls. Weicht es vom
+            # Ordnernamen ab, heißt der Skill anders, als sein Pfad verspricht.
             report.check(
                 frontmatter.get("name") == skill_file.parent.name,
                 f"{rel(skill_file)}: name: muss {skill_file.parent.name} sein (ist {frontmatter.get('name')!r})",
@@ -144,6 +140,8 @@ def check_skill(report: Report, plugin_dir: Path) -> None:
                 "../" not in path,
                 f"{rel(skill_file)}: ${{CLAUDE_SKILL_DIR}}{path} zeigt aus dem Skill heraus",
             )
+
+    return {s.parent.name for s in skills}
 
 
 def check_marketplace(report: Report, plugin_dirs: list[Path]) -> None:
@@ -220,9 +218,16 @@ def main() -> int:
     report = Report()
     plugin_dirs = sorted(p for p in PLUGINS_DIR.iterdir() if p.is_dir())
 
+    # Jeder Skill ist zusätzlich bar erreichbar (/ship neben /code:ship). Zwei
+    # gleichnamige Skills teilen sich diesen baren Befehl — einer verliert.
+    seen: dict[str, str] = {}
     for plugin_dir in plugin_dirs:
-        if check_manifests(report, plugin_dir) is not None:
-            check_skill(report, plugin_dir)
+        if check_manifests(report, plugin_dir) is None:
+            continue
+        for skill in sorted(check_skills(report, plugin_dir)):
+            if skill in seen:
+                report.fail(f"{plugin_dir.name}: Skill {skill!r} heißt wie der in {seen[skill]!r} — der bare /{skill} wird mehrdeutig")
+            seen[skill] = plugin_dir.name
     check_marketplace(report, plugin_dirs)
     if args.release_gate:
         check_release_gate(report, args.release_gate)
