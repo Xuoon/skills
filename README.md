@@ -41,7 +41,7 @@ Fünf Plugins, gruppiert nach Anlass. Mutierende Skills analysieren nur — gesc
 | `/handoff` | freier Text | Session in ein Übergabe-Dokument destillieren, mit dem ein anderer Agent direkt weiterarbeitet — die letzte Antwort ist das Dokument selbst |
 | `/bruh` | – | Die letzte Antwort in einfacher Sprache neu erklären. Keine neuen Informationen, Pfade und Befehle bleiben wörtlich |
 
-Jeder Skill ist zusätzlich bar erreichbar: `/ship` funktioniert genauso wie `/code:ship`.
+Jeder Skill ist zusätzlich bar erreichbar: `/ship` funktioniert genauso wie `/code:ship` — solange kein anderer Befehl denselben Namen belegt. `bun run validate` hält die Namen in diesem Katalog eindeutig; gegen eingebaute Befehle oder Skills aus anderen Quellen kann es das nicht prüfen.
 
 ## Installation
 
