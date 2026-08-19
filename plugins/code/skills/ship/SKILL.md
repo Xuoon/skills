@@ -33,7 +33,9 @@ Scope ist immer das aktuelle Verzeichnis.
 
 5. **Ausführen** in dieser Reihenfolge, dann durchziehen ohne weitere Zwischenfragen:
 
-   Branch anlegen (nur wenn HEAD auf dem Default-Branch steht, Name `typ/kurz-beschreibung`) → commit → push → `gh pr create`, nur wenn kein PR offen ist; sonst aktualisiert der Push den bestehenden → bei `--merge`: `gh pr merge` → Wechsel auf den Default-Branch + `git pull` → bei `--clean`: aufräumen. Der Wechsel kommt **vor** dem Aufräumen, weil der Branch, auf dem man steht, nicht löschbar ist.
+   Branch anlegen (nur wenn HEAD auf dem Default-Branch steht, Name `typ/kurz-beschreibung`) → commit → push → `gh pr create`, nur wenn kein PR offen ist; sonst aktualisiert der Push den bestehenden → bei `--merge`: `gh pr merge` → Default-Branch aktualisieren → bei `--clean`: aufräumen. Das Aktualisieren kommt **vor** dem Aufräumen, weil der Branch, auf dem man steht, nicht löschbar ist.
+
+   Läuft ship in einem Worktree, ist der Default-Branch meist schon im Hauptrepo ausgecheckt — ein `git checkout` darauf bricht dann ab (`'main' wird bereits von Arbeitsverzeichnis … verwendet`), und auch `gh pr merge` scheitert an derselben Stelle, nachdem der Merge auf der Gegenseite längst durch ist. Im Worktree deshalb nicht wechseln, sondern `git -C <hauptrepo> pull --ff-only` benutzen und den Merge-Status über `gh pr view` prüfen statt über den lokalen Checkout.
 
 6. **Bericht.** PR-URL, Commit-SHAs, Merge-Status, was aufgeräumt wurde. Fehler mit Ursache und nächstem Schritt, nichts still schlucken.
 
@@ -43,7 +45,7 @@ Bei `--clean` allein gibt es keinen Diff: Schritt 2 und 3 entfallen, und das Gat
 
 Gelöscht wird nur, was **nachweislich** gemergt oder verwaist ist:
 
-- Branches, die im Default-Branch enthalten sind (`git branch --merged <default>`) — lokal und, wenn dort vorhanden, remote.
+- Branches, deren Arbeit im Default-Branch angekommen ist — lokal und, wenn dort vorhanden, remote. `git branch --merged <default>` allein reicht dafür **nicht**: nach einem Squash-Merge trägt der Default-Branch einen neuen Commit, der Branch-Head bleibt unerreichbar, und der Branch taucht nie in `--merged` auf. Deshalb zusätzlich `gh pr list --state merged --head <branch>` fragen; findet sich ein gemergter PR, ist der Branch weg-berechtigt, auch wenn git ihn als ungemergt führt. Nur dann darf `git branch -D` sein.
 - Worktrees, deren Branch weg ist oder deren Verzeichnis nicht mehr existiert (`git worktree list`, dann `git worktree prune`).
 - Tags, die auf nichts Erreichbares mehr zeigen.
 

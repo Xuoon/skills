@@ -34,11 +34,11 @@ Kleinster passender Modus. **Kein Freifahrtschein zum Aufblasen.**
 Scope ist immer das aktuelle Verzeichnis. Diff-Basis oder Subtree bei Bedarf im **Fließtext** nennen („gegen main", „nur apps/dash"); ohne Angabe = Working Tree.
 
 ```text
-/agent-docs                        → Sync, nur Vorschlag
-/agent-docs --fix                  → Sync + direkt schreiben
-/agent-docs --audit                → voller Report, kein Edit
-/agent-docs --audit --fix          → Report + Fixes schreiben
-/agent-docs  nur apps/dash gegen main
+/code:agent-docs                → Sync, nur Vorschlag
+/code:agent-docs --fix          → Sync + direkt schreiben
+/code:agent-docs --audit        → voller Report, kein Edit
+/code:agent-docs --audit --fix  → Report + Fixes schreiben
+/code:agent-docs  nur apps/dash gegen main
 ```
 
 Modus + (freeform) Diff-Basis/Subtree in **einem Satz** festnageln, dann los.

@@ -22,6 +22,14 @@ claude plugin uninstall agent-docs cleanup windev claudex intune-win32
 
 ## code
 
+### [1.0.1] – 2026-08-19
+
+#### Behoben
+
+- **`/code:ship --clean` räumte squash-gemergte Branches nicht auf.** `git branch --merged` führt sie nach einem Squash nicht, weil der Branch-Head unerreichbar bleibt; ship fragt jetzt zusätzlich den PR-Status ab.
+- **`/code:ship` blieb in Worktrees nach dem Merge hängen**, wenn der Default-Branch bereits im Hauptrepo ausgecheckt war. Es wechselt dort nicht mehr den Branch.
+- Der Beispielblock in `/code:agent-docs` nannte noch den alten Befehl `/agent-docs`.
+
 ### [1.0.0] – 2026-08-19
 
 Bündelt die Arbeit am Code: `/code:planning`, `/code:cleanup`, `/code:agent-docs` und `/code:ship`.
@@ -37,6 +45,12 @@ Bündelt die Arbeit am Code: `/code:planning`, `/code:cleanup`, `/code:agent-doc
 - **`/code:agent-docs` pflegt jetzt auch Changelog-Dateien.** Ein Changelog ist für Endnutzer geschrieben: was neu, geändert oder entfernt ist. Keine Migrations- oder Baugeschichte, keine Verifikationsblöcke. Bei mehreren Changelogs im Monorepo nur der zum geänderten Bereich.
 
 ## setup
+
+### [1.0.1] – 2026-08-19
+
+#### Behoben
+
+- Der Zielzustand von `/setup:windev` nannte noch den alten Befehl `/windev`.
 
 ### [1.0.0] – 2026-08-19
 

@@ -1,6 +1,6 @@
 # Best Practice: Windows-PowerShell-Dev-Umgebung
 
-Zielzustand für `/windev --setup` und Maßstab für die Analyse. Erarbeitet und vermessen am 18.07.2026; Zahlen sind Richtwerte einer realen Maschine.
+Zielzustand für `/setup:windev --setup` und Maßstab für die Analyse. Erarbeitet und vermessen am 18.07.2026; Zahlen sind Richtwerte einer realen Maschine.
 
 ## Komponenten
 

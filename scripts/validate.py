@@ -170,6 +170,19 @@ def git(*args: str) -> str:
     ).stdout.strip()
 
 
+def changelog_section(changelog: str, name: str) -> str:
+    """Der `## <plugin>`-Abschnitt allein.
+
+    Global zu suchen würde den Eintrag eines anderen Plugins mit derselben
+    Versionsnummer akzeptieren — seit alle Plugins bei 1.0.0 starten, bumpen sie
+    häufig im Gleichschritt.
+    """
+    match = re.search(
+        rf"^## {re.escape(name)}$(.*?)(?=^## |\Z)", changelog, re.MULTILINE | re.DOTALL
+    )
+    return match.group(1) if match else ""
+
+
 def check_release_gate(report: Report, base_ref: str) -> None:
     """Geänderte Plugins brauchen Versions-Bump und CHANGELOG-Eintrag.
 
@@ -201,8 +214,8 @@ def check_release_gate(report: Report, base_ref: str) -> None:
         ):
             continue
         report.check(
-            f"[{version}]" in changelog,
-            f"{name}: version {version} hat keinen Eintrag in CHANGELOG.md",
+            f"[{version}]" in changelog_section(changelog, name),
+            f"{name}: version {version} hat keinen Eintrag im Abschnitt ## {name} der CHANGELOG.md",
         )
 
 

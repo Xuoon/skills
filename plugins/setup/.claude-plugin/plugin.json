@@ -1,6 +1,6 @@
 {
   "name": "setup",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Richtet die Arbeitsumgebung ein: windev für Windows-Entwicklung, claudex für Claude Code mit GPT auf macOS, labi-defaults für die globale CLAUDE.md.",
   "author": {
     "name": "Sven Labitzki",
