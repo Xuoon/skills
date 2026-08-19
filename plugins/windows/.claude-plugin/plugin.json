@@ -1,0 +1,10 @@
+{
+  "name": "windows",
+  "version": "1.0.0",
+  "description": "Windows-Werkzeuge: intune-win32 baut Intune-Win32-Pakete aus MSI und EXE, irm-skript erzeugt gehostete PowerShell-Tools für den Aufruf per Einzeiler.",
+  "author": {
+    "name": "Sven Labitzki",
+    "email": "sven@labitzki.de",
+    "url": "https://labi.dev"
+  }
+}
