@@ -41,7 +41,7 @@ git stash list
 
 - **Unverifiziertes klar markieren.** Was gebaut, aber nie ausgeführt/gesehen/getestet wurde („UI-Umbau nie im Browser geprüft"), gehört ausdrücklich ins Dokument — das sind die ersten Aufgaben des Nachfolgers.
 - Prüfbefehle mitgeben, wo es sie gibt (Test-, Check-, Start-Befehle des Projekts).
-- Offene Fragen an den Nutzer als solche kennzeichnen („Sven muss noch entscheiden: …") und von Agent-Aufgaben trennen.
+- Offene Fragen an den Nutzer als solche kennzeichnen („Der Nutzer muss noch entscheiden: …") und von Agent-Aufgaben trennen.
 
 ## Aufbau des Dokuments
 
