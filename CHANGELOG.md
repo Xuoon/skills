@@ -4,6 +4,17 @@ Was sich an den Plugins ändert, aus Sicht dessen, der sie benutzt. Jedes Plugin
 
 ## Marketplace
 
+### 2026-08-28
+
+`handoff` und `bruh` sind in **`kram`** aufgegangen, dem Plugin für die kleinen Alltagsbefehle. Neu dabei: `/kram:kleinanzeigen`. Die baren Befehle `/handoff` und `/bruh` funktionieren unverändert.
+
+**Einmalig auf jedem Gerät** — erst deinstallieren, sonst streiten sich die alten und die neuen Plugins um `/handoff` und `/bruh`:
+
+```
+claude plugin uninstall handoff bruh
+/plugin install kram@labi
+```
+
 ### 2026-08-19
 
 Die Befehle sind nach Anlass gruppiert. Statt acht einzelner Plugins gibt es fünf: `code`, `setup`, `windows`, `handoff` und `bruh`. Jeder Skill ist weiterhin auch bar erreichbar — `/ship` funktioniert wie `/code:ship`.
@@ -78,18 +89,17 @@ Bündelt die Windows-Werkzeuge: `/windows:intune-win32` und `/windows:irm-skript
 
 - **`/intune-win32` heißt `/windows:intune-win32`.** Verhalten bleibt.
 
-## bruh
 
-### [1.0.0] – 2026-08-19
+## kram
 
-#### Hinzugefügt
+### [1.0.0] – 2026-08-28
 
-- **`/bruh`** — erklärt die letzte Antwort noch einmal in einfacher Sprache. Keine neuen Informationen, keine Recherche; Pfade, Befehle und Zahlen bleiben wörtlich, Tabellen werden zu Fließtext.
-
-## handoff
-
-### [1.0.0] – 2026-08-18
+Bündelt die kleinen Alltagsbefehle: `/kram:handoff`, `/kram:bruh` und `/kram:kleinanzeigen`.
 
 #### Hinzugefügt
 
-- **`/handoff`** — destilliert die laufende Session in ein Übergabe-Dokument, mit dem ein anderer Agent direkt weiterarbeitet: Auftrag, Entscheidungen, Tretminen, Stand, nächste Schritte. Die letzte Antwort ist das Dokument selbst, zusätzlich landet es als `HANDOFF.md` im Arbeitsverzeichnis.
+- **`/kram:kleinanzeigen`** — recherchiert den realistischen Gebrauchtpreis eines Artikels und schreibt die fertige Verkaufsanzeige: Titel, Preisempfehlung mit Marktspanne, Beschreibung zum Kopieren mit Gewährleistungsausschluss. Grundlage sind tatsächlich erzielte Verkaufspreise, nicht die Forderungen in laufenden Inseraten.
+
+#### Geändert
+
+- **`/handoff` heißt `/kram:handoff`**, **`/bruh` heißt `/kram:bruh`**. Verhalten bleibt, die baren Befehle ebenfalls.

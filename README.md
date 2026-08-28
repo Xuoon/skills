@@ -8,7 +8,7 @@
 
 Persönlicher Plugin-Marketplace für [Claude Code](https://code.claude.com/docs/en/plugins). Philosophie: Evidenz statt Vermutung, Vorschlag vor Edit, löschen bevorzugt, knapper Output.
 
-Fünf Plugins, gruppiert nach Anlass. Mutierende Skills analysieren nur — geschrieben wird erst mit `--fix`.
+Vier Plugins, gruppiert nach Anlass. Mutierende Skills analysieren nur — geschrieben wird erst mit `--fix`.
 
 ## code — Arbeit am Code
 
@@ -34,12 +34,13 @@ Fünf Plugins, gruppiert nach Anlass. Mutierende Skills analysieren nur — gesc
 | `/windows:intune-win32` | freier Text | Intune-Win32-Paket aus MSI/EXE bauen oder einen fehlgeschlagenen Rollout eingrenzen — was gemeint ist, steht im Text |
 | `/windows:irm-skript` | freier Text | Gehostetes PowerShell-Tool im labi.dev-Hausstil erzeugen, aufrufbar per `irm labi.dev/route \| iex` |
 
-## Einzelne Befehle
+## kram — Alltagsbefehle
 
 | Befehl | Argumente | Verhalten |
 | --- | --- | --- |
-| `/handoff` | freier Text | Session in ein Übergabe-Dokument destillieren, mit dem ein anderer Agent direkt weiterarbeitet — die letzte Antwort ist das Dokument selbst |
-| `/bruh` | – | Die letzte Antwort in einfacher Sprache neu erklären. Keine neuen Informationen, Pfade und Befehle bleiben wörtlich |
+| `/kram:handoff` | freier Text | Session in ein Übergabe-Dokument destillieren, mit dem ein anderer Agent direkt weiterarbeitet — die letzte Antwort ist das Dokument selbst |
+| `/kram:bruh` | – | Die letzte Antwort in einfacher Sprache neu erklären. Keine neuen Informationen, Pfade und Befehle bleiben wörtlich |
+| `/kram:kleinanzeigen` | freier Text | Gebrauchtpreis eines Artikels recherchieren und die fertige Verkaufsanzeige schreiben — Titel, Preisempfehlung mit Marktspanne, Beschreibung zum Kopieren |
 
 Jeder Skill ist zusätzlich bar erreichbar: `/ship` funktioniert genauso wie `/code:ship` — solange kein anderer Befehl denselben Namen belegt. `bun run validate` hält die Namen in diesem Katalog eindeutig; gegen eingebaute Befehle oder Skills aus anderen Quellen kann es das nicht prüfen.
 
@@ -50,8 +51,7 @@ Jeder Skill ist zusätzlich bar erreichbar: `/ship` funktioniert genauso wie `/c
 /plugin install code@labi
 /plugin install setup@labi
 /plugin install windows@labi
-/plugin install handoff@labi
-/plugin install bruh@labi
+/plugin install kram@labi
 ```
 
 Updates kommen über `/plugin update` (bzw. Auto-Update), gesteuert über das `version`-Feld der jeweiligen `plugin.json`.
