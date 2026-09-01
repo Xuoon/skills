@@ -1,0 +1,33 @@
+{
+  "name": "setup",
+  "version": "2.0.0",
+  "description": "Richtet Entwicklungsumgebungen und lokale Agent-Werkzeuge auf macOS und Windows ein.",
+  "author": {
+    "name": "Sven Labitzki",
+    "email": "sven@labitzki.de",
+    "url": "https://labi.dev"
+  },
+  "homepage": "https://github.com/Xuoon/skills/tree/main/plugins/setup",
+  "repository": "https://github.com/Xuoon/skills",
+  "keywords": [
+    "agent-skills",
+    "setup",
+    "windows",
+    "powershell",
+    "configuration",
+    "devdrive"
+  ],
+  "skills": "./skills/",
+  "interface": {
+    "displayName": "Setup",
+    "shortDescription": "Entwicklungsumgebungen reproduzierbar einrichten",
+    "longDescription": "Workflows für Windows-Entwicklung, Dev Drives, Claude Code mit GPT und globale Agent-Client-Vorgaben.",
+    "developerName": "Sven Labitzki",
+    "category": "Productivity",
+    "capabilities": [],
+    "defaultPrompt": [
+      "Prüfe und optimiere meine Windows-Entwicklungsumgebung.",
+      "Plane ein Windows Dev Drive für meine Caches und Repositories."
+    ]
+  }
+}

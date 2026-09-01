@@ -1,8 +1,8 @@
 {
   "$schema": "https://agent-plugins.org/schemas/1.0.0/plugin.schema.json",
   "name": "setup",
-  "version": "1.0.1",
-  "description": "Richtet die Arbeitsumgebung ein: windev für Windows-Entwicklung, claudex für Claude Code mit GPT auf macOS, labi-defaults für die globale CLAUDE.md.",
+  "version": "2.0.0",
+  "description": "Richtet Entwicklungsumgebungen und lokale Agent-Werkzeuge auf macOS und Windows ein.",
   "author": {
     "name": "Sven Labitzki",
     "email": "sven@labitzki.de",
@@ -10,5 +10,12 @@
   },
   "homepage": "https://github.com/Xuoon/skills/tree/main/plugins/setup",
   "repository": "https://github.com/Xuoon/skills",
-  "keywords": ["claude-code", "setup", "windows", "powershell", "configuration"]
+  "keywords": [
+    "agent-skills",
+    "setup",
+    "windows",
+    "powershell",
+    "configuration",
+    "devdrive"
+  ]
 }

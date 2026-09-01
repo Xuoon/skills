@@ -1,7 +1,7 @@
 {
   "name": "code",
-  "version": "1.0.1",
-  "description": "Die vier Befehle für die Arbeit am Code: planning plant vor dem ersten Edit, cleanup findet toten Code, agent-docs hält CLAUDE.md und Changelog am Code, ship committet und öffnet den PR.",
+  "version": "1.1.0",
+  "description": "Die vier Workflows für Planung, Bereinigung, Agent-Dokumentation und das Veröffentlichen von Codeänderungen.",
   "author": {
     "name": "Sven Labitzki",
     "email": "sven@labitzki.de",

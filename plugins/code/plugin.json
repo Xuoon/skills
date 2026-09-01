@@ -1,8 +1,8 @@
 {
   "$schema": "https://agent-plugins.org/schemas/1.0.0/plugin.schema.json",
   "name": "code",
-  "version": "1.0.1",
-  "description": "Die vier Befehle für die Arbeit am Code: planning plant vor dem ersten Edit, cleanup findet toten Code, agent-docs hält CLAUDE.md und Changelog am Code, ship committet und öffnet den PR.",
+  "version": "1.1.0",
+  "description": "Die vier Workflows für Planung, Bereinigung, Agent-Dokumentation und das Veröffentlichen von Codeänderungen.",
   "author": {
     "name": "Sven Labitzki",
     "email": "sven@labitzki.de",
@@ -11,7 +11,7 @@
   "homepage": "https://github.com/Xuoon/skills/tree/main/plugins/code",
   "repository": "https://github.com/Xuoon/skills",
   "keywords": [
-    "claude-code",
+    "agent-skills",
     "dead-code",
     "documentation",
     "git",

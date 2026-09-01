@@ -1,13 +1,13 @@
 ---
 name: irm-skript
-description: Baut ein self-contained PowerShell-TUI-Tool für den Aufruf `irm labi.dev/<route> | iex` im Hausstil von labi.dev/secureboot.
+description: Nur bei ausdrücklichem Nutzerwunsch ein self-contained PowerShell-TUI-Tool für den Aufruf über `irm` bauen.
+compatibility: Benötigt PowerShell 7 für Parser- und Verhaltenstests.
 argument-hint: "[was das Tool tun soll]"
-disable-model-invocation: true
 ---
 
 # irm-skript — gehostete PowerShell-TUI-Tools
 
-Jedes Tool ist EINE self-contained `.ps1`, die per `irm labi.dev/<route> | iex` läuft. Der verbindliche Hausstil (Helper, Header, Badges, Menü, Hilfe, Headless) steht in `${CLAUDE_SKILL_DIR}/references/stilguide.md` — **zuerst lesen**. `${CLAUDE_SKILL_DIR}/assets/template.ps1` ist ein lauffähiges, geparstes Skelett: davon ausgehen, nicht von Null schreiben.
+Jedes Tool ist EINE self-contained `.ps1`, die per `irm labi.dev/<route> | iex` läuft. Der verbindliche Hausstil steht in `references/stilguide.md` — **zuerst lesen**. `assets/template.ps1` ist ein lauffähiges, geparstes Skelett; alle Bundle-Pfade sind relativ zum Skill-Root.
 
 ## Ablauf
 
@@ -18,16 +18,16 @@ Jedes Tool ist EINE self-contained `.ps1`, die per `irm labi.dev/<route> | iex` 
 
    Ist die Anforderung klar: nicht fragen, bauen.
 
-2. **Bei schreibenden Aktionen** zusätzlich `${CLAUDE_SKILL_DIR}/references/schreib-muster.md` lesen: Ist/Soll-Vorschau, Einzelbestätigung `j/N`, getipptes Token bei riskanten Aktionen, Rollback vor der ersten Schreiboperation. Ein rein lesendes Tool braucht davon nichts — keine Bestätigungs-Zeremonie für `Get-*`.
+2. **Bei schreibenden Aktionen** zusätzlich `references/schreib-muster.md` lesen: Ist/Soll-Vorschau, Einzelbestätigung `j/N`, getipptes Token bei riskanten Aktionen, Rollback vor der ersten Schreiboperation. Ein rein lesendes Tool braucht davon nichts — keine Bestätigungs-Zeremonie für `Get-*`.
 
 3. **Schreiben.** Eine Datei `<route>.ps1`:
    - **UTF-8 ohne BOM, LF.** Ein BOM bricht `irm | iex` (PowerShell sieht `ï»¿<#`).
    - **ASCII in der TUI-Ausgabe** (ue/oe/ae/ss statt Umlauten) — maximale Konsolen-Kompatibilität.
    - **Self-contained**: nichts nachladen, nichts installieren. Externe Abhängigkeiten (z. B. RSAT) werden geprüft und sauber gemeldet.
    - Deutsch, knapp. Keine TUI-Floskeln („Willkommen!"), Kommentar nur, wo ein Warum sonst verloren ginge.
-   - Das Write-Tool kappt bei ~33 KB — größere Skripte per Shell-Heredoc schreiben oder in mehreren Edits aufbauen.
+   - Meldet der aktive Client ein Größenlimit, die Datei in mehrere kontrollierte Edits aufteilen und danach vollständig parsen.
 
-4. **Verifizieren — immer, nicht optional.** `${CLAUDE_SKILL_DIR}/references/verifikation.md` lesen und ausführen: pwsh-Parser mit 0 Fehlern, BOM-Check, bei schreibenden Tools ein gemockter Dry-Run (lesender Pfad und Vorschau lösen 0 Schreibzugriffe aus, Bestätigungs-Gates greifen). Erst liefern, wenn alles grün ist.
+4. **Verifizieren — immer, nicht optional.** `references/verifikation.md` lesen und ausführen: pwsh-Parser mit 0 Fehlern, BOM-Check, bei schreibenden Tools ein gemockter Dry-Run (lesender Pfad und Vorschau lösen 0 Schreibzugriffe aus, Bestätigungs-Gates greifen). Erst liefern, wenn alles grün ist.
 
 5. **Liefern: nur die `.ps1`.** Gehostet wird selbst. Im Chat reicht `irm labi.dev/<route> | iex` plus besondere Hinweise („elevated nötig"). Keine README, keine Hosting-Anleitung.
 

@@ -1,116 +1,107 @@
 ---
 name: windev
-description: Windows-Dev-Umgebung vermessen, bereinigen oder neu einrichten (PowerShell, Prompt, PATH, Module, VS Code).
-argument-hint: "[--fix | --setup]"
-disable-model-invocation: true
-allowed-tools: Bash(pwsh -NoProfile -File "${CLAUDE_SKILL_DIR}/scripts/measure-environment.ps1"*) Read AskUserQuestion
+description: Nur bei ausdrücklichem Nutzerwunsch eine Windows-Entwicklungsumgebung interaktiv oder mit `--best-practice` einrichten.
+compatibility: Benötigt Windows 11; PowerShell 7 kann mit vorhandenem winget eingerichtet werden.
+argument-hint: "[--best-practice]"
 ---
 
 # windev — Windows-Entwicklungsumgebung
 
-Der Zielzustand samt Warum und Messmethodik steht in `${CLAUDE_SKILL_DIR}/references/best-practice.md` — **zuerst lesen**.
+Der Zielzustand und die Messmethodik stehen in `references/best-practice.md`. Den Skill-Root über den aktiven Skill-Kontext absolut auflösen und für `<skill-root>` einsetzen; niemals Bundle-Dateien relativ zum aktuellen Repo ausführen.
 
-## Argumente (`$ARGUMENTS`)
+## Modus
 
-| Flag | Bedeutung |
+Es gibt genau ein optionales Argument:
+
+| Aufruf | Verhalten |
 | --- | --- |
-| *(ohne Flag)* | Umgebung vollständig vermessen und berichten. **Read-only, keine Änderung** |
-| `--fix` | Die gefundenen Befunde abarbeiten — mit Backup vor jeder Änderung |
-| `--setup` | Umgebung nach Best Practice einrichten (auch auf frischem Windows) |
+| ohne Argument | Inventarisieren, alle tatsächlichen Installations-, Konfigurations- und Bereinigungskandidaten gebündelt entscheiden lassen, danach das Gewählte anwenden und verifizieren |
+| `--best-practice` | Belegte, reversible Standards direkt herstellen; nur persönliche, mehrdeutige oder potenziell destruktive Entscheidungen fragen |
 
-Jede Empfehlung nennt ihren Messwert — **ohne Zahl keine Behauptung**. Ehrlich einordnen, was wenig bringt (PATH-Bereinigung ist Hygiene, kein Speed).
+Andere Argumente abbrechen und diese Verwendung zeigen. `--fix` und `--setup` nicht stillschweigend weiter unterstützen.
 
-## Analyse (Standard)
+## Invarianten
 
-```
-pwsh -NoProfile -File "${CLAUDE_SKILL_DIR}/scripts/measure-environment.ps1"
-```
+- Vor der Inventur nichts verändern; Ausnahme ist das PowerShell-7-Bootstrap im ausdrücklich gewählten `--best-practice`-Modus.
+- Ohne Argument nur konkret ausgewählte Änderungen ausführen.
+- `--best-practice` erlaubt weder geratenes noch destruktives Aufräumen.
+- Profil, Theme, PATH und Editor-Settings vor jeder Änderung sichern; fremde Marker-Blöcke und Einstellungen erhalten.
+- Keine Identität, Editorvariante oder optionale Toolchain erfinden.
+- Erfolg erst nach direkter Nachmessung behaupten.
 
-Kann der Bericht die aktive OMP-Konfiguration nicht aus `POSH_CONFIG` oder einem literalen `--config`-Profilpfad ermitteln, den Pfad beim Lesen der Profile auflösen und die Inventur mit `-OhMyPoshConfig <pfad>` wiederholen. Danach gezielt vertiefen — der Bericht zeigt, wo:
+## 1. Laufzeit vorprüfen
 
-1. **Startzeit**: Differenz mit/ohne Profil = Profilkosten. Je 2–3× messen; Systemlast verzerrt Einzelwerte.
-2. **Prompt**: Segmente über ~100 ms sind die Täter (typisch: Sprachversions-Segmente wie `node`, Git-Status). Zum Vergleich rohes `git status` im selben Repo messen — schneller als das kann kein Prompt-Segment sein.
-3. **Profile lesen** (alle vier `$PROFILE`-Pfade + WindowsPowerShell): Risikomuster sind Remote-Code-Ausführung (`irm | iex`), Funktionen die das Profil selbst aus dem Netz überschreiben, blockierende `Import-Module` rein kosmetischer Module, Start-Banner, fehlender Nicht-interaktiv-Guard.
-4. **PATH**: Prozess- vs. HKCU- vs. HKLM-**Rohwert** (`DoNotExpandEnvironmentNames` — sonst sieht man wörtliche `%VAR%`-Einträge nicht). Tote Einträge, Duplikate, fremde Benutzerpfade. Notieren, was in Machine liegt (braucht Admin) und was in User.
-5. **Module**: Mehrfachversionen. Admin-Module (Graph/Exchange/SharePoint/PnP) nie ungefragt anfassen — ob sie gebraucht werden, weiß nur der Nutzer.
-6. **Editor-Terminal**: Welche VS-Code-Variante ist **wirklich** installiert (EXE prüfen — Settings-Ordner überleben Deinstallationen und täuschen). `fontFamily` gesetzt? `gpuAcceleration` deaktiviert?
-7. **Dateileichen**: alte `.bak`-Profile, verwaiste Skript-Versionen, ungenutzte Themes.
-8. **Kein Handlungsbedarf** — gar nicht erst vorschlagen: PSReadLine-Historie unter ein paar MB, zoxide-Hooks, OSC-Shell-Integrationen, pauschale Defender-Ausnahmen, WSL-Wechsel für Windows-Target-Projekte.
+Mit dem vorhandenen `powershell.exe` nach `pwsh` und `winget` suchen:
 
-Bericht als kompakte Tabelle: Befund · Messwert · Wirkung · Risiko. Was ein anderer Agent oder der Nutzer behauptet hat, vorher selbst nachmessen. **Ohne `--fix` endet der Lauf hier.**
-
-## Beheben (`--fix`)
-
-Die Befunde werden abgearbeitet, ohne vorher zu fragen — **aber nie ohne Backup**. Reihenfolge: Backups → sichtbare Fixes (Font) → Theme/Profil → Aufräumen (Dateien, PATH, Module) → Nachmessen.
-
-- **Profil**: vorher als `.backup-<yyyyMMdd>.ps1` sichern; Umbau nach dem Muster aus `${CLAUDE_SKILL_DIR}/references/profile.template.ps1` (Guard zuerst, kosmetische Module lazy). Nutzerspezifische Blöcke (Fremd-Tool-Integrationen zwischen Markern) unverändert übernehmen.
-- **Theme**: `pwsh -NoProfile -File "${CLAUDE_SKILL_DIR}/scripts/new-slim-theme.ps1" -SourceConfig <aktive-config> -OutPath <neue-config>`. Nie das aktive Theme überschreiben; erst nach dem Praxistest im Profil umschalten.
-- **Machine-PATH**: die zu entfernenden Einträge als JSON-Array in eine temporäre Requestdatei schreiben, z. B. `{"remove":["C:\\Alt","C:\\Program Files\\Alt"]}`, dann `pwsh -NoProfile -File "${CLAUDE_SKILL_DIR}/scripts/invoke-clean-machine-path.ps1" -RequestFile <request.json>`. Der Wrapper rekonstruiert das Array, eleviert mit einem kodierten Befehl und prüft den Exitcode; `clean-machine-path.ps1` sichert den HKLM-Rohwert vorher selbst. Requestdatei anschließend löschen. Windows-`sudo` kann per Policy deaktiviert sein; **danach zusätzlich den Registry-Ist-Zustand verifizieren**.
-- **Module**: `Uninstall-Module -RequiredVersion <alt>`; schlägt das fehl, den Versionsordner unter `<Documents>\PowerShell\Modules\<Name>\<Version>` löschen. Nur alte Versionen, die neueste bleibt.
-
-**Trotzdem fragen** bei: Admin-Modulen (Graph/Exchange/SharePoint/PnP), einem UAC-Prompt für den Machine-PATH, und allem, wo die Analyse „brauchst du X noch?" nicht selbst beantworten kann. Das sind echte Nutzer-Entscheidungen, keine Freigaben — Faktenfragen dagegen durch Messen klären.
-
-Abschluss: Vorher/Nachher-Tabelle (Startzeit, Prompt-Render, PATH-Einträge, entfernte Dateien/Module). Alle Backups auflisten mit dem Hinweis, sie erst nach bestandenem Praxistest (neues Terminal, ein Arbeitstag) zu löschen.
-
-## Einrichten (`--setup`)
-
-### Phase 0 — PowerShell 7 bootstrappen
-
-Zuerst mit dem auf jedem unterstützten Windows vorhandenen `powershell.exe` prüfen, ob `pwsh` und `winget` da sind:
-
-```
+```powershell
 powershell.exe -NoProfile -Command "Get-Command pwsh,winget -ErrorAction SilentlyContinue | Select-Object Name,Source"
 ```
 
-Fehlt `pwsh`, **vor jeder Inventur** erklären, dass die folgenden Skripte PowerShell 7 brauchen, und mit Windows PowerShell installieren:
+Fehlt `pwsh`, im interaktiven Modus die Installation über `winget` als erste Entscheidung anbieten. Mit `--best-practice` den folgenden Befehl im ursprünglichen Nutzerprozess ausführen, sofern `winget` vorhanden ist; der WIX-Installer fordert die nötige UAC-Freigabe selbst an:
 
+```powershell
+winget install --id Microsoft.PowerShell --exact --source winget --installer-type wix --accept-source-agreements --accept-package-agreements
 ```
-winget install --id Microsoft.PowerShell --exact --accept-source-agreements --accept-package-agreements
+
+Seit PowerShell 7.6 installiert `winget` ohne `--installer-type wix` standardmäßig das MSIX-Paket; das genügt nicht für die erhöhten Wrapper. Danach `C:\Program Files\PowerShell\7\pwsh.exe` direkt verifizieren und diesen absoluten Pfad verwenden. Fehlt das Binary trotz erfolgreichem Exitcode, nicht mit einer User-/MSIX-Version fortfahren. Fehlt auch `winget`, mit einem klaren Restschritt stoppen.
+
+## 2. Inventur
+
+```powershell
+& "$env:ProgramFiles\PowerShell\7\pwsh.exe" -NoProfile -File "<skill-root>/scripts/measure-environment.ps1"
 ```
 
-Danach `C:\Program Files\PowerShell\7\pwsh.exe` direkt verifizieren und diesen absoluten Pfad für die restliche Session verwenden; der PATH des laufenden Agent-Prozesses kennt die Neuinstallation eventuell noch nicht. Fehlt auch `winget`, App Installer (Store oder offizielles GitHub-Release) mit dem Nutzer klären. Ohne bestätigtes `pwsh` nicht fortfahren.
+Kann der Bericht die aktive Oh-My-Posh-Konfiguration nicht sicher bestimmen, Profile nur lesen und mit `-OhMyPoshConfig <aufgelöster-pfad>` erneut messen. Der Befund enthält Messwert, Wirkung und Risiko für:
 
-### Phase 1 — Inventur
+- Startzeit mit und ohne Profil,
+- Prompt-Segmente und rohes `git status` als Untergrenze,
+- Profile, PATH-Rohwerte und Modulversionen,
+- tatsächlich installierte VS-Code-Variante und Settings,
+- Fonts und vorhandene Toolchains.
 
-Analyse wie oben. Auf frischem Windows meldet vieles „fehlt" — das ist der Normalfall, kein Fehler. Existiert schon ein Profil oder eine Oh-My-Posh-Konfiguration, erst lesen und verstehen, was der Nutzer sich dort eingerichtet hat.
+## 3. Entscheidungen
 
-### Phase 2 — Rückfragen
+Strukturierte Nutzereingabe verwenden, ersatzweise alle offenen Fragen gebündelt im Chat stellen.
 
-Eine AskUserQuestion-Runde (max. 4 Fragen, Empfehlung als erste Option). Das sind Konfigurations-Entscheidungen, keine Freigaben — ohne sie wird ungefragt Software installiert:
+Ohne Argument werden nur reale Kandidaten angeboten:
 
-1. **Komponenten** (multiSelect): PowerShell 7 · Git · Oh My Posh + Nerd Font · zoxide · Terminal-Icons · VS Code (Stable oder Insiders?) · Node via NVM for Windows · Bun
-2. **Prompt-Detailgrad**: Git-Änderungszahlen anzeigen (informativ, kostet je nach Repo 100–400 ms) oder nur Branch (schnellstmöglich)?
-3. **Git-Identität** (`user.name`/`user.email`), falls Git gewählt und noch nicht konfiguriert
-4. **Profil**: Template übernehmen, oder — falls ein Profil existiert — Merge-Vorschlag zeigen?
+- zu installierende Komponenten,
+- Prompt schnell oder mit Git-Änderungszahlen,
+- Stable, Insiders oder kein VS Code,
+- optionale Node-/Bun-Toolchains,
+- zu behebende PATH-, Modul- und Altdatei-Befunde,
+- Merge eines bestehenden Profils oder unverändert lassen.
 
-Bei bestehendem Profil: Konflikte konkret benennen (welche Funktion/Einstellung kollidiert womit), Vorschlag zeigen, dann erst schreiben.
+Mit `--best-practice` automatisch:
 
-### Phase 3 — Installation (nur Gewähltes)
+- PowerShell 7 und Git sicherstellen,
+- vorhandenes Oh My Posh ohne pro-Prompt-Prozessstarts konfigurieren,
+- Documents-Pfade dynamisch auflösen und den Nicht-interaktiv-Guard setzen,
+- `gpuAcceleration` bei der belegten VS-Code-Variante auf `auto` halten,
+- tote und doppelte PATH-Einträge nur bei eindeutigem Nachweis entfernen,
+- nur alte Versionen gewöhnlicher CurrentUser-Module bereinigen.
 
-winget-IDs: `Microsoft.PowerShell` · `Git.Git` · `JanDeDobbeleer.OhMyPosh` · `ajeetdsouza.zoxide` · `Microsoft.VisualStudioCode` / `Microsoft.VisualStudioCode.Insiders` · `CoreyButler.NVMforWindows` · `Oven-sh.Bun`
+Auch mit `--best-practice` fragen bei Git-Identität, nicht ableitbarer Editorwahl, optionalen Toolchains, Git-Status-Detailgrad, fremden Profil-/Settings-Konflikten, Admin-Modulen und zweifelhaften PATH- oder Altdatei-Kandidaten.
 
-- Erster winget-Lauf auf frischer Maschine: `--accept-source-agreements --accept-package-agreements` mitgeben.
-- Nerd Font ohne Adminrechte: `oh-my-posh font install CascadiaCode` (installiert „CaskaydiaCove NF" in den User-Scope).
-- Terminal-Icons: `Install-Module Terminal-Icons -Scope CurrentUser -Force`.
-- Nach jedem Install per `Get-Command` verifizieren (neue Shell nötig, wenn PATH sich geändert hat: `$env:Path` im laufenden Prozess aktualisiert sich nicht von selbst). Fehler sofort benennen statt weiterzumachen.
+## 4. Anwenden
 
-### Phase 4 — Konfiguration
+Bereits getroffene Entscheidungen sind die Freigabe; keine zusätzliche Frage „Soll ich anfangen?“. Abhängige Schritte stoppen nach einem Fehler, unabhängige Kandidaten dürfen weiterlaufen.
 
-1. **Theme**: `pwsh -NoProfile -File "${CLAUDE_SKILL_DIR}/scripts/new-slim-theme.ps1"` — verwendet die mitgelieferte `assets/base.omp.json` als Quelle. Parameter entsprechend Phase 2 (`-GitStatusCounts`, `-RemoveRightPrompt`); eine andere Quelle nur via `-SourceConfig <pfad>`.
-2. **Profil**: `${CLAUDE_SKILL_DIR}/references/profile.template.ps1` nach `<Documents>\PowerShell\Microsoft.PowerShell_profile.ps1` bringen. Documents **immer** über `[Environment]::GetFolderPath('MyDocuments')` auflösen — OneDrive Known Folder Move verschiebt den Ordner, harte Pfade brechen. Bestehendes Profil vorher als `Microsoft.PowerShell_profile.ps1.backup-<yyyyMMdd>.ps1` sichern.
-3. **VS Code**: `"terminal.integrated.fontFamily": "CaskaydiaCove NF"` in die settings.json der **tatsächlich installierten** Variante (Stable: `%APPDATA%\Code`, Insiders: `%APPDATA%\Code - Insiders`). User-Installer unter `%LOCALAPPDATA%\Programs`, System-Installer unter `%ProgramFiles%` (ggf. `%ProgramFiles(x86)%`) prüfen — Settings-Ordner überleben Deinstallationen und führen sonst in die Irre. `terminal.integrated.gpuAcceleration` auf Default (`auto`) lassen.
-4. **Git**: `git config --global user.name/user.email` gemäß Antwort; `init.defaultBranch main` anbieten.
+- **Installationen:** `winget` nur für gewählte oder im Modus belegte Komponenten; danach die echte EXE beziehungsweise `Get-Command` prüfen. IDs: `Microsoft.PowerShell`, `Git.Git`, `JanDeDobbeleer.OhMyPosh`, `ajeetdsouza.zoxide`, `Microsoft.VisualStudioCode`, `Microsoft.VisualStudioCode.Insiders`, `CoreyButler.NVMforWindows`, `Oven-sh.Bun`. Nerd Font über `oh-my-posh font install CascadiaCode`, Terminal-Icons über `Install-Module Terminal-Icons -Scope CurrentUser`.
+- **Theme:** `scripts/new-slim-theme.ps1` schreibt standardmäßig `windev.omp.json`; für den schnellen Modus `-NoGitStatusCounts` setzen. Ein bestehendes verwaltetes Theme nur mit `-UpdateManaged` nach Backup ersetzen.
+- **Profil:** `scripts/update-profile.ps1` übernimmt ausschließlich den markierten Block aus `references/profile.template.ps1`, sichert die bestehende Datei und prüft die PowerShell-Syntax.
+- **VS Code:** `scripts/update-vscode-settings.ps1` ändert nur `terminal.integrated.fontFamily` und `terminal.integrated.gpuAcceleration`, mit Backup und ohne fremde JSONC-Einstellungen zu ersetzen.
+- **Machine-PATH:** Entferne nur bestätigte Werte über `scripts/invoke-clean-machine-path.ps1` mit JSON-Request. Das erhöhte Skript sichert den Registry-Rohwert selbst.
+- **Module:** Admin-Module nie automatisch entfernen; bei normalen CurrentUser-Modulen bleibt die neueste Version.
 
-### Phase 5 — Verifikation
+Temporäre Requestdateien nach dem Lauf löschen. Keine persönliche Alias- oder Git-Kürzel-Sammlung in ein neues Profil schreiben.
 
-- `pwsh -Command 1`: fehlerfrei und nahe der No-Profile-Zeit (der Guard greift; 2–3× messen, Streuung ist normal).
-- `oh-my-posh debug --plain --config <theme>`: kein Segment über ~100 ms, außer Git in großen/ungecommitteten Repos — dort rohes `git status` daneben messen, das ist die Untergrenze.
-- Neues Terminal öffnen (lassen): Glyphen statt □-Kästchen, Icons erscheinen kurz nach dem ersten Prompt (Lazy-Load ist Absicht).
+## 5. Verifikation
 
-Abschlussbericht als Tabelle: installiert / übersprungen / Messwerte; manuelle Restschritte (Terminal neu öffnen, ggf. Editor-Neustart) explizit nennen.
+- Profilstart mit und ohne `-NoProfile` je 2–3-mal messen.
+- Theme vor dem Umschalten und danach mit `oh-my-posh debug --plain --config <pfad>` prüfen.
+- PATH und Tool-Herkunft in einer neuen Shell verifizieren.
+- Installierte Editorvariante über ihre EXE, nicht über übrig gebliebene Settings-Verzeichnisse bestätigen.
+- Backups mit exaktem Pfad nennen; Löschung erst nach einem Arbeitstag ohne Befund empfehlen.
 
-## Fallstricke
-
-- Der `oh-my-posh`-Alias unter `WindowsApps` kostet ~150 ms Prozessstart pro Prompt — bekannt und akzeptabel, nicht „reparieren".
-- `pwsh -File skript.ps1` mit umgeleiteter Ausgabe lädt das Profil dank Guard nicht — gewollt. Skripte dürfen sich nie auf Profil-Funktionen verlassen.
-- Exportierte OMP-Themes haben teils `properties: null` an Segmenten; Properties nur mit `Add-Member -Force` setzen (macht `new-slim-theme.ps1` bereits richtig).
+Der Abschluss enthält eine kompakte Vorher-/Nachher-Tabelle und nur echte manuelle Restschritte.

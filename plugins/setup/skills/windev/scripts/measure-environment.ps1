@@ -37,7 +37,8 @@ function Resolve-OhMyPoshConfig {
         $candidates += $profileCandidates[$i]
     }
 
-    # Das mitgelieferte Profil verwendet diesen festen Zielnamen.
+    # Aktueller neutraler Zielname; den alten Namen nur zur Bestandsmigration erkennen.
+    $candidates += (Join-Path $DocumentsPath 'PowerShell\windev.omp.json')
     $candidates += (Join-Path $DocumentsPath 'PowerShell\sven.omp.json')
 
     foreach ($candidate in $candidates) {

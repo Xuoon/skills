@@ -5,11 +5,10 @@ description: >
   — legt neu an, wenn keine da ist, sonst Diff-Sync nach Code-Änderungen. Löschen-bevorzugt,
   strenges Add-Gate; 0 Änderungen ist ein gültiges Ergebnis. Standard nur Vorschlag, geschrieben
   wird erst mit `--fix`. AUSLÖSER: Code geändert, "Doku syncen", "Changelog schreiben/anpassen",
-  "kürzen"/"weniger Doku", oder ein Repo ohne CLAUDE.md, das eine braucht. NICHT wenn die
+  "kürzen"/"weniger Doku", oder ein Repo ohne Agent-Doku, das eine braucht. NICHT wenn die
   Änderung kein dokumentiertes Verhalten berührt.
   Von selbst immer nur der Vorschlagsmodus — `--audit` und `--fix` nie ungefragt.
 argument-hint: "[--audit] [--fix]"
-allowed-tools: Task Agent Bash(git status *) Bash(git diff *) Bash(git log *) Bash(git merge-base *) Bash(git ls-files *) Bash(ls *) Bash(find *) Bash(wc *)
 ---
 
 # agent-docs — Doku am Code halten
@@ -18,11 +17,11 @@ Kleinster passender Modus. **Kein Freifahrtschein zum Aufblasen.**
 
 **Zuerst lesen:**
 
-1. `${CLAUDE_SKILL_DIR}/references/shared.md` — Scope, asymmetrisches Gate, Format, Verify, Anti-Patterns
-2. `${CLAUDE_SKILL_DIR}/references/style.md` — was rein / was raus, Größenrichtwerte
-3. Bei jedem Add oder User-Wunsch „dünner/prune": `${CLAUDE_SKILL_DIR}/references/prune-sweep.md`
+1. `references/shared.md` — Scope, asymmetrisches Gate, Format, Verify, Anti-Patterns
+2. `references/style.md` — was rein / was raus, Größenrichtwerte
+3. Bei jedem Add oder User-Wunsch „dünner/prune": `references/prune-sweep.md`
 
-## Argumente (`$ARGUMENTS`)
+## Argumente aus der Nutzeranfrage
 
 | Flag | Bedeutung |
 | --- | --- |
@@ -34,36 +33,32 @@ Kleinster passender Modus. **Kein Freifahrtschein zum Aufblasen.**
 Scope ist immer das aktuelle Verzeichnis. Diff-Basis oder Subtree bei Bedarf im **Fließtext** nennen („gegen main", „nur apps/dash"); ohne Angabe = Working Tree.
 
 ```text
-/code:agent-docs                → Sync, nur Vorschlag
-/code:agent-docs --fix          → Sync + direkt schreiben
-/code:agent-docs --audit        → voller Report, kein Edit
-/code:agent-docs --audit --fix  → Report + Fixes schreiben
-/code:agent-docs  nur apps/dash gegen main
+agent-docs                → Sync, nur Vorschlag
+agent-docs --fix          → Sync + direkt schreiben
+agent-docs --audit        → voller Report, kein Edit
+agent-docs --audit --fix  → Report + Fixes schreiben
+agent-docs nur apps/dash gegen main
 ```
 
 Modus + (freeform) Diff-Basis/Subtree in **einem Satz** festnageln, dann los.
 
 ## Routing
 
-Snapshot: `git status --short`, `git diff --stat` (ggf. gegen freeform Ref), `git ls-files` für `CLAUDE.md`/`AGENTS.md`/Rules.
+Snapshot: `git status --short`, `git diff --stat` (ggf. gegen freeform Ref), `git ls-files` für vorhandene Agent-Doku und client-spezifische Rules; `AGENTS.override.md` sowie gitignorierte `CLAUDE.local.md`/`.claude.local.md` zusätzlich direkt auf Existenz prüfen.
 
 | Situation | Modus |
 | --- | --- |
-| Keine Agent-Doku im Scope | **Init** → `${CLAUDE_SKILL_DIR}/references/init.md` |
+| Keine Agent-Doku im Scope | **Init** → `references/init.md` |
 | `--audit` | **Audit** (unten) |
 | sonst | **Sync** (unten); Diff-Basis aus freeform Ref wenn genannt |
-
-## Asymmetrisches Gate
-
-Kanonisch in `shared.md`. Essenz: DELETE billig (stale, Duplikat, generisch, Impl-Detail, Historie) — ADD teuer (agent-blocking ∧ non-obvious ∧ single home ∧ ≤3 Zeilen ∧ Netto-Budget). Unsicher → ADD nicht vorschlagen, klaren Müll löschen.
 
 ## Sync (Standard)
 
 1. **Snapshot.** Working Tree + Session; User-Ref → Diff gegen `merge-base <ref> HEAD`. Optional `wc -l` auf betroffene Doc-Files als Baseline.
 
-2. **Doc-Discovery.** Parallel Subagenten (1 pro Bereich). Geänderte Code-Pfade + **fester** Auftrag:
+2. **Doc-Discovery.** Falls Subagenten verfügbar sind parallel pro Bereich, sonst seriell. Geänderte Code-Pfade + **fester** Auftrag:
 
-   > Finde in CLAUDE.md/AGENTS.md, Rules, Frontmatter-`paths:`, Code-Doku-Refs:
+   > Finde in der kanonischen Agent-Doku, client-spezifischen Rules und Code-Doku-Refs:
    > (A) Stellen die **falsch/stale** zum Diff sind
    > (B) Stellen die durch den Diff **redundant** werden (löschen)
    > (C) **Nur wenn** agent-blocking und non-obvious: materielle Lücken
@@ -94,7 +89,7 @@ Rein gehört, was der Nutzer tun muss, mit exakten Befehlen.
 
 Completeness **ohne** Conciseness ist ein Fail-Modus: aufgeblähte korrekte Docs sind **nicht** A. Vorher zusätzlich `prune-sweep.md` lesen.
 
-1. **Discovery — Fan-out.** Scope globben (shared.md), dann parallele Subagenten in **einem** Zug losschicken (~1 pro 3–5 Dateien plus die vier Sweeps). Jeder bekommt einen festen Auftrag und gibt nur strukturierte Funde zurück, keine Fixes:
+1. **Discovery — Fan-out.** Scope globben (shared.md), dann verfügbare Subagenten parallel einsetzen (~1 pro 3–5 Dateien plus die fünf Sweeps), sonst dieselben Aufträge seriell abarbeiten. Nur strukturierte Funde, keine Fixes:
 
    > Beidseitig verifizieren (Doku→Code **und** Code→Doku).
    > Output: `{file,line,claim,verified|stale|wrong|missing|duplicate|generic|impl-detail,evidence}`.
@@ -107,6 +102,7 @@ Completeness **ohne** Conciseness ist ein Fail-Modus: aufgeblähte korrekte Docs
    - **b) `paths:`** — `ok|dead|too-broad|too-narrow` + Beispiele.
    - **c) Links + Code-Kommentar-Refs** resolven.
    - **d) Prune-Sweep** laut prune-sweep.md.
+   - **e) Aktive Kette** — für Root und betroffene Subtrees belegen, welche Dateien der erkannte Client tatsächlich lädt, in welcher Reihenfolge und welche Same-Directory-Datei eine andere verdrängt.
 
 2. **Scoring** pro Datei (s.u.).
 3. **Report** (Template unten).
@@ -156,8 +152,6 @@ Gegen Aufblasen: Completeness darf **nicht** steigen, indem man Impl-Detail oder
 ## Fix-Regeln
 
 - Nur Issues aus dem Lauf. Kein Scope-Creep.
-- **Lösch-Kandidaten zuerst** im Vorschlagspaket.
-- Eine Zeile pro Konzept; Add ≤3 Zeilen (≤10 nur bei undocumented-critical).
 - Neue Datei nur wenn eigener Themenbereich **und** Merge unzumutbar.
 - Nichts erfinden. Spekulation → drop.
 
@@ -177,8 +171,4 @@ Valides und **erwünschtes** Outcome. Melden: `Sync: 0 candidates (gate).` Nicht
 
 ## Anti-Patterns
 
-- Nach UI-Arbeit die Rule um Chrome/Prefetch/Debounce erweitern.
-- Overview und Rule gleichzeitig mit demselben Fakt füttern.
-- Neue Rule-Datei für <15 exklusive Zeilen statt Merge.
-- Whole-file rewrite zum Erweitern.
 - Approval umgehen („user said go go go" auf Code ≠ Blankoscheck für Doc-Aufblasen; Doc-Edits bleiben approval-gated außer der User hat **explizit** Doc-Apply freigegeben).

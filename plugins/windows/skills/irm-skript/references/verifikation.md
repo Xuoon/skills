@@ -1,24 +1,20 @@
 # Verifikation — Pflicht vor jeder Lieferung
 
-Es gibt in der Dev-Umgebung kein Windows/AD. Verifiziert wird deshalb statisch
-(Parser) und mit gemockten Cmdlets. Erst liefern, wenn alle Punkte grün sind.
+Auf Windows reale Cmdlets und Zielbedingungen prüfen; auf anderen Systemen statisch mit Parser und Mocks. Jede nicht verfügbare Laufzeitprüfung ausdrücklich als ungeprüft melden.
 
-## 1. pwsh besorgen (falls nicht vorhanden)
+## 1. PowerShell 7 vorprüfen
 
 ```bash
-command -v pwsh || ls /tmp/pwsh/pwsh 2>/dev/null || {
-  mkdir -p /tmp/pwsh && cd /tmp/pwsh
-  curl -sL https://github.com/PowerShell/PowerShell/releases/download/v7.4.6/powershell-7.4.6-linux-x64.tar.gz | tar xz
-}
-PWSH=$(command -v pwsh || echo /tmp/pwsh/pwsh)
+PWSH=$(command -v pwsh)
+test -n "$PWSH" || { echo "PowerShell 7 fehlt; Parser- und Mock-Tests bleiben ungeprüft."; exit 1; }
 ```
 
-(Version egal, jede 7.x reicht — es geht um Parser und Sprachsemantik.)
+PowerShell nie ungefragt herunterladen oder installieren. Fehlt es, den Nutzer vor einer Installation entscheiden lassen oder die Prüfung als ungeprüft melden.
 
 ## 2. Parser-Check (0 Fehler) + BOM-Check
 
 ```bash
-$PWSH -NoProfile -Command '
+"$PWSH" -NoProfile -Command '
   $t=[IO.File]::ReadAllText("<datei>.ps1")
   $errs=$null
   [System.Management.Automation.Language.Parser]::ParseInput($t,[ref]$null,[ref]$errs)|Out-Null

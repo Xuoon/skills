@@ -1,8 +1,6 @@
 ---
 name: bruh
-description: Die letzte Antwort noch einmal erklären, in einfacher Sprache.
-disable-model-invocation: true
-disallowed-tools: Read Write Edit Glob Grep Bash Task Agent WebFetch WebSearch NotebookEdit
+description: Nur bei ausdrücklichem Nutzerwunsch die letzte Antwort noch einmal in einfacher Sprache erklären.
 ---
 
 # bruh — nochmal, in einfach

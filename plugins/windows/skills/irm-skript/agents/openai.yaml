@@ -1,0 +1,6 @@
+interface:
+  display_name: "IRM-Skript"
+  short_description: "PowerShell-TUI für einen IRM-Aufruf bauen"
+  default_prompt: "Nutze $irm-skript, um ein PowerShell-TUI-Tool für diesen Zweck zu bauen."
+policy:
+  allow_implicit_invocation: false

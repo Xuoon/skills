@@ -1,0 +1,32 @@
+{
+  "name": "code",
+  "version": "1.1.0",
+  "description": "Die vier Workflows für Planung, Bereinigung, Agent-Dokumentation und das Veröffentlichen von Codeänderungen.",
+  "author": {
+    "name": "Sven Labitzki",
+    "email": "sven@labitzki.de",
+    "url": "https://labi.dev"
+  },
+  "homepage": "https://github.com/Xuoon/skills/tree/main/plugins/code",
+  "repository": "https://github.com/Xuoon/skills",
+  "keywords": [
+    "agent-skills",
+    "dead-code",
+    "documentation",
+    "git",
+    "pull-request"
+  ],
+  "skills": "./skills/",
+  "interface": {
+    "displayName": "Code",
+    "shortDescription": "Code planen, bereinigen, dokumentieren und veröffentlichen",
+    "longDescription": "Vier Workflows für Planung, Cleanup, Agent-Dokumentation sowie Commit- und Pull-Request-Abschluss.",
+    "developerName": "Sven Labitzki",
+    "category": "Productivity",
+    "capabilities": [],
+    "defaultPrompt": [
+      "Plane diese Änderung vollständig, bevor du Code schreibst.",
+      "Prüfe den aktuellen Diff und bereite einen Pull Request vor."
+    ]
+  }
+}

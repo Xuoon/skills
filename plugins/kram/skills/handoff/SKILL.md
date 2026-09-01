@@ -1,16 +1,14 @@
 ---
 name: handoff
-description: Destilliert die laufende Session in ein Übergabe-Dokument für den nächsten Agenten.
-argument-hint: "[Sonderwünsche als Fließtext, z. B. „kürzer“ oder „Empfänger kennt das Repo nicht“]"
-disable-model-invocation: true
-allowed-tools: Bash(git status *) Bash(git branch *) Bash(git log *) Bash(git diff *) Bash(git worktree *) Bash(git stash *) Read Write
+description: Nur bei ausdrücklichem Nutzerwunsch die laufende Session in ein Übergabe-Dokument destillieren.
+argument-hint: "[Sonderwünsche als Fließtext]"
 ---
 
 # handoff — Session-Übergabe an den nächsten Agenten
 
-Erzeuge aus der bisherigen Session ein Übergabe-Dokument, mit dem ein **frischer Agent ohne diesen Kontext** direkt weiterarbeiten kann. Der Empfänger kann Claude Code sein, aber auch Codex oder ein anderer Agent — das Dokument bleibt deshalb **provider-neutral**: keine Verweise auf Tools, Skills oder Mechanismen, die nur in dieser Umgebung existieren.
+Erzeuge aus der bisherigen Session ein Übergabe-Dokument, mit dem ein **frischer Agent ohne diesen Kontext** direkt weiterarbeiten kann. Das Dokument bleibt client-neutral: keine Verweise auf Werkzeuge, Skills oder Mechanismen, die nur in der aktuellen Umgebung existieren.
 
-Keine Flags. Steht hinter dem Befehl Fließtext, ist das eine Anweisung an dieses Dokument („kürzer", „nur der Backend-Teil", „Empfänger kennt Repo und Rechner nicht") — umsetzen, nicht zitieren.
+Keine Flags. Zusätzlicher Fließtext in der Nutzeranfrage steuert das Dokument („kürzer", „nur der Backend-Teil", „Empfänger kennt Repo und Rechner nicht") — umsetzen, nicht zitieren.
 
 ## Die Aufnahme-Regel
 
@@ -55,9 +53,9 @@ Umfang: etwa zwei Seiten Markdown. Überschriften nach Bedarf, aber diese Inhalt
 6. **Nächste Schritte** — konkret und geordnet, mit den nötigen Befehlen. Offene Nutzer-Entscheidungen separat.
 7. **Arbeitsregeln** — die projektspezifischen Regeln, die der Nachfolger sonst bricht (Toolchain, Stil-Invarianten, Verbote). Nur was nicht ohnehin in einer Doku steht, die er sicher liest — sonst auf die Doku verweisen.
 
-Was der Empfänger selbst billig herausfinden kann (Dateibäume, Standard-Konventionen, Inhalte einer CLAUDE.md im Repo), wird verwiesen statt kopiert.
+Was der Empfänger selbst billig herausfinden kann (Dateibäume, Standard-Konventionen, vorhandene Agent-Doku im Repo), wird verwiesen statt kopiert.
 
 ## Ausgabe-Vertrag
 
-1. Zuerst das fertige Dokument zusätzlich als `HANDOFF.md` ins Arbeitsverzeichnis schreiben (überschreiben ist in Ordnung). Die Datei ist ein Fallback und wird **nicht committet**.
-2. Dann das Dokument als letzte Antwort ausgeben — **nur** das Dokument. Kein „Hier ist die Übergabe", kein Nachsatz, keine Rückfrage, keine Erwähnung der Datei. Die Antwort muss unverändert kopierbar und als Erst-Prompt für den nächsten Agenten verwendbar sein.
+1. Das Dokument immer als letzte Antwort ausgeben — **nur** das Dokument. Kein Vorspann, Nachsatz oder Verweis auf lokale Dateien.
+2. Ist ein beschreibbarer lokaler Workspace vorhanden, zusätzlich eine ungetrackte `HANDOFF.md` anlegen. Existiert sie bereits, einen kollisionsfreien Zeitstempel-Namen verwenden; nie überschreiben. Ein fehlender Schreibzugriff blockiert die Antwort nicht.

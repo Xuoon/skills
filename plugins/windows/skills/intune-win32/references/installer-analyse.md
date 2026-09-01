@@ -65,7 +65,7 @@ Archiv entpackt mitzuschleppen.
 Autodesk-Selbstentpacker verstehen zusätzlich `-suppresslaunch -d <Zielordner>`.
 7-Zip ist dort der zuverlässigere Weg.
 
-### Sonderfall: Downloader statt Setup (Autodesk „Create Installer")
+### Sonderfall: Downloader statt Setup (Autodesk „Create Installer“)
 
 Manche Hersteller-EXEs enthalten **kein** Setup, sondern nur einen
 Bootstrapper. Erkennungszeichen im Konfigblock:
@@ -87,7 +87,7 @@ Qt6-DLLs – und **ein inneres Archiv** mit dem eigentlichen Produkt. Die
 
 Das Vorbereitungsskript muss dann **zweistufig** entpacken (Downloader nach
 `_extract\`, dann das gefundene `*.7z` nach `App\Image\`). Wer nur einstufig
-entpackt und danach auf `Setup.exe` prüft, bekommt „7-Zip: Everything is Ok"
+entpackt und danach auf `Setup.exe` prüft, bekommt „7-Zip: Everything is Ok“
 und trotzdem FEHLGESCHLAGEN – auf der ersten Ebene kann `Setup.exe` gar nicht
 liegen. Platzbedarf einplanen: Quelldatei + Zwischenstand + Ergebnis, bei
 2-GB-Produkten also rund 7 GB.
@@ -192,7 +192,4 @@ Mindestversion ins Paket gehört.
 
 ## 7. Ergebnis dokumentieren
 
-Was hier gefunden wurde, gehört in den Kopfkommentar von `install.ps1` **und**
-in die `CLAUDE.md` – inklusive der Herkunft („aus der EXE ausgelesen" vs. „laut
-Herstellerdoku" vs. „geraten, noch zu testen"). Sonst rät der nächste Durchgang
-wieder.
+Was hier gefunden wurde, gehört in den Kopfkommentar von `install.ps1` und, falls `docFile` konfiguriert ist, in die kanonische Agent-Doku – inklusive der Herkunft („aus der EXE ausgelesen“ vs. „laut Herstellerdoku“ vs. „geraten, noch zu testen“). Sonst rät der nächste Durchgang wieder.

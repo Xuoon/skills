@@ -1,7 +1,7 @@
 {
   "packagePrefix": "C_",
   "logDir": "C:\\ProgramData\\Intune-Logs",
-  "docFile": "CLAUDE.md",
+  "docFile": null,
   "utilSearchRoots": ["."],
   "requirements": {
     "architecture": "x64",

@@ -8,6 +8,8 @@ on:
 jobs:
   check:
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
     steps:
       - uses: actions/checkout@v4
         with:
@@ -18,6 +20,29 @@ jobs:
       - uses: oven-sh/setup-bun@v2
       - run: bun install --frozen-lockfile
       - run: bun run check
+
+      - name: PowerShell-Syntax
+        shell: pwsh
+        run: |
+          $failed = $false
+          $scriptFiles = @(Get-ChildItem 'plugins' -Recurse -File -Filter '*.ps1' | Sort-Object FullName)
+          if ($scriptFiles.Count -eq 0) { throw 'Keine PowerShell-Dateien in den Plugins gefunden.' }
+          $scriptFiles | ForEach-Object {
+            $tokens = $null
+            $errors = $null
+            [void][System.Management.Automation.Language.Parser]::ParseFile($_.FullName, [ref]$tokens, [ref]$errors)
+            foreach ($parseError in $errors) {
+              $relativePath = [IO.Path]::GetRelativePath((Get-Location).Path, $_.FullName)
+              Write-Output "::error file=$relativePath,line=$($parseError.Extent.StartLineNumber),col=$($parseError.Extent.StartColumnNumber)::$($parseError.Message)"
+              $failed = $true
+            }
+          }
+          if ($failed) { exit 1 }
+
+      - name: Python-Syntax
+        env:
+          PYTHONPYCACHEPREFIX: /tmp/labi-python-cache
+        run: python3 -m py_compile scripts/validate.py plugins/windows/skills/intune-win32/scripts/new_package.py
 
       - uses: astral-sh/setup-uv@v5
       - run: bun run validate
@@ -31,3 +56,14 @@ jobs:
         run: |
           git fetch --no-tags origin "$BASE_REF"
           uv run --with pyyaml scripts/validate.py --release-gate "origin/$BASE_REF"
+
+      - name: Release-Gate für direkten Push
+        if: github.event_name == 'push'
+        env:
+          BASE_REF: ${{ github.event.before }}
+        run: |
+          if [ "$BASE_REF" = "0000000000000000000000000000000000000000" ] || ! git cat-file -e "$BASE_REF^{commit}" 2>/dev/null; then
+            echo "Basis-Commit nicht verfügbar — Release-Gate übersprungen."
+            exit 0
+          fi
+          uv run --with pyyaml scripts/validate.py --release-gate "$BASE_REF"

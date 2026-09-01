@@ -4,11 +4,13 @@ Wird von jedem agent-docs-Skill zuerst geladen. Qualitätsmaßstab: [style.md](s
 
 ## Scope (alle Modi)
 
-- Alle `CLAUDE.md`/`AGENTS.md` (Root, `.claude/`, `apps/*`, `packages/*` bzw. Workspace-Struktur).
-- `CLAUDE.local.md`/`.claude.local.md` (gitignorierte persönliche Overrides), falls vorhanden — Inhalte von dort nie in geteilte Docs spiegeln.
-- Alle `.md` unter dem Rules-Verzeichnis (üblich: `.claude/rules/**`).
-- Frontmatter-`paths:`-Globs — steuern **Auto-Injection**; too-narrow = Regel fehlt genau dann, wenn sie gebraucht wird. Typische Lücke: Tests + Lib-/Helper-Pfade außerhalb des Feature-Ordners.
-- Code-Kommentare mit Doku-Refs (`\.claude/rules|CLAUDE\.md|AGENTS\.md`).
+- Kanonische Agent-Doku im Root und in Apps/Packages erkennen (`AGENTS.md`, `CLAUDE.md` oder belegte Client-Konvention); `AGENTS.override.md` einbeziehen, weil es bei Codex ein gleichnamiges `AGENTS.md` im selben Verzeichnis verdrängt.
+- Persönliche oder gitignorierte Overrides (`CLAUDE.local.md`, `.claude.local.md`) zusätzlich per direktem Existenzcheck suchen; Inhalte nie in geteilte Docs spiegeln.
+- Client-spezifische Rules-Verzeichnisse nur einbeziehen, wenn das Repo sie tatsächlich verwendet.
+- Imports, Symlinks und reine Kompatibilitäts-Pointer bis zur kanonischen Datei auflösen; Pointer nicht als zweite Inhaltsquelle behandeln.
+- Für jeden betroffenen Subtree die **tatsächlich aktive Anweisungskette** nach belegter Client-Semantik prüfen. „Nächste Datei gewinnt" nicht pauschal auf Clients übertragen, die Eltern und Kinddateien zusammenführen.
+- Formatfelder wie Frontmatter-`paths:` nur prüfen, wenn der erkannte Client ihnen nachweislich Auto-Injection-Semantik gibt.
+- Code-Kommentare mit Verweisen auf die vorhandene Agent-Doku und Rules einbeziehen.
 - Excludieren: `node_modules/**`, `.turbo/**`, `dist/**`, `build/**`, `.next/**`, `coverage/**`, `.git/**`.
 - User nennt Subtree → Scope darauf einschränken; kanonische Gegenstellen und Cross-Refs **außerhalb** trotzdem prüfen (sonst Duplikate unsichtbar).
 
@@ -20,6 +22,7 @@ Wird von jedem agent-docs-Skill zuerst geladen. Qualitätsmaßstab: [style.md](s
 - **One Source of Truth.** Jede Mechanik/Zahl/Invariante **eine** kanonische Stelle; woanders max. ein Pointer-Satz mit Link. Niemals dieselbe Mechanik zweimal ausführen.
 - **Repo-spezifisch, non-obvious.** Keine Generics, kein Best-Practice-Boilerplate, keine Code-Paraphrase. Details: [style.md](style.md).
 - **Code owns implementation detail.** Prefetch-Pads, Debounce-ms, UI-Chrome-Layouts, Dateibaum, Prop-Listen — gehören in den Code, nicht in Rules. Docs halten **Verträge** (Invarianten, Lifecycle, Security, „nutze X nicht Y“).
+- **Prosa ist keine Enforcement.** Formatierung und mechanisch prüfbare Stilregeln gehören in Formatter/Lint/CI; Agent-Doku nennt nur nicht offensichtliche Ausnahmen oder den exakten Prüfpfad.
 - **Voice/Sprache der Datei matchen** (DE/EN, Bullet/Tabelle).
 - **Future Agent als Maßstab.** Ohne Fix: misled/blocked **oder** muss Müll lesen (beides zählt).
 - **Nebenbefunde separat.** Code-Bugs aus dem Doku-Lauf: eigene Liste, nicht als Doku-Issue fixen.
@@ -58,11 +61,9 @@ Lösch-Vorschläge brauchen Evidence, **aber keine** „would agent break?“-An
 - Inventar-Listen (Exports, Ordnerbäume, alle Placeholder-Keys, alle Props).
 - Key-References-Wäsche, die Root-Index + `paths:` schon abdecken.
 
-## Subagenten (Sync-Discovery + Audit)
+## Discovery-Ausführung
 
-Parallel, gründlich (Sync: 1 pro Bereich; Audit: ~1 pro 3–5 Files). Output-Format **festnageln**: nur strukturierte Daten, kein Fließtext; verified nur als Count; Abweichungen ausführlich; 1-Satz-Einschätzung pro Datei.
-
-Jeder Discovery-Prompt muss **explizit** nach Lösch-/Kürzungs-Kandidaten fragen, nicht nur nach Lücken.
+Falls Subagenten verfügbar sind parallel und gründlich arbeiten (Sync: 1 pro Bereich; Audit: ~1 pro 3–5 Files), sonst dieselben Aufträge seriell abarbeiten. Output-Format **festnageln**: nur strukturierte Daten, kein Fließtext; verified nur als Count; Abweichungen ausführlich; 1-Satz-Einschätzung pro Datei.
 
 ## Vorschlags-Format + Approval
 
@@ -100,12 +101,6 @@ Danach: **ohne `--fix` ist hier Schluss — kein Edit.** Mit `--fix` (oder ausdr
 
 ## Anti-Patterns (= sofort abbrechen / Kandidat droppen)
 
-- Whole-file rewrite zum Erweitern; „while we're here“-Aufblasen.
 - Neue Sektionen, die niemand verlangt hat; spekulative Vollständigkeit.
-- Overview ↔ Rules denselben Inhalt statt Pointer.
-- Code paraphrasieren (Ordnerbäume, CRUD, Prop-Listen).
-- Implementation-Detail dokumentieren (Prefetch-Fenster, Debounce-Pfade, CSS-Klassen der UI), das der Code allein trägt.
-- „Schadet ja nicht“-Bullets stehen lassen.
+- „Schadet ja nicht"-Bullets stehen lassen.
 - Hohe Scores für knappe Docs mit echten Security-Lücken **oder** für fette korrekte Novellen.
-- Cross-Refs auf unbestätigte Files; Issues ohne `file:line`.
-- Nach Feature-Arbeit die neue Implementierung 1:1 in die Rule schreiben (Sync ≠ Changelog).

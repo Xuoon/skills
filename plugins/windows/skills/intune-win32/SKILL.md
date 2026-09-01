@@ -1,18 +1,19 @@
 ---
 name: intune-win32
-description: Intune-Win32-Pakete aus MSI/EXE bauen und fehlgeschlagene Rollouts eingrenzen.
+description: Nur bei ausdrücklichem Nutzerwunsch Intune-Win32-Pakete aus MSI/EXE bauen oder fehlgeschlagene Rollouts eingrenzen.
+compatibility: Benötigt Python 3; Paketierung und Laufzeitprüfung erfordern Windows-Werkzeuge.
 argument-hint: "[Ordner, Installer oder Fehlerbeschreibung]"
-disable-model-invocation: true
 ---
 
 # intune-win32
 
-Zwei Aufgaben, kein Flag: **was gemeint ist, steht in `$ARGUMENTS`.**
+Zwei Aufgaben, kein Flag: **was gemeint ist, steht in der Nutzeranfrage.**
+Den Skill-Root über den aktiven Skill-Kontext absolut auflösen und für `<skill-root>` einsetzen. Pfade unter `references/`, `scripts/`, `assets/` und `examples/` niemals relativ zum aktuellen Repo verwenden.
 
 | Im Text steht | Aufgabe |
 | --- | --- |
 | Ein Ordner, ein Installer, ein Programmname | **Paket bauen** — Ablauf unten ab Schritt 0 |
-| Ein Fehlercode, „geht nicht", „schlägt fehl", ein Gerät | **Problem eingrenzen** — Abschnitt „Fehlerbilder", dann gezielt beheben |
+| Ein Fehlercode, „geht nicht“, „schlägt fehl“, ein Gerät | **Problem eingrenzen** — Abschnitt „Fehlerbilder“, dann gezielt beheben |
 | Nichts | Genau **eine** Rückfrage stellen: Paket bauen oder Problem lösen? Kein Raten. |
 
 Ziel beim Bauen: aus einem Ordner, in dem nur ein Installer liegt, ein vollständiges
@@ -29,7 +30,7 @@ Abhängigkeit eingebaut.
 
 Ordnerpräfix, Log-Pfad, Doku-Datei, Zuweisungsgruppen und Anforderungen sind
 pro Umgebung verschieden. Sie stehen in einer optionalen `intune-paket.json`
-(Fundort, Schlüssel und Standardwerte in `${CLAUDE_SKILL_DIR}/references/konfiguration.md`).
+(Fundort, Schlüssel und Standardwerte in `references/konfiguration.md`).
 Diese Datei **zuerst suchen und lesen**. Fehlt sie, mit den dort dokumentierten
 Standardwerten arbeiten und beim User nachfragen, sobald etwas davon
 offensichtlich nicht passt – nicht eine Konvention erfinden und stillschweigend
@@ -65,7 +66,7 @@ Vor dem Bauen kurz prüfen – das spart mehr Zeit als jeder Silent-Schalter:
   gemacht wird. Ein fertig gebautes Paket, das niemand braucht, ist der teuerste
   Ausgang.
 - **Gibt es das als Store-App?** Manche Hersteller liefern nur noch über den
-  Microsoft Store – dann in Intune als „Store-App (neu)" zuweisen statt ein
+  Microsoft Store – dann in Intune als „Store-App (neu)“ zuweisen statt ein
   Win32-Paket zu bauen.
 - **Ist die Software überhaupt frei verteilbar?** Named-User-Lizenzen lassen
   sich installieren, aber nicht aktivieren. Vor dem Bauen klären, wie viele
@@ -82,7 +83,7 @@ Sprachpakete + Redist), gibt es schon `App\`/`Pack.cmd` aus einem früheren Lauf
 ### 2. Installer analysieren, statt Schalter zu raten
 
 Das ist der Teil, der Denkarbeit braucht – der Rest ist Mechanik. Vollständige
-Kommandos und Beispiele in `${CLAUDE_SKILL_DIR}/references/installer-analyse.md`.
+Kommandos und Beispiele in `references/installer-analyse.md`.
 
 Kurzfassung:
 
@@ -101,11 +102,7 @@ Kurzfassung:
   64-Bit-Prozess und sieht `WOW6432Node` **nicht** – dann muss die
   Abhängigkeit ebenfalls 64-Bit installiert werden).
 
-Wenn es trotz Analyse unsicher bleibt: den plausibelsten Wert eintragen und im
-Skript als `TODO pruefen` markiert lassen, damit der User es auf einem
-Testgerät verifiziert. Erkennungsmuster für `detect-*.ps1` zu eng → Rollout
-meldet `0x87D1041C`, zu weit → alte Versionen gelten als installiert. Den
-echten Anzeigenamen bestätigt der User nach dem ersten Testgerät.
+Bleibt Silent-Schalter oder Erkennungswert trotz Analyse unbelegt, nichts raten und kein Rollout-Paket als fertig ausgeben. Herstellerquelle, isolierten Installationstest oder eine ausdrückliche Nutzerentscheidung verlangen. Erkennungsmuster für `detect-*.ps1` zu eng → Rollout meldet `0x87D1041C`, zu weit → alte Versionen gelten als installiert.
 
 ### 3. Gerüst erzeugen
 
@@ -122,9 +119,9 @@ Die Mechanik erledigt das Helferskript (liest `intune-paket.json` selbst, falls
 vorhanden):
 
 ```bash
-python3 "${CLAUDE_SKILL_DIR}/scripts/new_package.py" "<Paketordner>" \
+python3 "<skill-root>/scripts/new_package.py" "<Paketordner>" \
   --mode auto --name <Paketname> --display-name "<Produkt>*<Version>*" \
-  --silent-args "'/S'" --util-search "<Wurzel der Intune-Apps>"
+  --silent-args "<verifizierte PowerShell-Argumentliste>" --util-search "<Wurzel der Intune-Apps>"
 ```
 
 Fällt das Skript aus (kein `python3`, oder ein Sonderfall den `--mode` nicht
@@ -138,7 +135,7 @@ abdeckt), dieselben vier Schritte von Hand:
    einem Nachbarpaket suchen (`find <Wurzel> -name IntuneWinAppUtil.exe`).
    Findet sich keine: beim User anfragen bzw. von
    github.com/microsoft/Microsoft-Win32-Content-Prep-Tool holen.
-3. Die Vorlagen aus `${CLAUDE_SKILL_DIR}/assets/` lesen, die
+3. Die Vorlagen aus `assets/` lesen, die
    `{{...}}`-Platzhalter ersetzen und die Dateien schreiben. Platzhalter:
    `PKGNAME`, `SETUPFILE`, `DISPLAYNAME`, `SILENTARGS` (PowerShell-Argumentliste,
    z. B. `'/S','/norestart'`), `UNINSTALLARGS`, `LOGDIR`, bei `copy` zusätzlich
@@ -172,7 +169,7 @@ erst ansehen, ob dort schon angepasste Logik drinsteht.
 Manche Hersteller liefern keinen fertigen Offline-Installer, sondern einen
 Download-Bootstrapper oder ein Selbstentpacker-Archiv. Dafür ein
 `01_Image-erzeugen.cmd` bzw. `01_Image-entpacken.cmd` in die **Paketwurzel**
-legen (Vorlage `${CLAUDE_SKILL_DIR}/assets/prepare.cmd.tmpl`). Regeln:
+legen (Vorlage `assets/prepare.cmd.tmpl`). Regeln:
 
 - **Mehrere Wege nacheinander probieren**, nicht auf ein Werkzeug verlassen:
   erst der herstellereigene Schalter (z. B. `-suppresslaunch -d <Ziel>`), dann
@@ -180,7 +177,7 @@ legen (Vorlage `${CLAUDE_SKILL_DIR}/assets/prepare.cmd.tmpl`). Regeln:
 - **Auf verschachtelte Archive prüfen.** Es gibt Downloader, die entpackt nur
   Hilfsprogramme plus **ein inneres Archiv** enthalten – erst darin liegt das
   Setup. Einstufig entpacken und dann auf `Setup.exe` prüfen ergibt
-  „Everything is Ok" **und** trotzdem einen Fehlschlag. Also: nach `*.7z`/`*.zip`
+  „Everything is Ok“ **und** trotzdem einen Fehlschlag. Also: nach `*.7z`/`*.zip`
   im Ergebnis suchen und eine zweite Stufe anhängen. Begleitdateien wie
   `*.json` nennen häufig Name, Größe und Prüfsumme des inneren Archivs.
 - **Ergebnis verifizieren**, nicht dem Exitcode glauben: prüfen, ob die
@@ -269,7 +266,7 @@ copy-paste-fertig, nicht als Prosa: Name, Version, Hersteller,
 Installations- und Deinstallationsbefehl, Installationsverhalten, Anforderungen,
 Erkennungsregel mit dem Pfad zum Detect-Skript, Rückgabecodes, Zuweisungsgruppe
 nach `assignment.groupPattern`. Werte und Fallstricke stehen in
-`${CLAUDE_SKILL_DIR}/references/intune-portal.md`; die Datei lesen, statt die
+`references/intune-portal.md`; die Datei lesen, statt die
 Werte aus dem Gedächtnis zu rekonstruieren.
 
 Zuweisungen, Gruppen und Richtlinien werden **nicht** selbst angelegt, sondern
@@ -278,10 +275,9 @@ eigene, ausdrücklich freigegebene Aktion.
 
 ## Dokumentation nachziehen
 
-Liegt im Wurzelordner der Intune-Apps die in `docFile` genannte Datei
-(Standard `CLAUDE.md`), das neue Paket dort in die Ordnertabelle eintragen und
+Ist `docFile` nach erkannter Repo-Konvention oder ausdrücklicher Auswahl gesetzt und liegt die Datei im Wurzelordner der Intune-Apps, das neue Paket dort in die Ordnertabelle eintragen und
 die Besonderheiten ergänzen: Silent-Weg **mit Begründung, woher er stammt**
-(„aus der EXE ausgelesen" / „laut Herstellerdoku" / „geraten, noch zu testen"),
+(„aus der EXE ausgelesen“ / „laut Herstellerdoku“ / „geraten, noch zu testen“),
 Lizenzlage, Abhängigkeiten, Bezugsquelle des Installers, Standard-Zielordner.
 Eine zentrale Datei genügt – keine READMEs in die einzelnen Paketordner legen.
 
@@ -298,11 +294,11 @@ Doku – sie wird typischerweise mitgesichert und weitergegeben.
 | Exitcode 1603 | Setup braucht Voraussetzung (Redist, .NET) oder Konflikt mit vorhandener Version |
 | Gerät gilt als installiert, Programm startet nicht | Detect prüft nur das Hauptprogramm, nicht die Abhängigkeit |
 | `.intunewin` doppelt so groß wie erwartet | Quell-Bootstrapper liegt zusätzlich zum Image in `App\` – gehört in die Paketwurzel |
-| Vorbereitungsskript „lief durch", `App\Image\` ist leer | Werkzeug fehlte (7-Zip nicht installiert); es gibt kein `extract.log`, weil das Skript vorher ausgestiegen ist – Skript mit Fallback-Weg und durchgängigem Logging neu schreiben |
-| Entpacker meldet „Everything is Ok", Skript trotzdem FEHLGESCHLAGEN | inneres Archiv – zweite Entpackstufe fehlt, siehe Schritt 4 |
+| Vorbereitungsskript „lief durch“, `App\Image\` ist leer | Werkzeug fehlte (7-Zip nicht installiert); es gibt kein `extract.log`, weil das Skript vorher ausgestiegen ist – Skript mit Fallback-Weg und durchgängigem Logging neu schreiben |
+| Entpacker meldet „Everything is Ok“, Skript trotzdem FEHLGESCHLAGEN | inneres Archiv – zweite Entpackstufe fehlt, siehe Schritt 4 |
 | Ordner sieht leer aus, obwohl entpackt wurde | Sync-Client (OneDrive, Dropbox o. ä.) hat den Ordner noch nicht hochgeladen bzw. legt leere Ordner nicht an – mit `du -sh` gegenprüfen |
 | `App\ImageSetup.exe` statt `App\Image\Setup.exe` | Backslash beim Schreiben per `sed`/Heredoc verschluckt – siehe Schritt 3 |
-| Detect meldet immer „installiert" | Detect-Skript gibt auch im Negativfall etwas aus (`Write-Host`, Fehlermeldung). Bei „nicht installiert" **nichts** ausgeben, nur `exit 1` |
+| Detect meldet immer „installiert“ | Detect-Skript gibt auch im Negativfall etwas aus (`Write-Host`, Fehlermeldung). Bei „nicht installiert“ **nichts** ausgeben, nur `exit 1` |
 
 ## Aufräumen
 

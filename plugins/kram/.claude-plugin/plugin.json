@@ -1,7 +1,7 @@
 {
   "name": "kram",
-  "version": "1.0.0",
-  "description": "Die kleinen Alltagsbefehle: handoff übergibt die Session an den nächsten Agenten, bruh erklärt die letzte Antwort in einfacher Sprache, kleinanzeigen recherchiert den Gebrauchtpreis und schreibt die Verkaufsanzeige.",
+  "version": "1.1.0",
+  "description": "Bündelt kleine Alltagsworkflows für Übergaben, einfache Erklärungen und private Verkaufsanzeigen.",
   "author": {
     "name": "Sven Labitzki",
     "email": "sven@labitzki.de",

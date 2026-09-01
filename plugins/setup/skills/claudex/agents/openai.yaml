@@ -1,0 +1,6 @@
+interface:
+  display_name: "claudex"
+  short_description: "Claude Code mit lokalem GPT-Proxy einrichten"
+  default_prompt: "Nutze $claudex, um Claude Code über den lokalen GPT-Proxy einzurichten."
+policy:
+  allow_implicit_invocation: false

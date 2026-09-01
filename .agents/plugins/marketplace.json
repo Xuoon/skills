@@ -1,0 +1,56 @@
+{
+  "name": "labi",
+  "interface": {
+    "displayName": "labi"
+  },
+  "plugins": [
+    {
+      "name": "code",
+      "source": {
+        "source": "local",
+        "path": "./plugins/code"
+      },
+      "policy": {
+        "installation": "AVAILABLE",
+        "authentication": "ON_INSTALL"
+      },
+      "category": "Productivity"
+    },
+    {
+      "name": "setup",
+      "source": {
+        "source": "local",
+        "path": "./plugins/setup"
+      },
+      "policy": {
+        "installation": "AVAILABLE",
+        "authentication": "ON_INSTALL"
+      },
+      "category": "Productivity"
+    },
+    {
+      "name": "windows",
+      "source": {
+        "source": "local",
+        "path": "./plugins/windows"
+      },
+      "policy": {
+        "installation": "AVAILABLE",
+        "authentication": "ON_INSTALL"
+      },
+      "category": "Productivity"
+    },
+    {
+      "name": "kram",
+      "source": {
+        "source": "local",
+        "path": "./plugins/kram"
+      },
+      "policy": {
+        "installation": "AVAILABLE",
+        "authentication": "ON_INSTALL"
+      },
+      "category": "Productivity"
+    }
+  ]
+}
