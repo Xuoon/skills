@@ -27,6 +27,7 @@ if ($startCount -ne $endCount -or $startCount -gt 1) { throw 'Profil enthaelt ei
 
 if ($startCount -eq 1) {
     $existingMatch = [regex]::Match($current, $blockPattern)
+    if (-not $existingMatch.Success) { throw 'Profil enthaelt einen falsch angeordneten windev-Markerblock.' }
     $prefix = $current.Substring(0, $existingMatch.Index)
     $blockingPrefix = @($prefix -split "`r?`n" | Where-Object { $_.Trim() -and -not $_.TrimStart().StartsWith('#') })
     if ($blockingPrefix.Count -gt 0) { throw 'Vor dem windev-Guard steht ausführbarer Profilcode; sicherer Merge nicht möglich.' }

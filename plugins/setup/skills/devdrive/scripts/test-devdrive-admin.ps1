@@ -48,10 +48,25 @@ if ($ExpectedImagePath) {
     $task = Get-ScheduledTask -TaskName $TaskName -ErrorAction SilentlyContinue
     if (-not $task) {
         Fail "Mount-Task '$TaskName' fehlt"
-    } elseif (-not ([string]$task.Description).Contains($expectedImageFull, [StringComparison]::OrdinalIgnoreCase)) {
-        Fail "Mount-Task '$TaskName' zeigt nicht auf $expectedImageFull"
     } else {
-        Pass "Mount-Task '$TaskName' ($($task.State))"
+        $actions = @($task.Actions)
+        $systemPowerShell = Join-Path ([Environment]::GetFolderPath([Environment+SpecialFolder]::Windows)) 'System32\WindowsPowerShell\v1.0\powershell.exe'
+        $taskCommand = $null
+        if ($actions.Count -eq 1 -and (Get-NormalizedPath ([string]$actions[0].Execute)).Equals((Get-NormalizedPath $systemPowerShell), [StringComparison]::OrdinalIgnoreCase)) {
+            $parts = @([regex]::Split(([string]$actions[0].Arguments).Trim(), '\s+'))
+            $encodedIndex = [Array]::IndexOf($parts, '-EncodedCommand')
+            if ($encodedIndex -ge 0 -and $encodedIndex + 1 -lt $parts.Count) {
+                try { $taskCommand = [Text.Encoding]::Unicode.GetString([Convert]::FromBase64String($parts[$encodedIndex + 1])) } catch {}
+            }
+        }
+        $escapedImagePath = $expectedImageFull.Replace("'", "''")
+        $expectedTaskCommand = "`$imagePath = '$escapedImagePath'; if (-not (Get-DiskImage -ImagePath `$imagePath).Attached) { Mount-DiskImage -ImagePath `$imagePath }"
+        $descriptionMatches = ([string]$task.Description).Contains($expectedImageFull, [StringComparison]::OrdinalIgnoreCase)
+        if (-not $descriptionMatches -or -not $taskCommand -or -not $taskCommand.Equals($expectedTaskCommand, [StringComparison]::OrdinalIgnoreCase)) {
+            Fail "Mount-Task '$TaskName' zeigt nicht ausführbar auf $expectedImageFull"
+        } else {
+            Pass "Mount-Task '$TaskName' ($($task.State))"
+        }
     }
 }
 

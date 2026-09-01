@@ -30,7 +30,7 @@ Fehlt die systemweit geschützte `C:\Program Files\PowerShell\7\pwsh.exe`, vor d
 
 ## 1. Inventur (read-only)
 
-```
+```powershell
 & "$env:ProgramFiles\PowerShell\7\pwsh.exe" -NoProfile -File "<skill-root>/scripts/measure-devdrive.ps1"
 ```
 
@@ -53,13 +53,13 @@ Strukturierte Nutzereingabe verwenden, ersatzweise die Fragen gebündelt im Chat
 3. **Laufwerksbuchstabe und Label**: freien Buchstaben vorschlagen
 4. **Mount-Task** bei VHDX: ja (Standard) oder selbst kümmern
 
-Eine belegte Antwort nicht nochmal fragen. Keine Freigabe-Fragen wie „darf ich anfangen?", die Fragerunde ist die Freigabe.
+Eine belegte Antwort nicht nochmal fragen. Keine Freigabe-Fragen wie „darf ich anfangen?“, die Fragerunde ist die Freigabe.
 
 ## 4. Anlegen (elevated)
 
 Alles, was Datenträger anfasst, läuft über den Wrapper. Requestfile als JSON in ein Temp-Verzeichnis schreiben, dann:
 
-```
+```powershell
 & "$env:ProgramFiles\PowerShell\7\pwsh.exe" -NoProfile -File "<skill-root>/scripts/invoke-elevated.ps1" -RequestFile <request.json>
 ```
 
@@ -95,7 +95,7 @@ Vor dem Umzug: Terminals, Editoren und laufende Builds schließen lassen, sonst 
 
 Pro Kandidat ein Aufruf, Parameter aus der Umzugstabelle der Referenz. Pfade immer als aufgelöste Literale aus dem Bericht übergeben — Ausdrücke wie `$env:USERPROFILE` würden vom umgebenden Bash falsch interpretiert. Variablen als JSON-Objekt in eine temporäre Datei schreiben und mit `-EnvFile` übergeben. `Discard` nur für regenerierbare Standard-Caches und immer mit `-ConfirmDiscardPath '<exakter Source-Pfad>'`:
 
-```
+```powershell
 & "$env:ProgramFiles\PowerShell\7\pwsh.exe" -NoProfile -File "<skill-root>/scripts/move-toolchain.ps1" -Name Cargo -Mode Move -Source '<Ist-Pfad aus Bericht>' -Target '<Zielpfad>' -EnvFile '<env-cargo.json>' -PathReplace '<alter-bin-Pfad>=><neuer-bin-Pfad>'
 ```
 
@@ -121,7 +121,7 @@ Trust und Mount-Task getrennt als JSON-Request über den abgesicherten Wrapper p
 
 Optionale Parameter nur für tatsächlich gewählte Kandidaten angeben. `-ExpectedEnv` ist eine kommaseparierte Liste der gesetzten, rein pfadwertigen Variablen. `-ExpectedTools` enthält kommasepariert nur Executables, deren Installationspfad tatsächlich umgezogen ist; bei reinen Caches bleibt es weg. `ExpectedImagePath` im Admin-Request nur setzen, wenn bei einer VHDX der Mount-Task gewählt wurde.
 
-Abschluss: angelegt / umgezogen / übersprungen als kurze Liste, Backup-Dateien nennen, dann `---` und „Du machst:" mit den Restschritten (neues Terminal, Prüfskript, nach dem nächsten Neustart nochmal prüfen).
+Abschluss: angelegt / umgezogen / übersprungen als kurze Liste, Backup-Dateien nennen, dann `---` und „Du machst:“ mit den Restschritten (neues Terminal, Prüfskript, nach dem nächsten Neustart nochmal prüfen).
 
 ## Fallstricke
 

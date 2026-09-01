@@ -14,7 +14,7 @@ PowerShell nie ungefragt herunterladen oder installieren. Fehlt es, den Nutzer v
 ## 2. Parser-Check (0 Fehler) + BOM-Check
 
 ```bash
-$PWSH -NoProfile -Command '
+"$PWSH" -NoProfile -Command '
   $t=[IO.File]::ReadAllText("<datei>.ps1")
   $errs=$null
   [System.Management.Automation.Language.Parser]::ParseInput($t,[ref]$null,[ref]$errs)|Out-Null

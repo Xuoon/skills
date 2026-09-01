@@ -8,6 +8,8 @@ on:
 jobs:
   check:
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
     steps:
       - uses: actions/checkout@v4
         with:
@@ -59,4 +61,9 @@ jobs:
         if: github.event_name == 'push'
         env:
           BASE_REF: ${{ github.event.before }}
-        run: uv run --with pyyaml scripts/validate.py --release-gate "$BASE_REF"
+        run: |
+          if [ "$BASE_REF" = "0000000000000000000000000000000000000000" ] || ! git cat-file -e "$BASE_REF^{commit}" 2>/dev/null; then
+            echo "Basis-Commit nicht verfügbar — Release-Gate übersprungen."
+            exit 0
+          fi
+          uv run --with pyyaml scripts/validate.py --release-gate "$BASE_REF"

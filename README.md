@@ -33,7 +33,7 @@ Vier Plugins, gruppiert nach Anlass. Mutationen brauchen immer ein dokumentierte
 | Skill | Argumente | Verhalten |
 | --- | --- | --- |
 | `intune-win32` | freier Text | Intune-Win32-Paket aus MSI/EXE bauen oder einen fehlgeschlagenen Rollout eingrenzen — was gemeint ist, steht im Text |
-| `irm-skript` | freier Text | Gehostetes PowerShell-Tool im labi.dev-Hausstil erzeugen, aufrufbar per `irm labi.dev/route \| iex` |
+| `irm-skript` | freier Text | Gehostetes PowerShell-Tool im labi.dev-Hausstil für den bewusst gewählten Aufruf `irm https://labi.dev/route \| iex` erzeugen |
 
 ## kram — Alltagsbefehle
 
@@ -55,9 +55,9 @@ codex plugin add windows@labi
 codex plugin add kram@labi
 ```
 
-## Installation in ChatGPT Desktop
+## Installation in ChatGPT Work
 
-Den Marketplace `Xuoon/skills` in der Plugins Directory als Quelle hinzufügen oder eine bereits über Codex konfigurierte lokale Quelle verwenden. Danach die App neu starten und die gewünschten Plugins ausschließlich in der Plugins Directory installieren; die `codex plugin add`-Befehle oben gehören nur zum CLI-Ablauf.
+Ein Workspace-Admin öffnet `Admin > Plugins`, wählt `Add > Import marketplace` und trägt als Source `https://github.com/Xuoon/skills` ein. Path bleibt leer, weil `.agents/plugins/marketplace.json` im Repo-Root liegt. Nach dem Import die Installation Policy der gewünschten Plugins festlegen; Updates werden täglich synchronisiert oder über `Sync now` angefordert.
 
 Der Repo-Katalog liegt in `.agents/plugins/marketplace.json`. ChatGPT und Codex verwenden dieselben `.codex-plugin/plugin.json`-Manifeste.
 

@@ -13,7 +13,7 @@ Den Skill-Root über den aktiven Skill-Kontext absolut auflösen und für `<skil
 | Im Text steht | Aufgabe |
 | --- | --- |
 | Ein Ordner, ein Installer, ein Programmname | **Paket bauen** — Ablauf unten ab Schritt 0 |
-| Ein Fehlercode, „geht nicht", „schlägt fehl", ein Gerät | **Problem eingrenzen** — Abschnitt „Fehlerbilder", dann gezielt beheben |
+| Ein Fehlercode, „geht nicht“, „schlägt fehl“, ein Gerät | **Problem eingrenzen** — Abschnitt „Fehlerbilder“, dann gezielt beheben |
 | Nichts | Genau **eine** Rückfrage stellen: Paket bauen oder Problem lösen? Kein Raten. |
 
 Ziel beim Bauen: aus einem Ordner, in dem nur ein Installer liegt, ein vollständiges
@@ -66,7 +66,7 @@ Vor dem Bauen kurz prüfen – das spart mehr Zeit als jeder Silent-Schalter:
   gemacht wird. Ein fertig gebautes Paket, das niemand braucht, ist der teuerste
   Ausgang.
 - **Gibt es das als Store-App?** Manche Hersteller liefern nur noch über den
-  Microsoft Store – dann in Intune als „Store-App (neu)" zuweisen statt ein
+  Microsoft Store – dann in Intune als „Store-App (neu)“ zuweisen statt ein
   Win32-Paket zu bauen.
 - **Ist die Software überhaupt frei verteilbar?** Named-User-Lizenzen lassen
   sich installieren, aber nicht aktivieren. Vor dem Bauen klären, wie viele
@@ -121,7 +121,7 @@ vorhanden):
 ```bash
 python3 "<skill-root>/scripts/new_package.py" "<Paketordner>" \
   --mode auto --name <Paketname> --display-name "<Produkt>*<Version>*" \
-  --silent-args "'/S'" --util-search "<Wurzel der Intune-Apps>"
+  --silent-args "<verifizierte PowerShell-Argumentliste>" --util-search "<Wurzel der Intune-Apps>"
 ```
 
 Fällt das Skript aus (kein `python3`, oder ein Sonderfall den `--mode` nicht
@@ -177,7 +177,7 @@ legen (Vorlage `assets/prepare.cmd.tmpl`). Regeln:
 - **Auf verschachtelte Archive prüfen.** Es gibt Downloader, die entpackt nur
   Hilfsprogramme plus **ein inneres Archiv** enthalten – erst darin liegt das
   Setup. Einstufig entpacken und dann auf `Setup.exe` prüfen ergibt
-  „Everything is Ok" **und** trotzdem einen Fehlschlag. Also: nach `*.7z`/`*.zip`
+  „Everything is Ok“ **und** trotzdem einen Fehlschlag. Also: nach `*.7z`/`*.zip`
   im Ergebnis suchen und eine zweite Stufe anhängen. Begleitdateien wie
   `*.json` nennen häufig Name, Größe und Prüfsumme des inneren Archivs.
 - **Ergebnis verifizieren**, nicht dem Exitcode glauben: prüfen, ob die
@@ -277,7 +277,7 @@ eigene, ausdrücklich freigegebene Aktion.
 
 Ist `docFile` nach erkannter Repo-Konvention oder ausdrücklicher Auswahl gesetzt und liegt die Datei im Wurzelordner der Intune-Apps, das neue Paket dort in die Ordnertabelle eintragen und
 die Besonderheiten ergänzen: Silent-Weg **mit Begründung, woher er stammt**
-(„aus der EXE ausgelesen" / „laut Herstellerdoku" / „geraten, noch zu testen"),
+(„aus der EXE ausgelesen“ / „laut Herstellerdoku“ / „geraten, noch zu testen“),
 Lizenzlage, Abhängigkeiten, Bezugsquelle des Installers, Standard-Zielordner.
 Eine zentrale Datei genügt – keine READMEs in die einzelnen Paketordner legen.
 
@@ -294,11 +294,11 @@ Doku – sie wird typischerweise mitgesichert und weitergegeben.
 | Exitcode 1603 | Setup braucht Voraussetzung (Redist, .NET) oder Konflikt mit vorhandener Version |
 | Gerät gilt als installiert, Programm startet nicht | Detect prüft nur das Hauptprogramm, nicht die Abhängigkeit |
 | `.intunewin` doppelt so groß wie erwartet | Quell-Bootstrapper liegt zusätzlich zum Image in `App\` – gehört in die Paketwurzel |
-| Vorbereitungsskript „lief durch", `App\Image\` ist leer | Werkzeug fehlte (7-Zip nicht installiert); es gibt kein `extract.log`, weil das Skript vorher ausgestiegen ist – Skript mit Fallback-Weg und durchgängigem Logging neu schreiben |
-| Entpacker meldet „Everything is Ok", Skript trotzdem FEHLGESCHLAGEN | inneres Archiv – zweite Entpackstufe fehlt, siehe Schritt 4 |
+| Vorbereitungsskript „lief durch“, `App\Image\` ist leer | Werkzeug fehlte (7-Zip nicht installiert); es gibt kein `extract.log`, weil das Skript vorher ausgestiegen ist – Skript mit Fallback-Weg und durchgängigem Logging neu schreiben |
+| Entpacker meldet „Everything is Ok“, Skript trotzdem FEHLGESCHLAGEN | inneres Archiv – zweite Entpackstufe fehlt, siehe Schritt 4 |
 | Ordner sieht leer aus, obwohl entpackt wurde | Sync-Client (OneDrive, Dropbox o. ä.) hat den Ordner noch nicht hochgeladen bzw. legt leere Ordner nicht an – mit `du -sh` gegenprüfen |
 | `App\ImageSetup.exe` statt `App\Image\Setup.exe` | Backslash beim Schreiben per `sed`/Heredoc verschluckt – siehe Schritt 3 |
-| Detect meldet immer „installiert" | Detect-Skript gibt auch im Negativfall etwas aus (`Write-Host`, Fehlermeldung). Bei „nicht installiert" **nichts** ausgeben, nur `exit 1` |
+| Detect meldet immer „installiert“ | Detect-Skript gibt auch im Negativfall etwas aus (`Write-Host`, Fehlermeldung). Bei „nicht installiert“ **nichts** ausgeben, nur `exit 1` |
 
 ## Aufräumen
 

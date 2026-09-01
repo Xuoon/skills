@@ -250,6 +250,7 @@ def check_skills(report: Report, plugin_dir: Path) -> set[str]:
 
 
 def check_marketplaces(report: Report, plugin_dirs: list[Path]) -> None:
+    """Prüft beide Marketplace-Kataloge gegen die Pluginordner."""
     claude_catalog = read_json(CLAUDE_MARKETPLACE_FILE)
     codex_catalog = read_json(CODEX_MARKETPLACE_FILE)
     if not report.check(
@@ -290,8 +291,9 @@ def check_marketplaces(report: Report, plugin_dirs: list[Path]) -> None:
             f"{name}: Claude-source {source!r} passt nicht zum Plugin-Ordner",
         )
         report.check(bool(entry.get("description")), f"{name}: Claude-Katalogeintrag ohne description")
-        if name in on_disk:
-            manifest_description = read_json(PLUGINS_DIR / str(name) / STANDARD_MANIFEST).get("description")
+        manifest_file = PLUGINS_DIR / str(name) / STANDARD_MANIFEST
+        if name in on_disk and manifest_file.is_file():
+            manifest_description = read_json(manifest_file).get("description")
             report.check(entry.get("description") == manifest_description, f"{name}: Katalog- und Manifestbeschreibung laufen auseinander")
 
     installations = {"NOT_AVAILABLE", "AVAILABLE", "INSTALLED_BY_DEFAULT"}
@@ -325,6 +327,7 @@ def check_marketplaces(report: Report, plugin_dirs: list[Path]) -> None:
 
 
 def check_readme(report: Report, skill_names: set[str]) -> None:
+    """Stellt sicher, dass der Nutzerkatalog jeden Skill nennt."""
     readme = README_FILE.read_text(encoding="utf-8")
     for skill_name in sorted(skill_names):
         report.check(skill_name in readme, f"README.md erwähnt Skill {skill_name!r} nicht")
@@ -403,6 +406,7 @@ def check_release_gate(report: Report, base_ref: str) -> None:
 
 
 def main() -> int:
+    """Führt Repo- und optionale Release-Prüfungen aus."""
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument(
         "--release-gate",

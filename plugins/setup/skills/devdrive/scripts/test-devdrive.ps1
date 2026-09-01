@@ -65,13 +65,24 @@ if ($ExpectedPnpmStore) {
 
 if ($ExpectedMavenRepository) {
     $mavenOptions = [Environment]::GetEnvironmentVariable('MAVEN_OPTS', 'User')
-    $configured = $mavenOptions -and $mavenOptions.Contains("-Dmaven.repo.local=$ExpectedMavenRepository", [StringComparison]::OrdinalIgnoreCase)
+    $expectedMavenNormalized = Get-NormalizedPath $ExpectedMavenRepository
+    $configured = $false
+    if ($mavenOptions) {
+        $optionMatches = [regex]::Matches($mavenOptions, '(?i)(?:^|\s)-Dmaven\.repo\.local=(?:"([^"]*)"|''([^'']*)''|(\S+))')
+        foreach ($optionMatch in $optionMatches) {
+            $candidate = @($optionMatch.Groups[1..3] | Where-Object Success | Select-Object -First 1).Value
+            if ($candidate -and (Get-NormalizedPath $candidate).Equals($expectedMavenNormalized, [StringComparison]::OrdinalIgnoreCase)) {
+                $configured = $true
+                break
+            }
+        }
+    }
     $settingsPath = Join-Path ([Environment]::GetFolderPath('UserProfile')) '.m2\settings.xml'
     if (-not $configured -and (Test-Path -LiteralPath $settingsPath)) {
         try {
             [xml]$settings = Get-Content -LiteralPath $settingsPath -Raw
             $configured = @($settings.SelectNodes("//*[local-name()='localRepository']")) |
-                Where-Object { ([string]$_.InnerText).Trim().Equals($ExpectedMavenRepository, [StringComparison]::OrdinalIgnoreCase) }
+                Where-Object { (Get-NormalizedPath ([string]$_.InnerText).Trim()).Equals($expectedMavenNormalized, [StringComparison]::OrdinalIgnoreCase) }
         } catch {
             Warn "Maven-settings.xml konnte nicht gelesen werden: $($_.Exception.Message)"
         }
