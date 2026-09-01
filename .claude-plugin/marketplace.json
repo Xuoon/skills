@@ -9,22 +9,22 @@
     {
       "name": "code",
       "source": "./plugins/code",
-      "description": "Die vier Befehle für die Arbeit am Code: planning plant vor dem ersten Edit, cleanup findet toten Code, agent-docs hält CLAUDE.md und Changelog am Code, ship committet und öffnet den PR."
+      "description": "Die vier Workflows für Planung, Bereinigung, Agent-Dokumentation und das Veröffentlichen von Codeänderungen."
     },
     {
       "name": "setup",
       "source": "./plugins/setup",
-      "description": "Richtet die Arbeitsumgebung ein: windev für Windows-Entwicklung, claudex für Claude Code mit GPT auf macOS, labi-defaults für die globale CLAUDE.md."
+      "description": "Richtet Entwicklungsumgebungen und lokale Agent-Werkzeuge auf macOS und Windows ein."
     },
     {
       "name": "windows",
       "source": "./plugins/windows",
-      "description": "Windows-Werkzeuge: intune-win32 baut Intune-Win32-Pakete aus MSI und EXE, irm-skript erzeugt gehostete PowerShell-Tools für den Aufruf per Einzeiler."
+      "description": "Erstellt und analysiert Windows-Bereitstellungspakete und PowerShell-Werkzeuge."
     },
     {
       "name": "kram",
       "source": "./plugins/kram",
-      "description": "Die kleinen Alltagsbefehle: handoff übergibt die Session an den nächsten Agenten, bruh erklärt die letzte Antwort in einfacher Sprache, kleinanzeigen recherchiert den Gebrauchtpreis und schreibt die Verkaufsanzeige."
+      "description": "Bündelt kleine Alltagsworkflows für Übergaben, einfache Erklärungen und private Verkaufsanzeigen."
     }
   ]
 }

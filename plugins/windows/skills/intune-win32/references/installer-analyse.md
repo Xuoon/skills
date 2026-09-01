@@ -192,7 +192,4 @@ Mindestversion ins Paket gehört.
 
 ## 7. Ergebnis dokumentieren
 
-Was hier gefunden wurde, gehört in den Kopfkommentar von `install.ps1` **und**
-in die `CLAUDE.md` – inklusive der Herkunft („aus der EXE ausgelesen" vs. „laut
-Herstellerdoku" vs. „geraten, noch zu testen"). Sonst rät der nächste Durchgang
-wieder.
+Was hier gefunden wurde, gehört in den Kopfkommentar von `install.ps1` und, falls `docFile` konfiguriert ist, in die kanonische Agent-Doku – inklusive der Herkunft („aus der EXE ausgelesen" vs. „laut Herstellerdoku" vs. „geraten, noch zu testen"). Sonst rät der nächste Durchgang wieder.

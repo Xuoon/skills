@@ -1,0 +1,6 @@
+interface:
+  display_name: "Einfach erklären"
+  short_description: "Letzte Antwort verständlich neu erklären"
+  default_prompt: "Nutze $bruh, um die letzte Antwort einfacher zu erklären."
+policy:
+  allow_implicit_invocation: false

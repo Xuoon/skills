@@ -1,16 +1,15 @@
 # Style: Was gute Agent-Doku ausmacht
 
-Maßstab für alle Modi. Gilt für `CLAUDE.md`/`AGENTS.md` und Rules gleichermaßen.
+Maßstab für alle Modi. Gilt für die kanonische Agent-Doku und client-spezifische Rules gleichermaßen.
 
 **Leitidee:** Desto weniger Zeilen, desto weniger mögliche Fehler — **so viel wie nötig, nicht so viel wie möglich.** Token-effizient und agent-blocking.
 
 ## Architektur der Doku
 
-- **Overview (CLAUDE.md/AGENTS.md)** = Was ist das, Commands, wenige Invarianten, **Verweise**. Keine Domain-Novellen.
+- **Overview** = Was ist das, Commands, wenige Invarianten, **Verweise**. Keine Domain-Novellen.
 - **Rules** = Tiefe pro Domäne (Security, Lifecycle, non-obvious Business-Regeln).
-- **Hierarchie:** Root → App/Package → Rules-Unterordner. Die Datei, die der Arbeit am nächsten ist, gewinnt.
-- **One Source of Truth:** Eine Mechanik/Zahl = eine kanonische Stelle. Woanders: max. ein Pointer-Satz + Link. Frage vor jedem Write: „Wo ist der kanonische Ort?“
-- **Frontmatter-`paths:`:** Auto-Injection. Tests, Lib-Helfer, Consumer mit aufnehmen — nicht nur das Feature-Verzeichnis. Nicht so broad, dass die Rule bei jedem Edit im Repo lädt (außer bewusst always-on wie Security/Architecture).
+- **Hierarchie:** Repo-weite Regeln ins Root, echte Subtree-Deltas nahe an App/Package. Lade-, Merge- und Override-Reihenfolge ist Client-Semantik und muss belegt werden; nicht jeder Client behandelt die nächste Datei gleich.
+- **Portabilität:** Gemeinsame Regeln kanonisch in `AGENTS.md`; ein `CLAUDE.md` darf sie per `@AGENTS.md` importieren und nur echte Claude-Deltas ergänzen. Keine Inhaltskopie. Imports vermeiden Drift, sparen aber keinen Kontext.
 
 ## Was reingehört (Agent-blocking)
 
@@ -54,6 +53,3 @@ Maßstab für alle Modi. Gilt für `CLAUDE.md`/`AGENTS.md` und Rules gleicherma�
 ## Wartung
 
 - Doku wie Code: Lifecycle/Schema/Security-Änderung → Doku im selben PR (Sync).
-- Beweis vor Behauptung (`file:line`).
-- Nach **jedem** Sync, der Zeilen **addiert**, sofort Mini-Prune (siehe Sync-Skill + [prune-sweep.md](prune-sweep.md)).
-- Nach großem Audit mit Adds: voller Prune-Sweep Pflicht.

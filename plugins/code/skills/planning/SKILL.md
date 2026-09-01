@@ -1,9 +1,7 @@
 ---
 name: planning
-description: Ein Vorhaben vollständig durchplanen und abstimmen, bevor die erste Zeile geschrieben wird.
+description: Nur bei ausdrücklichem Nutzerwunsch ein Vorhaben vollständig durchplanen und abstimmen, bevor die erste Zeile geschrieben wird.
 argument-hint: "<Vorhaben>"
-disable-model-invocation: true
-allowed-tools: Task Agent Bash(git status *) Bash(git log *) Bash(git diff *) Bash(git grep *) Bash(git ls-files *) Grep Glob Read AskUserQuestion
 ---
 
 # planning — planen, abstimmen, dann durchziehen
@@ -16,13 +14,13 @@ Der Lauf hat vier Phasen und **zwei harte Übergänge**: von Phase 2 nach 3 erst
 
 Nichts schreiben, nichts editieren, nichts committen — auch nicht „schon mal vorbereitend".
 
-Den betroffenen Code lesen, bis das Vorhaben in der Realität des Repos verortet ist: wo es andockt, was es bricht, wer es sonst noch benutzt. Jeder Befund wird mit `file:line` belegt. Bei größeren Vorhaben parallele Subagenten pro Bereich, die nur strukturierte Funde zurückgeben.
+Den betroffenen Code lesen, bis das Vorhaben in der Realität des Repos verortet ist: wo es andockt, was es bricht, wer es sonst noch benutzt. Jeder Befund wird mit `file:line` belegt. Bei größeren Vorhaben verfügbare Subagenten pro Bereich parallel einsetzen, sonst dieselben Prüfungen seriell durchführen.
 
 **Was unklar bleibt, wird eine Frage — keine Annahme.** Eine unbelegte Annahme im Plan ist der teuerste Fehler dieses Skills, weil sie erst nach dem Go auffliegt.
 
 ## Phase 2 — Fragerunde
 
-Fragen kommen über **AskUserQuestion mit vorgeschlagenen Antwortoptionen**, nie als Fließtext. Die eigene Empfehlung steht an erster Stelle und ist als Empfehlung markiert, mit dem Grund in einem Halbsatz.
+Fragen kommen über strukturierte Nutzereingabe mit vorgeschlagenen Antwortoptionen; fehlt diese Fähigkeit, werden sie gebündelt im Chat gestellt. Die eigene Empfehlung steht an erster Stelle und ist mit einem knappen Grund markiert.
 
 Gefragt wird nur, was den Plan wirklich **verzweigt**. Alles mit offensichtlichem Default wird entschieden und im Plan genannt, nicht vorgelegt — eine Frage, deren Antwort feststeht, kostet den Nutzer Zeit und bringt nichts.
 

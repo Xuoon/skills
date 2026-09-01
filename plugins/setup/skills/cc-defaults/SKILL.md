@@ -1,35 +1,37 @@
 ---
-name: labi-defaults
-description: Die globale Claude-Code-Konfiguration analysieren und gemeinsam schärfen, damit der Agent sich überall gleich verhält.
-disable-model-invocation: true
-allowed-tools: Read Glob Grep AskUserQuestion
+name: cc-defaults
+description: Nur bei ausdrücklichem Nutzerwunsch die globale Anweisungsdatei des aktiven Agent-Clients analysieren und gemeinsam schärfen.
 ---
 
-# labi-defaults — globale Vorgaben schärfen
+# cc-defaults — globale Vorgaben schärfen
 
-Ziel ist ein `~/.claude/CLAUDE.md`, das überall dasselbe Verhalten erzeugt: kurze Antworten, sauberes PR- und Changelog-Format, keine Emojis, klare Grenze zwischen selbst machen und vorher fragen.
+Ziel ist die globale Anweisungsdatei des aktiven Agent-Clients: kurze Antworten, sauberes PR- und Changelog-Format, keine Emojis und eine klare Grenze zwischen selbst machen und vorher fragen.
 
 **Keine Argumente. Es wird nichts geschrieben, bevor der Nutzer zugestimmt hat.**
 
-## 1. Analysieren (read-only)
+## 1. Ziel und Client ermitteln
 
-Ansehen: `~/.claude/CLAUDE.md`, `~/.claude/settings.json` (Permissions, Env, Hooks), `~/.claude/skills/`, `~/.claude/commands/`, installierte Plugins.
+- Codex: zuerst `$CODEX_HOME/AGENTS.override.md`, falls die Datei nicht leer ist; sonst `$CODEX_HOME/AGENTS.md`. Ohne gesetztes `CODEX_HOME` ist der Basisordner `~/.codex`. Eine inaktive Geschwisterdatei nur als Kontext lesen, nie statt der aktiven Datei ändern.
+- Claude Code: `~/.claude/CLAUDE.md`.
+- Anderer oder unklarer Client: dokumentierten globalen Anweisungspfad ermitteln oder einmal nach dem Ziel fragen.
+
+Danach die gewählte Anweisungsdatei und angrenzende Client-Konfiguration read-only ansehen. Settings, Hooks, Skills, Plugins und Marketplaces nur als Kontext lesen, nie ändern.
 
 Vier Fragen an den Bestand: Was ist geregelt? Was widerspricht sich? Was fehlt? Was steht doppelt?
 
 ## 2. Befund zeigen
 
-Kurze Liste, gruppiert nach **geregelt / widersprüchlich / fehlt / doppelt**, jede Zeile mit Beleg (`~/.claude/CLAUDE.md:42`). Keine Bewertung ohne Fundstelle.
+Kurze Liste, gruppiert nach **geregelt / widersprüchlich / fehlt / doppelt**, jede Zeile mit Beleg aus der gewählten Datei. Keine Bewertung ohne Fundstelle.
 
-Widersprüche zwischen Text und `settings.json` oder einem Hook gehören in den Befund — sie wirken unsichtbar und werden nur **gemeldet, nie geändert**.
+Widersprüche zwischen Text und angrenzenden Settings oder Hooks gehören in den Befund — sie wirken unsichtbar und werden nur **gemeldet, nie geändert**.
 
-## 3. Fragerunde (AskUserQuestion)
+## 3. Fragerunde
 
-Gebündelt in einer Runde, Empfehlung als erste Option. **Nur fragen, wo es wirklich eine Entscheidung gibt** — was bereits so dasteht, wird nicht nochmal zur Abstimmung gestellt.
+Strukturierte Nutzereingabe verwenden, ersatzweise gebündelt im Chat; Empfehlung als erste Option. **Nur fragen, wo es wirklich eine Entscheidung gibt** — was bereits so dasteht, wird nicht nochmal zur Abstimmung gestellt.
 
 ## 4. Schreiben
 
-Nur nach Zustimmung, nur das Zugestimmte, nur in `~/.claude/CLAUDE.md`. Was der Nutzer streicht, wird nicht geschrieben. Abschluss: ein Satz, welche Abschnitte angefasst wurden.
+Nur nach Zustimmung, nur das Zugestimmte und nur in der gewählten globalen Anweisungsdatei schreiben. Was der Nutzer streicht, wird nicht geschrieben. Abschluss: ein Satz, welche Abschnitte angefasst wurden.
 
 Der Text muss **schichten statt sammeln**: kurze Abschnitte mit Überschriften, eine Zeile pro Regel, keine Aussage in zwei Abschnitten.
 
@@ -43,7 +45,7 @@ Die Themen, aus denen sich Befund und Fragerunde speisen, und zugleich die Textb
 - Der kürzeste vollständige Text gewinnt; dieselbe Aussage nie an zwei Stellen; leere Abschnitte weglassen statt „keine" zu schreiben.
 - Muss der Nutzer danach selbst etwas tun: `---`-Trennlinie, darunter „Du machst:" mit nummerierten Schritten. Sonst weglassen.
 - Nach einer Freigabe wird durchgezogen — kein „nächste Schritte wären", Bericht am Ende.
-- Rückfragen gebündelt in einer Nachricht über das Frage-Tool mit Antwortoptionen, nicht als Fließtext.
+- Rückfragen über strukturierte Nutzereingabe, ersatzweise gebündelt im Chat mit Antwortoptionen.
 - Keine Emojis in allem, was ausgeliefert oder abgelegt wird: Dokumente, Mails, Commits, Skripte, Skilltexte, Doku.
 
 ### Pull Requests
@@ -76,4 +78,4 @@ Löschen: in einem Git-Repo wird gelöscht, git ist das Backup. Außerhalb der V
 
 ## Grenzen
 
-Vorschlagen darf dieser Skill ausschließlich `~/.claude/CLAUDE.md`. `settings.json`, Hooks, Skills und Plugins gehören dem Nutzer — sie werden gelesen und im Befund erwähnt, nie angefasst.
+Vorschlagen und schreiben darf dieser Skill ausschließlich in der zuvor gewählten globalen Anweisungsdatei. Settings, Hooks, Skills, Plugins und Marketplaces werden nur gelesen und im Befund erwähnt.

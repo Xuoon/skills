@@ -1,0 +1,6 @@
+interface:
+  display_name: "Dev Drive"
+  short_description: "Windows Dev Drive planen und einrichten"
+  default_prompt: "Nutze $devdrive, um ein Windows Dev Drive zu planen."
+policy:
+  allow_implicit_invocation: false

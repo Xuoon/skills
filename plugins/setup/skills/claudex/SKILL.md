@@ -1,8 +1,7 @@
 ---
 name: claudex
-description: claudex auf macOS einrichten, reparieren, aktualisieren oder entfernen — Claude Code auf GPT über einen lokalen CLIProxyAPI.
-disable-model-invocation: true
-allowed-tools: Bash Read AskUserQuestion
+description: Nur bei ausdrücklichem Nutzerwunsch claudex auf macOS einrichten, reparieren, aktualisieren oder entfernen — Claude Code auf GPT über einen lokalen CLIProxyAPI.
+compatibility: Benötigt macOS, Claude Code, zsh, curl und Netzwerkzugriff.
 ---
 
 # claudex
@@ -50,8 +49,8 @@ korrekt zwischen `darwin_aarch64` und `darwin_amd64`.
 
 ### 2. Aktion und Optionen klären
 
-Der Skill hat keine Flags — was zu tun ist, ergibt die Vorprüfung plus **eine**
-AskUserQuestion-Runde. Sagt der Benutzer es schon im Fließtext („entfernen", „auf Port 9000"),
+Der Skill hat keine Flags — was zu tun ist, ergibt die Vorprüfung plus **eine gebündelte Fragerunde**.
+Sagt der Benutzer es schon im Fließtext („entfernen", „auf Port 9000"),
 das übernehmen und die Frage weglassen. Sonst fragen, aber nur was die Vorprüfung offen lässt:
 
 1. **Aktion** (immer): installieren · aktualisieren · reparieren · entfernen. Empfehlung ist,
@@ -77,10 +76,10 @@ aktualisieren und reparieren laufen alle über den Ablauf ab Schritt 3.
 
 ### 3. Dry-Run zeigen
 
-Die gebündelten Skripte liegen unter `${CLAUDE_SKILL_DIR}/scripts/`. Führe zunächst aus:
+Die gebündelten Skripte liegen unter `scripts/`. Löse den Skill-Root über den aktiven Skill-Kontext absolut auf und ersetze `<skill-root>` in jedem Befehl; niemals einen gleichnamigen Pfad aus dem aktuellen Repo ausführen. Führe zunächst aus:
 
 ```bash
-bash "${CLAUDE_SKILL_DIR}/scripts/install.sh" --dry-run [gewählte Optionen]
+bash "<skill-root>/scripts/install.sh" --dry-run [gewählte Optionen]
 ```
 
 Fasse danach knapp zusammen, was geschrieben wird:
@@ -91,7 +90,7 @@ Fasse danach knapp zusammen, was geschrieben wird:
 - `~/.cli-proxy-api/` für OAuth-Daten
 - ein markierter, vorher gesicherter Block in `~/.zshrc`
 
-Frage nun über `AskUserQuestion`, ob das Setup ausgeführt werden soll. Die Bestätigung muss nach
+Frage nun über strukturierte Nutzereingabe, ersatzweise gebündelt im Chat, ob das Setup ausgeführt werden soll. Die Bestätigung muss nach
 dem Dry-Run erfolgen, weil Download, OAuth und Shell-Änderung echte Systemaktionen sind.
 
 ### 4. Installieren und OAuth abschließen
@@ -99,7 +98,7 @@ dem Dry-Run erfolgen, weil Download, OAuth und Shell-Änderung echte Systemaktio
 Nach der Bestätigung:
 
 ```bash
-bash "${CLAUDE_SKILL_DIR}/scripts/install.sh" --yes [gewählte Optionen]
+bash "<skill-root>/scripts/install.sh" --yes [gewählte Optionen]
 ```
 
 Der Installer läuft deterministisch durch (Architektur-Erkennung inkl. Rosetta, verifizierte
@@ -160,14 +159,14 @@ und erneuert den markierten `.zshrc`-Block.
 Vor einer Deinstallation wieder Bestätigung einholen:
 
 ```bash
-bash "${CLAUDE_SKILL_DIR}/scripts/uninstall.sh"
+bash "<skill-root>/scripts/uninstall.sh"
 ```
 
 OAuth-Daten bleiben standardmäßig erhalten. Nur wenn der Benutzer ausdrücklich auch die
 Anmeldedaten löschen will:
 
 ```bash
-bash "${CLAUDE_SKILL_DIR}/scripts/uninstall.sh" --purge-auth
+bash "<skill-root>/scripts/uninstall.sh" --purge-auth
 ```
 
-Lies bei Fehlern oder Sonderfällen `${CLAUDE_SKILL_DIR}/references/troubleshooting.md`.
+Lies bei Fehlern oder Sonderfällen `references/troubleshooting.md`.

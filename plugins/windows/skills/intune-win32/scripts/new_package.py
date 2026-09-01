@@ -40,7 +40,7 @@ CONFIG_NAME = "intune-paket.json"
 DEFAULTS = {
     "packagePrefix": "",
     "logDir": r"C:\ProgramData\Intune-Logs",
-    "docFile": "CLAUDE.md",
+    "docFile": None,
     "utilSearchRoots": [],
     "trashFolder": "_to_delete",
 }

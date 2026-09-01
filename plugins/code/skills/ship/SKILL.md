@@ -1,16 +1,17 @@
 ---
 name: ship
-description: Arbeit abschließen — committen, PR auf den Default-Branch, auf Wunsch mergen und aufräumen.
+description: Nur bei ausdrücklichem Nutzerwunsch Arbeit abschließen — committen, PR anlegen, auf Wunsch mergen und aufräumen.
+compatibility: Benötigt Git, ein Remote und authentifizierten Schreibzugriff auf dessen Forge.
 argument-hint: "[--merge] [--clean] [hinweise]"
-disable-model-invocation: true
-allowed-tools: Bash(git status *) Bash(git diff *) Bash(git log *) Bash(git branch --show-current) Bash(git branch --merged *) Bash(git worktree list*) Bash(git tag --list*) Bash(git remote -v) Bash(gh repo view *) Bash(gh pr list *) Bash(gh pr view *)
 ---
 
 # ship — commit → PR → (merge, aufräumen)
 
 Schließt die aktuelle Arbeit ab. Alles Schreibende — commit, push, PR, merge, löschen — läuft **erst nach der Freigabe am Gate**.
 
-## Argumente (`$ARGUMENTS`)
+Voraussetzung sind `git`, ein Remote und authentifizierter Schreibzugriff auf dessen Forge. Eine vorhandene Forge-API oder Integration ist bevorzugt; bei GitHub ist ein authentifiziertes `gh` der CLI-Fallback.
+
+## Argumente aus der Nutzeranfrage
 
 | Flag | Bedeutung |
 | --- | --- |
@@ -23,7 +24,7 @@ Scope ist immer das aktuelle Verzeichnis.
 
 ## Ablauf
 
-1. **Recon, read-only.** `git status --short`, `git diff` staged und unstaged, aktueller Branch, Default-Branch, `git log` für den Commit-Stil des Repos, `git remote -v`, offener PR via `gh pr list --head <branch> --state open`. Sichtbarkeit über `gh repo view --json visibility,nameWithOwner` — schlägt das fehl oder bleibt unklar, **als öffentlich behandeln**.
+1. **Recon, read-only.** `git status --short`, staged und unstaged Diff, aktueller Branch, Default-Branch, Commit-Stil und Remotes prüfen. Offenen PR und Sichtbarkeit über die verfügbare Forge-Integration ermitteln; bei GitHub ohne Integration `gh pr list` und `gh repo view` verwenden. Bleibt die Sichtbarkeit unklar, **als öffentlich behandeln**.
 
 2. **Öffentlich-Check.** Bei öffentlichem oder unklarem Repo den Diff prüfen auf: Secrets, Keys, Tokens, `.env`-Werte, interne URLs und Hosts, personenbezogene Daten, versehentliche Build-/Log-Artefakte. Fund → melden und **stoppen**, nicht selbst wegcommitten. Sauber → in einem Satz bestätigen, dass der Inhalt öffentlich wird.
 
@@ -33,9 +34,9 @@ Scope ist immer das aktuelle Verzeichnis.
 
 5. **Ausführen** in dieser Reihenfolge, dann durchziehen ohne weitere Zwischenfragen:
 
-   Branch anlegen (nur wenn HEAD auf dem Default-Branch steht, Name `typ/kurz-beschreibung`) → commit → push → `gh pr create`, nur wenn kein PR offen ist; sonst aktualisiert der Push den bestehenden → bei `--merge`: `gh pr merge` → Default-Branch aktualisieren → bei `--clean`: aufräumen. Das Aktualisieren kommt **vor** dem Aufräumen, weil der Branch, auf dem man steht, nicht löschbar ist.
+   Branch anlegen, wenn HEAD auf dem Default-Branch steht: zuerst die Repo-Konvention verwenden, ohne Vorgabe `typ/kurz-beschreibung`. Dann commit → push → PR über die verfügbare Forge-Integration anlegen, nur wenn keiner offen ist; sonst aktualisiert der Push den bestehenden → bei `--merge` über dieselbe Forge mergen → Default-Branch aktualisieren → bei `--clean` aufräumen. Bei GitHub ohne Integration sind `gh pr create` und `gh pr merge` der Fallback.
 
-   Läuft ship in einem Worktree, ist der Default-Branch meist schon im Hauptrepo ausgecheckt — ein `git checkout` darauf bricht dann ab (`'main' wird bereits von Arbeitsverzeichnis … verwendet`), und auch `gh pr merge` scheitert an derselben Stelle, nachdem der Merge auf der Gegenseite längst durch ist. Im Worktree deshalb nicht wechseln, sondern `git -C <hauptrepo> pull --ff-only` benutzen und den Merge-Status über `gh pr view` prüfen statt über den lokalen Checkout.
+   Läuft ship in einem Worktree, ist der Default-Branch oft schon im Hauptrepo ausgecheckt. Dort nicht wechseln, sondern `git -C <hauptrepo> pull --ff-only` benutzen und den Merge-Status über die Forge prüfen statt über den lokalen Checkout.
 
 6. **Bericht.** PR-URL, Commit-SHAs, Merge-Status, was aufgeräumt wurde. Fehler mit Ursache und nächstem Schritt, nichts still schlucken.
 
@@ -45,21 +46,19 @@ Bei `--clean` allein gibt es keinen Diff: Schritt 2 und 3 entfallen, und das Gat
 
 Gelöscht wird nur, was **nachweislich** gemergt oder verwaist ist:
 
-- Branches, deren Arbeit im Default-Branch angekommen ist — lokal und, wenn dort vorhanden, remote. `git branch --merged <default>` allein reicht dafür **nicht**: nach einem Squash-Merge trägt der Default-Branch einen neuen Commit, der Branch-Head bleibt unerreichbar, und der Branch taucht nie in `--merged` auf. Deshalb zusätzlich `gh pr list --state merged --head <branch>` fragen; findet sich ein gemergter PR, ist der Branch weg-berechtigt, auch wenn git ihn als ungemergt führt. Nur dann darf `git branch -D` sein.
+- Branches, deren Arbeit im Default-Branch angekommen ist — lokal und, wenn dort vorhanden, remote. `git branch --merged <default>` allein reicht nach einem Squash-Merge nicht; deshalb zusätzlich den gemergten PR über die Forge belegen. Nur mit diesem Nachweis darf `git branch -D` sein.
 - Worktrees, deren Branch weg ist oder deren Verzeichnis nicht mehr existiert (`git worktree list`, dann `git worktree prune`).
-- Tags, die auf nichts Erreichbares mehr zeigen.
-
 **Nie** der aktuelle Branch, **nie** der Default-Branch, **nie** ungemergte Arbeit ohne Rückfrage. Ist der Zustand eines Branches unklar, geht er als Frage an den Nutzer statt in die Löschliste.
 
 ## Commit- und PR-Format
 
-Verbindlich ist Svens globale `~/.claude/CLAUDE.md`, Abschnitt „Pull request descriptions" — Aufbau, Sektionen und Ton stehen dort und werden hier **nicht** wiederholt. ship ergänzt nur:
-
-- Conventional Commits mit deutschem Betreff, im Stil der letzten Commits des Repos.
-- Commit-Message endet mit dem `Co-Authored-By:`-Trailer laut Harness-Konvention.
-- PR-Body endet mit der „Generated with Claude Code"-Zeile.
-
-Widerspricht eine Repo-Konvention (PR-Template, Changelog-Pflicht, Sprache) der globalen Vorgabe, hat das Repo Vorrang.
+- **Commit und PR-Titel:** Conventional Commit mit deutschem Betreff, im Stil der letzten Commits des Repos.
+- **Kopf ohne Überschrift:** 2–4 Sätze oder Punkte zu Umsetzung und Anlass, keine Diff-Nacherzählung.
+- **`## Changelog`:** Jeder Punkt beginnt mit einem fetten Anker, Gedankenstrich und einem Satz (`**fix(rmm): Neustart-Gate** — …`). Mehr als zwei Einzeländerungen werden Unterpunkte; maximal zwei Ebenen. Bezeichner, Pfade und Befehle stehen in Backticks. Keine Tabellen, Klappblöcke oder Checkboxen.
+- **`## Prüfung`:** Nur Evidenz, die nicht aus dem Diff folgt, etwa Geräteprüfung, reproduzierter Fehler oder geprobte Migration. Bewusst Ungeprüftes gehört ebenfalls hierher; kein „Tests grün" und kein CI-Status.
+- **`## Manuelle Schritte`:** Nur wenn nach dem Merge wirklich etwas zu tun ist; nummeriert in Ausführungsreihenfolge mit exakten Befehlen.
+- Abschnitte ohne echten Inhalt entfallen vollständig; nie „keine" schreiben.
+- Widerspricht eine Repo-Konvention (PR-Template, Changelog-Pflicht, Sprache) diesen Vorgaben, hat das Repo Vorrang.
 
 ## Grenzen
 

@@ -1,0 +1,26 @@
+{
+  "name": "windows",
+  "version": "1.1.0",
+  "description": "Erstellt und analysiert Windows-Bereitstellungspakete und PowerShell-Werkzeuge.",
+  "author": {
+    "name": "Sven Labitzki",
+    "email": "sven@labitzki.de",
+    "url": "https://labi.dev"
+  },
+  "homepage": "https://github.com/Xuoon/skills/tree/main/plugins/windows",
+  "repository": "https://github.com/Xuoon/skills",
+  "keywords": ["agent-skills", "windows", "intune", "powershell", "packaging"],
+  "skills": "./skills/",
+  "interface": {
+    "displayName": "Windows",
+    "shortDescription": "Intune-Pakete und PowerShell-Werkzeuge erstellen",
+    "longDescription": "Workflows für Intune-Win32-Pakete und selbstständige PowerShell-Werkzeuge im labi.dev-Hausstil.",
+    "developerName": "Sven Labitzki",
+    "category": "Productivity",
+    "capabilities": [],
+    "defaultPrompt": [
+      "Baue aus diesem Installer ein Intune-Win32-Paket.",
+      "Erzeuge ein PowerShell-Werkzeug für den Aufruf über irm."
+    ]
+  }
+}

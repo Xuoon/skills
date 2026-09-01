@@ -15,7 +15,7 @@ gewinnt:
 ```
 
 Eine ausgefüllte Vorlage zum Kopieren liegt in
-`${CLAUDE_SKILL_DIR}/examples/intune-paket.json`.
+`examples/intune-paket.json` relativ zum Skill-Root.
 
 Fehlt die Datei, gelten die Standardwerte. Es ist **kein** Fehler, ohne sie zu
 arbeiten – dann bei ungewöhnlichen Umgebungen einmal beim User nachfragen,
@@ -27,7 +27,7 @@ statt eine Konvention zu erfinden.
 {
   "packagePrefix": "C_",
   "logDir": "C:\\ProgramData\\Intune-Logs",
-  "docFile": "CLAUDE.md",
+  "docFile": null,
   "utilSearchRoots": ["."],
   "requirements": {
     "architecture": "x64",
@@ -50,7 +50,7 @@ statt eine Konvention zu erfinden.
 |---|---|---|
 | `packagePrefix` | `""` | Präfix der Paketordner (z. B. `C_` in `C_Programm`). Wird beim Ableiten des Paketnamens abgeschnitten. |
 | `logDir` | `C:\ProgramData\Intune-Logs` | Zielordner der Client-Logs. Landet als `{{LOGDIR}}` in allen Skripten. |
-| `docFile` | `CLAUDE.md` | Datei im Wurzelordner, in der neue Pakete dokumentiert werden. `null` = keine Doku nachziehen. |
+| `docFile` | `null` | Kanonische Agent-Doku im Wurzelordner. Nur nach erkannter Repo-Konvention oder expliziter Auswahl auf `AGENTS.md`, `CLAUDE.md` oder einen anderen vorhandenen Pfad setzen. |
 | `utilSearchRoots` | Elternordner | Pfade, unter denen nach einer vorhandenen `IntuneWinAppUtil.exe` gesucht wird. |
 | `requirements.architecture` | `x64` | Vorgabe für die Anforderungen im Intune-Assistenten. |
 | `requirements.minWindows` | `Windows 10 1607` | dito. |

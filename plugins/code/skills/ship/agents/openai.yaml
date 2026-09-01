@@ -1,0 +1,6 @@
+interface:
+  display_name: "Ship"
+  short_description: "Commit und Pull Request vorbereiten"
+  default_prompt: "Nutze $ship, um die aktuelle Arbeit als Pull Request abzuschließen."
+policy:
+  allow_implicit_invocation: false

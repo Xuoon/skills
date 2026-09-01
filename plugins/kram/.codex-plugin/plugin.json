@@ -1,0 +1,26 @@
+{
+  "name": "kram",
+  "version": "1.1.0",
+  "description": "Bündelt kleine Alltagsworkflows für Übergaben, einfache Erklärungen und private Verkaufsanzeigen.",
+  "author": {
+    "name": "Sven Labitzki",
+    "email": "sven@labitzki.de",
+    "url": "https://labi.dev"
+  },
+  "homepage": "https://github.com/Xuoon/skills/tree/main/plugins/kram",
+  "repository": "https://github.com/Xuoon/skills",
+  "keywords": ["agent-skills", "handoff", "explain", "kleinanzeigen"],
+  "skills": "./skills/",
+  "interface": {
+    "displayName": "Kram",
+    "shortDescription": "Kleine wiederkehrende Alltagsaufgaben",
+    "longDescription": "Workflows für Session-Übergaben, einfache Erklärungen und private Verkaufsanzeigen mit Marktpreis.",
+    "developerName": "Sven Labitzki",
+    "category": "Productivity",
+    "capabilities": [],
+    "defaultPrompt": [
+      "Erstelle eine Übergabe für den nächsten Agenten.",
+      "Erkläre die letzte Antwort noch einmal in einfacher Sprache."
+    ]
+  }
+}

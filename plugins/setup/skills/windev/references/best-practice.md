@@ -1,6 +1,6 @@
 # Best Practice: Windows-PowerShell-Dev-Umgebung
 
-Zielzustand für `/setup:windev --setup` und Maßstab für die Analyse. Erarbeitet und vermessen am 18.07.2026; Zahlen sind Richtwerte einer realen Maschine.
+Zielzustand für den interaktiven Modus und `--best-practice`. Zahlen sind Messrichtwerte, keine pauschalen Erfolgsbehauptungen.
 
 ## Komponenten
 
@@ -13,6 +13,8 @@ Zielzustand für `/setup:windev --setup` und Maßstab für die Analyse. Erarbeit
 | zoxide (`z`) | Verzeichnis-Sprünge | Init ~80 ms, laufender Hook praktisch kostenlos |
 | Terminal-Icons | Datei-Icons | Rein kosmetisch, ~480 ms Import → nur lazy laden |
 | PSReadLine | Vorschläge/History | ListView-Prediction, HistorySearch auf Pfeiltasten |
+
+PowerShell 7 und Git sind der technische Kern. Oh My Posh, Nerd Font, zoxide, Terminal-Icons, VS Code, Node und Bun sind optionale Nutzerentscheidungen oder werden nur optimiert, wenn ihre Nutzung bereits belegt ist.
 
 ## Profil-Prinzipien
 

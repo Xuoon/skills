@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Prüft die Marktplatz-Invarianten aus CLAUDE.md.
+"""Prüft die Marktplatz-Invarianten aus AGENTS.md.
 
 Lokal: uv run --with pyyaml scripts/validate.py
 CI:    uv run --with pyyaml scripts/validate.py --release-gate origin/main
@@ -12,20 +12,22 @@ import json
 import re
 import subprocess
 import sys
-from pathlib import Path
+from pathlib import Path, PurePosixPath
 
 import yaml
 
 REPO_ROOT = Path(__file__).resolve().parent.parent
 PLUGINS_DIR = REPO_ROOT / "plugins"
-MARKETPLACE_FILE = REPO_ROOT / ".claude-plugin" / "marketplace.json"
+CLAUDE_MARKETPLACE_FILE = REPO_ROOT / ".claude-plugin" / "marketplace.json"
+CODEX_MARKETPLACE_FILE = REPO_ROOT / ".agents" / "plugins" / "marketplace.json"
 CHANGELOG_FILE = REPO_ROOT / "CHANGELOG.md"
+README_FILE = REPO_ROOT / "README.md"
 
-# Zwei Manifeste, weil zwei Ökosysteme: Claude Code liest ausschließlich
-# .claude-plugin/plugin.json, der Agent-Plugins-Standard ausschließlich das im
-# Plugin-Root. Sie müssen inhaltlich übereinstimmen — siehe check_manifests.
+# Drei Manifeste verbinden denselben Skillbestand mit Agent Plugins, Claude Code
+# sowie ChatGPT/Codex. Gemeinsame Identitätsfelder müssen übereinstimmen.
 STANDARD_MANIFEST = Path("plugin.json")
 CLAUDE_MANIFEST = Path(".claude-plugin") / "plugin.json"
+CODEX_MANIFEST = Path(".codex-plugin") / "plugin.json"
 
 AGENT_PLUGINS_SCHEMA = "https://agent-plugins.org/schemas/1.0.0/plugin.schema.json"
 # Schema 1.0.0 ist geschlossen (additionalProperties: false); alles
@@ -36,11 +38,24 @@ STANDARD_FIELDS = {
 }
 STANDARD_NAME = re.compile(r"^(?!.*(?:--|\.\.))[a-z0-9](?:[a-z0-9.-]*[a-z0-9])?$")
 SHARED_FIELDS = ("name", "version", "description")
+AGENT_SKILLS_FIELDS = {"name", "description", "license", "compatibility", "metadata", "argument-hint"}
+CODEX_INTERFACE_FIELDS = {
+    "displayName", "shortDescription", "longDescription", "developerName", "category",
+}
+CODEX_FIELDS = {
+    "name", "version", "description", "author", "homepage", "repository", "license",
+    "keywords", "skills", "mcpServers", "apps", "hooks", "interface", "bundledContentVariant",
+}
+CODEX_INTERFACE_ALLOWED = {
+    *CODEX_INTERFACE_FIELDS, "capabilities", "defaultPrompt", "brandColor", "brandColorDark", "websiteURL",
+    "privacyPolicyURL", "termsOfServiceURL", "supportURL", "composerIcon", "logo", "logoDark", "screenshots",
+}
+CLIENT_SPECIFIC_TEXT = ("${CLAUDE_SKILL_DIR}", "$ARGUMENTS", "AskUserQuestion")
 
-# ${CLAUDE_SKILL_DIR} zeigt auf das Verzeichnis der SKILL.md. Ein ../ darin
-# verlässt das Plugin und bricht nach der Installation, weil Plugins in einen
-# Cache kopiert werden.
-SKILL_DIR_PATH = re.compile(r"\$\{CLAUDE_SKILL_DIR\}(/[^\s`)\"]*)")
+# Agent Skills referenzieren gebündelte Dateien relativ zum Skill-Root.
+BUNDLED_PATH = re.compile(
+    r"(?<![A-Za-z0-9_./-])((?:references|scripts|assets|examples)/(?:[A-Za-z0-9_.-]+/)*[A-Za-z0-9_.-]*)"
+)
 FRONTMATTER = re.compile(r"\A---\r?\n(.*?)\r?\n---\r?\n", re.DOTALL)
 SEMVER = re.compile(r"\A\d+\.\d+\.\d+\Z")
 
@@ -75,18 +90,28 @@ def rel(path: Path) -> str:
 
 
 def check_manifests(report: Report, plugin_dir: Path) -> dict | None:
-    """Beide Manifeste vorhanden, standardkonform und untereinander gleich."""
+    """Alle drei Manifeste vorhanden, valide und in Identitätsfeldern gleich."""
     name = plugin_dir.name
     standard_file = plugin_dir / STANDARD_MANIFEST
     claude_file = plugin_dir / CLAUDE_MANIFEST
+    codex_file = plugin_dir / CODEX_MANIFEST
 
     ok = report.check(standard_file.is_file(), f"{name}: {STANDARD_MANIFEST} fehlt (Agent-Plugins-Standard)")
     ok &= report.check(claude_file.is_file(), f"{name}: {CLAUDE_MANIFEST} fehlt (Claude Code lädt sonst nicht)")
+    ok &= report.check(codex_file.is_file(), f"{name}: {CODEX_MANIFEST} fehlt (ChatGPT/Codex lädt sonst nicht)")
     if not ok:
         return None
 
     standard = read_json(standard_file)
     claude = read_json(claude_file)
+    codex = read_json(codex_file)
+    if not report.check(
+        all(isinstance(manifest, dict) for manifest in (standard, claude, codex)),
+        f"{name}: jedes Manifest muss ein JSON-Objekt enthalten",
+    ):
+        return None
+    for field in sorted(set(codex) - CODEX_FIELDS):
+        report.fail(f"{name}: Codex-Manifestfeld {field!r} ist nicht erlaubt")
 
     report.check(
         standard.get("$schema") == AGENT_PLUGINS_SCHEMA,
@@ -99,17 +124,60 @@ def check_manifests(report: Report, plugin_dir: Path) -> dict | None:
         f"{name}: plugin.json name {standard.get('name')!r} verletzt das Namensmuster des Standards",
     )
 
-    for field in SHARED_FIELDS:
+    for field in (*SHARED_FIELDS, "author"):
+        values = (standard.get(field), claude.get(field), codex.get(field))
         report.check(
-            standard.get(field) == claude.get(field),
-            f"{name}: {field} läuft zwischen den beiden Manifesten auseinander "
-            f"({standard.get(field)!r} vs. {claude.get(field)!r})",
+            values[0] == values[1] == values[2],
+            f"{name}: {field} läuft zwischen Standard-, Claude- und Codex-Manifest auseinander",
+        )
+    for field in ("homepage", "repository", "keywords"):
+        report.check(
+            standard.get(field) == codex.get(field),
+            f"{name}: {field} läuft zwischen Standard- und Codex-Manifest auseinander",
         )
 
-    report.check(claude.get("name") == name, f"{name}: plugin.json name muss dem Ordnernamen entsprechen")
-    report.check(bool(SEMVER.match(str(claude.get("version", "")))), f"{name}: version {claude.get('version')!r} ist kein Semver")
-    report.check(bool(claude.get("description")), f"{name}: plugin.json ohne description")
-    return claude
+    for manifest_name, manifest in (("Claude", claude), ("Codex", codex)):
+        report.check(manifest.get("name") == name, f"{name}: {manifest_name}-Manifestname passt nicht zum Ordner")
+        report.check(
+            bool(SEMVER.match(str(manifest.get("version", "")))),
+            f"{name}: {manifest_name}-Version {manifest.get('version')!r} ist kein Semver",
+        )
+        report.check(bool(manifest.get("description")), f"{name}: {manifest_name}-Manifest ohne description")
+
+    report.check(codex.get("skills") == "./skills/", f"{name}: Codex-Manifest skills muss './skills/' sein")
+    report.check((plugin_dir / "skills").is_dir(), f"{name}: skills-Verzeichnis fehlt")
+    for field in ("skills", "mcpServers", "apps", "hooks"):
+        value = codex.get(field)
+        paths = [value] if isinstance(value, str) else value if isinstance(value, list) and all(isinstance(item, str) for item in value) else []
+        for path in paths:
+            if not report.check(path.startswith("./"), f"{name}: Codex-{field}-Pfad muss mit './' beginnen"):
+                continue
+            resolved = (plugin_dir / path.removeprefix("./")).resolve()
+            try:
+                resolved.relative_to(plugin_dir.resolve())
+                contained = True
+            except ValueError:
+                contained = False
+            report.check(contained and resolved.exists(), f"{name}: Codex-{field}-Pfad {path!r} fehlt oder verlässt das Plugin")
+    interface = codex.get("interface")
+    if report.check(isinstance(interface, dict), f"{name}: Codex-Manifest ohne interface-Objekt"):
+        for field in sorted(set(interface) - CODEX_INTERFACE_ALLOWED):
+            report.fail(f"{name}: Codex-interface-Feld {field!r} ist nicht erlaubt")
+        for field in sorted(CODEX_INTERFACE_FIELDS):
+            report.check(bool(interface.get(field)), f"{name}: Codex-interface.{field} fehlt")
+        capabilities = interface.get("capabilities")
+        report.check(
+            isinstance(capabilities, list) and all(isinstance(value, str) for value in capabilities),
+            f"{name}: Codex-interface.capabilities muss ein String-Array sein",
+        )
+        prompts = interface.get("defaultPrompt")
+        report.check(
+            isinstance(prompts, list)
+            and 1 <= len(prompts) <= 3
+            and all(isinstance(prompt, str) and 0 < len(prompt) <= 128 for prompt in prompts),
+            f"{name}: Codex-interface.defaultPrompt braucht 1-3 Strings mit höchstens 128 Zeichen",
+        )
+    return standard
 
 
 def check_skills(report: Report, plugin_dir: Path) -> set[str]:
@@ -127,6 +195,8 @@ def check_skills(report: Report, plugin_dir: Path) -> set[str]:
     for skill_file in skills:
         frontmatter = read_frontmatter(skill_file)
         if report.check(frontmatter is not None, f"{rel(skill_file)}: ohne Frontmatter"):
+            for field in sorted(set(frontmatter) - AGENT_SKILLS_FIELDS):
+                report.fail(f"{rel(skill_file)}: nicht-portables Frontmatter-Feld {field!r}")
             # name: bestimmt das letzte Segment des Befehls. Weicht es vom
             # Ordnernamen ab, heißt der Skill anders, als sein Pfad verspricht.
             report.check(
@@ -134,34 +204,130 @@ def check_skills(report: Report, plugin_dir: Path) -> set[str]:
                 f"{rel(skill_file)}: name: muss {skill_file.parent.name} sein (ist {frontmatter.get('name')!r})",
             )
             report.check(bool(frontmatter.get("description")), f"{rel(skill_file)}: ohne description")
+            policy_file = skill_file.parent / "agents" / "openai.yaml"
+            explicit_only = str(frontmatter.get("description", "")).startswith("Nur bei ausdrücklichem Nutzerwunsch")
+            if explicit_only:
+                report.check(policy_file.is_file(), f"{rel(skill_file)}: expliziter Skill ohne agents/openai.yaml")
+            if policy_file.is_file():
+                policy_data = yaml.safe_load(policy_file.read_text(encoding="utf-8"))
+                policy = policy_data.get("policy") if isinstance(policy_data, dict) else None
+                report.check(
+                    isinstance(policy, dict) and policy.get("allow_implicit_invocation") is False,
+                    f"{rel(policy_file)}: allow_implicit_invocation muss false sein",
+                )
 
-        for path in SKILL_DIR_PATH.findall(skill_file.read_text(encoding="utf-8")):
-            report.check(
-                "../" not in path,
-                f"{rel(skill_file)}: ${{CLAUDE_SKILL_DIR}}{path} zeigt aus dem Skill heraus",
-            )
+        for markdown_file in sorted(skill_file.parent.rglob("*.md")):
+            text = markdown_file.read_text(encoding="utf-8")
+            for token in CLIENT_SPECIFIC_TEXT:
+                report.check(token not in text, f"{rel(markdown_file)}: client-spezifischer Text {token!r}")
+            for relative_path in sorted(set(BUNDLED_PATH.findall(text))):
+                if not report.check(
+                    ".." not in PurePosixPath(relative_path).parts,
+                    f"{rel(markdown_file)}: Bundle-Pfad {relative_path!r} zeigt aus dem Skill heraus",
+                ):
+                    continue
+                bundled_path = skill_file.parent / relative_path
+                try:
+                    bundled_path.resolve().relative_to(skill_file.parent.resolve())
+                except ValueError:
+                    report.fail(f"{rel(markdown_file)}: Bundle-Pfad {relative_path!r} löst außerhalb des Skills auf")
+                    continue
+                if relative_path.endswith("/"):
+                    exists = bundled_path.is_dir()
+                    expected = "Verzeichnis"
+                elif bundled_path.suffix:
+                    exists = bundled_path.is_file()
+                    expected = "Datei"
+                else:
+                    exists = bundled_path.exists()
+                    expected = "Pfad"
+                report.check(
+                    exists,
+                    f"{rel(markdown_file)}: Bundle-Pfad {relative_path!r} existiert nicht oder ist nicht vom Typ {expected}",
+                )
 
     return {s.parent.name for s in skills}
 
 
-def check_marketplace(report: Report, plugin_dirs: list[Path]) -> None:
-    catalog = read_json(MARKETPLACE_FILE)
-    entries = catalog.get("plugins", [])
-    listed = {entry.get("name") for entry in entries}
+def check_marketplaces(report: Report, plugin_dirs: list[Path]) -> None:
+    claude_catalog = read_json(CLAUDE_MARKETPLACE_FILE)
+    codex_catalog = read_json(CODEX_MARKETPLACE_FILE)
+    if not report.check(
+        isinstance(claude_catalog, dict) and isinstance(codex_catalog, dict),
+        "Beide Marketplaces müssen JSON-Objekte enthalten",
+    ):
+        return
+    claude_entries = claude_catalog.get("plugins", [])
+    codex_entries = codex_catalog.get("plugins", [])
+    if not report.check(
+        isinstance(claude_entries, list) and isinstance(codex_entries, list),
+        "Beide Marketplaces brauchen ein plugins-Array",
+    ):
+        return
+    if not report.check(
+        all(isinstance(entry, dict) for entry in (*claude_entries, *codex_entries)),
+        "Jeder Marketplace-Eintrag muss ein Objekt sein",
+    ):
+        return
+    claude_names = [entry.get("name") for entry in claude_entries]
+    codex_names = [entry.get("name") for entry in codex_entries]
+    listed = set(claude_names)
     on_disk = {p.name for p in plugin_dirs}
 
+    report.check(claude_catalog.get("name") == codex_catalog.get("name") == "labi", "Marketplace-Name muss in beiden Katalogen 'labi' sein")
+    report.check(claude_names == codex_names, "Claude- und Codex-Marketplace haben unterschiedliche Reihenfolge oder Einträge")
+    report.check(len(claude_names) == len(set(claude_names)), "Marketplace enthält doppelte Plugin-Namen")
     for missing in sorted(on_disk - listed):
-        report.fail(f"{missing}: liegt unter plugins/, fehlt aber in marketplace.json")
+        report.fail(f"{missing}: liegt unter plugins/, fehlt aber in den Marketplaces")
     for stale in sorted(listed - on_disk):
-        report.fail(f"{stale}: steht in marketplace.json, hat aber keinen Ordner unter plugins/")
+        report.fail(f"{stale}: steht im Marketplace, hat aber keinen Ordner unter plugins/")
 
-    for entry in entries:
+    for entry in claude_entries:
+        name = entry.get("name")
         source = entry.get("source", "")
         report.check(
-            source == f"./plugins/{entry.get('name')}",
-            f"{entry.get('name')}: source {source!r} passt nicht zum Plugin-Ordner",
+            source == f"./plugins/{name}",
+            f"{name}: Claude-source {source!r} passt nicht zum Plugin-Ordner",
         )
-        report.check(bool(entry.get("description")), f"{entry.get('name')}: Katalogeintrag ohne description")
+        report.check(bool(entry.get("description")), f"{name}: Claude-Katalogeintrag ohne description")
+        if name in on_disk:
+            manifest_description = read_json(PLUGINS_DIR / str(name) / STANDARD_MANIFEST).get("description")
+            report.check(entry.get("description") == manifest_description, f"{name}: Katalog- und Manifestbeschreibung laufen auseinander")
+
+    installations = {"NOT_AVAILABLE", "AVAILABLE", "INSTALLED_BY_DEFAULT"}
+    authentications = {"ON_INSTALL", "ON_USE"}
+    catalog_interface = codex_catalog.get("interface")
+    report.check(isinstance(catalog_interface, dict), "Codex-Marketplace ohne interface-Objekt")
+    if isinstance(catalog_interface, dict):
+        report.check(bool(catalog_interface.get("displayName")), "Codex-Marketplace ohne interface.displayName")
+    for entry in codex_entries:
+        name = entry.get("name")
+        source = entry.get("source")
+        expected_path = f"./plugins/{name}"
+        report.check(
+            isinstance(source, dict) and source.get("source") == "local" and source.get("path") == expected_path,
+            f"{name}: Codex-source muss local mit path {expected_path!r} sein",
+        )
+        if isinstance(source, dict) and isinstance(source.get("path"), str):
+            source_path = (REPO_ROOT / source["path"].removeprefix("./")).resolve()
+            try:
+                source_path.relative_to(REPO_ROOT.resolve())
+                contained = source_path == (PLUGINS_DIR / str(name)).resolve()
+            except ValueError:
+                contained = False
+            report.check(contained, f"{name}: Codex-source.path verlässt den erwarteten Plugin-Ordner")
+        policy = entry.get("policy")
+        report.check(isinstance(policy, dict), f"{name}: Codex-Marketplace ohne policy")
+        if isinstance(policy, dict):
+            report.check(policy.get("installation") in installations, f"{name}: ungültige installation-Policy")
+            report.check(policy.get("authentication") in authentications, f"{name}: ungültige authentication-Policy")
+        report.check(bool(entry.get("category")), f"{name}: Codex-Marketplace ohne category")
+
+
+def check_readme(report: Report, skill_names: set[str]) -> None:
+    readme = README_FILE.read_text(encoding="utf-8")
+    for skill_name in sorted(skill_names):
+        report.check(skill_name in readme, f"README.md erwähnt Skill {skill_name!r} nicht")
 
 
 def git(*args: str) -> str:
@@ -198,19 +364,36 @@ def check_release_gate(report: Report, base_ref: str) -> None:
     changelog = CHANGELOG_FILE.read_text(encoding="utf-8")
 
     for name in sorted(touched):
-        manifest_file = PLUGINS_DIR / name / CLAUDE_MANIFEST
+        manifest_file = PLUGINS_DIR / name / STANDARD_MANIFEST
         if not manifest_file.is_file():
-            continue  # gelöscht
+            try:
+                git("show", f"{base_ref}:plugins/{name}/{STANDARD_MANIFEST}")
+            except subprocess.CalledProcessError:
+                continue
+            marketplace_notes = changelog_section(changelog, "Marketplace")
+            report.check(
+                re.search(rf"\b{re.escape(name)}\b.*\b(entfernt|gelöscht)\b", marketplace_notes, re.IGNORECASE) is not None,
+                f"{name}: gelöscht, aber ohne Entfernungseintrag im Abschnitt ## Marketplace",
+            )
+            continue
 
         try:
-            base_manifest = json.loads(git("show", f"{base_ref}:plugins/{name}/{CLAUDE_MANIFEST}"))
+            base_manifest = json.loads(git("show", f"{base_ref}:plugins/{name}/{STANDARD_MANIFEST}"))
         except subprocess.CalledProcessError:
-            continue  # neu
+            version = read_json(manifest_file).get("version")
+            report.check(
+                bool(SEMVER.match(str(version))) and f"[{version}]" in changelog_section(changelog, name),
+                f"{name}: neues Plugin ohne initiale Semver und Changelog-Eintrag",
+            )
+            continue
 
         version = read_json(manifest_file).get("version")
+        base_version = base_manifest.get("version")
+        version_tuple = tuple(map(int, str(version).split("."))) if SEMVER.match(str(version)) else None
+        base_tuple = tuple(map(int, str(base_version).split("."))) if SEMVER.match(str(base_version)) else None
         if not report.check(
-            version != base_manifest.get("version"),
-            f"{name}: geändert, aber version steht weiter auf {version} — /plugin update zieht das nicht",
+            version_tuple is not None and base_tuple is not None and version_tuple > base_tuple,
+            f"{name}: geändert, aber version {version!r} ist nicht höher als {base_version!r}",
         ):
             continue
         report.check(
@@ -234,14 +417,16 @@ def main() -> int:
     # Jeder Skill ist zusätzlich bar erreichbar (/ship neben /code:ship). Zwei
     # gleichnamige Skills teilen sich diesen baren Befehl — einer verliert.
     seen: dict[str, str] = {}
+    skill_names: set[str] = set()
     for plugin_dir in plugin_dirs:
-        if check_manifests(report, plugin_dir) is None:
-            continue
+        check_manifests(report, plugin_dir)
         for skill in sorted(check_skills(report, plugin_dir)):
+            skill_names.add(skill)
             if skill in seen:
                 report.fail(f"{plugin_dir.name}: Skill {skill!r} heißt wie der in {seen[skill]!r} — der bare /{skill} wird mehrdeutig")
             seen[skill] = plugin_dir.name
-    check_marketplace(report, plugin_dirs)
+    check_marketplaces(report, plugin_dirs)
+    check_readme(report, skill_names)
     if args.release_gate:
         check_release_gate(report, args.release_gate)
 

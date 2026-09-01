@@ -4,6 +4,10 @@ Was sich an den Plugins ändert, aus Sicht dessen, der sie benutzt. Jedes Plugin
 
 ## Marketplace
 
+### 2026-09-01
+
+Alle vier Plugins lassen sich zusätzlich über denselben Repo-Marketplace in ChatGPT und Codex installieren. Die Skills verwenden portable Bundle-Pfade; OpenAI-spezifische Aktivierungsregeln liegen in `agents/openai.yaml`, andere Clients werden durch enge Beschreibungen und Inhalts-Gates begrenzt.
+
 ### 2026-08-28
 
 `handoff` und `bruh` sind in **`kram`** aufgegangen, dem Plugin für die kleinen Alltagsbefehle. Neu dabei: `/kram:kleinanzeigen`. Die baren Befehle `/handoff` und `/bruh` funktionieren unverändert.
@@ -33,6 +37,17 @@ claude plugin uninstall agent-docs cleanup windev claudex intune-win32
 
 ## code
 
+### [1.1.0] – 2026-09-01
+
+#### Behoben
+
+- **`agent-docs` lädt weniger redundante Regeln.** Das asymmetrische Gate, Inhaltsausschlüsse und Prune-Pflichten bleiben an ihrer kanonischen Stelle erhalten, werden aber nicht mehr in den immer gemeinsam geladenen Dateien wiederholt.
+- **`ship` ist nicht mehr von einer persönlichen Claude-Code-Datei abhängig.** Commit- und PR-Format stehen vollständig im Skill und erzeugen keine falschen harness-spezifischen Provenienzangaben mehr.
+
+#### Geändert
+
+- **Die Code-Skills sind client-neutral aufrufbar.** Manuell gedachte Workflows bleiben in ChatGPT und Codex explizit; Fragen, Parallelisierung und Forge-Zugriff haben portable Fallbacks.
+
 ### [1.0.1] – 2026-08-19
 
 #### Behoben
@@ -57,6 +72,18 @@ Bündelt die Arbeit am Code: `/code:planning`, `/code:cleanup`, `/code:agent-doc
 
 ## setup
 
+### [2.0.0] – 2026-09-01
+
+#### Hinzugefügt
+
+- **`devdrive`** — vermisst und plant ein Windows Dev Drive read-only. Mit `--fix` stimmt der Skill VHDX oder Partition sowie jeden Cache- und Repo-Umzug einzeln ab, legt das trusted ReFS-Volume über UAC an und prüft den Zustand auch nach dem Neustart.
+
+#### Geändert
+
+- **`windev` hat nur noch das optionale Argument `--best-practice`.** Ohne Argument führt der Skill interaktiv durch Befund und gewählte Änderungen; mit dem Flag stellt er belegte reversible Standards direkt her und fragt nur persönliche oder riskante Entscheidungen.
+- **PowerShell 7 wird für erhöhte Setup-Schritte als systemweites WIX-Paket installiert.** `devdrive` prüft Trust und Mount-Task anschließend über denselben abgesicherten UAC-Wrapper.
+- **`labi-defaults` heißt jetzt `cc-defaults`.** Der neue Name ist in allen Clients verbindlich; Codex-, Claude-Code- und andere globale Anweisungsdateien werden erkannt oder einmal ausgewählt.
+
 ### [1.0.1] – 2026-08-19
 
 #### Behoben
@@ -77,6 +104,13 @@ Bündelt die Einrichtung: `/setup:windev`, `/setup:claudex` und `/setup:labi-def
 
 ## windows
 
+### [1.1.0] – 2026-09-01
+
+#### Geändert
+
+- **Die Windows-Skills verwenden portable Bundle-Pfade und Aktivierungsregeln.** Sie funktionieren damit aus ChatGPT, Codex, Claude Code und kompatiblen Agent-Skills-Clients heraus.
+- **`intune-win32` nimmt keine Agent-Dokumentationsdatei mehr an.** `docFile` ist standardmäßig deaktiviert und wird nur nach erkannter Repo-Konvention oder expliziter Auswahl gesetzt.
+
 ### [1.0.0] – 2026-08-19
 
 Bündelt die Windows-Werkzeuge: `/windows:intune-win32` und `/windows:irm-skript`.
@@ -89,8 +123,13 @@ Bündelt die Windows-Werkzeuge: `/windows:intune-win32` und `/windows:irm-skript
 
 - **`/intune-win32` heißt `/windows:intune-win32`.** Verhalten bleibt.
 
-
 ## kram
+
+### [1.1.0] – 2026-09-01
+
+#### Geändert
+
+- **`handoff` und `bruh` sind client-neutral verpackt.** Beide bleiben in ChatGPT und Codex explizit aufzurufen; die inhaltlichen Grenzen stehen direkt im Skill statt in herstellerspezifischen Tool-Sperren.
 
 ### [1.0.0] – 2026-08-28
 

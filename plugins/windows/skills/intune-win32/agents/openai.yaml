@@ -1,0 +1,6 @@
+interface:
+  display_name: "Intune Win32"
+  short_description: "Intune-Win32-Pakete bauen und analysieren"
+  default_prompt: "Nutze $intune-win32, um aus diesem Installer ein Intune-Paket zu bauen."
+policy:
+  allow_implicit_invocation: false

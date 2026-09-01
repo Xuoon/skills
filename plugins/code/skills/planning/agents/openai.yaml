@@ -1,0 +1,6 @@
+interface:
+  display_name: "Planung"
+  short_description: "Vorhaben vor der Umsetzung abstimmen"
+  default_prompt: "Nutze $planning, um dieses Vorhaben vollständig zu planen."
+policy:
+  allow_implicit_invocation: false

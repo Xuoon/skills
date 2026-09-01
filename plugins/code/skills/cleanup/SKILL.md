@@ -7,14 +7,13 @@ description: >
   AUSLÖSER: "aufräumen", "toter Code", "wird das noch benutzt", verwaiste Dateien nach
   einem Umbau. Standard nur analysieren und vorschlagen — von selbst nie mit `--fix`.
 argument-hint: "[--skills] [--fix]"
-allowed-tools: Task Agent Bash(git status *) Bash(git log *) Bash(git grep *) Bash(git ls-files *) Bash(git worktree *) Bash(find *) Bash(wc *) Bash(du *) Grep Glob Read
 ---
 
 # cleanup — toter Code & repo-lokale Skills
 
 **Standard: nur analysieren und vorschlagen — es wird nichts gelöscht.** Löschen ist billig, aber **jede Löschung braucht Beweis, dass wirklich nichts sie nutzt**. Falsch-Positive bei totem Code sind gefährlich — im Zweifel nicht löschen.
 
-## Argumente (`$ARGUMENTS`)
+## Argumente aus der Nutzeranfrage
 
 | Flag | Bedeutung |
 | --- | --- |
@@ -29,7 +28,7 @@ Scope ist immer das aktuelle Verzeichnis. Einen Subtree bei Bedarf im **Fließte
 
 1. **Snapshot + Baseline.** `git status`, betroffener Baum. Zahlen erheben, die später den Report tragen: Dateien, Zeilen (`wc -l`), Bytes (`du -sh`).
 
-2. **Discovery (parallel Subagenten, 1 pro Bereich).** Fester Auftrag, nur strukturierte Funde, keine Fixes:
+2. **Discovery.** Verfügbare Subagenten parallel pro Bereich einsetzen, sonst seriell. Fester Auftrag, nur strukturierte Funde, keine Fixes:
 
    > Finde Kandidaten, je mit `{path:line, kind, evidence}`:
    > - **tot:** Exports/Funktionen/Dateien ohne Aufrufer/Importeur, auskommentierte Blöcke, unerreichbare Zweige.
@@ -69,9 +68,9 @@ Scope ist immer das aktuelle Verzeichnis. Einen Subtree bei Bedarf im **Fließte
 
 Prüft die im Repo liegenden Skills/Commands und sortiert jeden in: **löschen** (ein Plugin oder Built-in deckt das schon ab), **hochziehen** (gehört als Plugin in den Marketplace), **behalten** (wirklich projektspezifisch).
 
-1. **Inventar.** `.claude/skills/**/SKILL.md`, `.claude/commands/**`, `commands/**`. Je Fund: Zweck in einem Satz (aus Frontmatter-`description` + Body).
+1. **Inventar.** Zuerst die vom aktiven Client exponierten Skills und Commands erfassen, dann belegte Repo-Roots wie `.agents/skills/**/SKILL.md`, `.claude/skills/**/SKILL.md`, `.claude/commands/**` und `commands/**`. Je Fund: Zweck in einem Satz.
 
-2. **Verfügbares erheben.** Installierte Plugins/Skills und Built-ins sammeln, gegen die verglichen wird: Marketplace-Katalog(e) und Plugin-Config unter `~/.claude/plugins/` bzw. die im Kontext gelisteten verfügbaren Skills. So wird „deckt schon ab" belegbar statt geraten.
+2. **Verfügbares erheben.** Die im aktuellen Client-Kontext exponierten Plugins, Skills und Built-ins sind die Primärquelle. Zusätzlich bekannte lokale Marketplace- und Plugin-Verzeichnisse des aktiven Clients prüfen; kein einzelnes Herstellerverzeichnis als vollständig annehmen.
 
 3. **Urteil je Skill mit Evidence.**
    - **löschen** — welches Plugin/Built-in überlappt und warum redundant.
@@ -84,4 +83,4 @@ Prüft die im Repo liegenden Skills/Commands und sortiert jeden in: **löschen**
 
 ## Grenzen
 
-Nur nachweislich Ungenutztes. **Öffentliche/exportierte Library-Oberfläche** nicht ohne Rückfrage entfernen — externe Nutzer sind im Repo nicht sichtbar. Side-Effect-Importe sind nicht tot. Bei `--skills` nichts anfassen, was nicht klar abgedeckt ist, und keine Änderungen unter `~/.claude`. Echte Bugs aus dem Lauf → separate Nebenbefund-Liste, nicht hier mitfixen.
+Nur nachweislich Ungenutztes. **Öffentliche/exportierte Library-Oberfläche** nicht ohne Rückfrage entfernen — externe Nutzer sind im Repo nicht sichtbar. Side-Effect-Importe sind nicht tot. Bei `--skills` nichts anfassen, was nicht klar abgedeckt ist, und keine persönlichen Client-Konfigurationen verändern. Echte Bugs aus dem Lauf → separate Nebenbefund-Liste, nicht hier mitfixen.

@@ -1,13 +1,14 @@
 ---
 name: intune-win32
-description: Intune-Win32-Pakete aus MSI/EXE bauen und fehlgeschlagene Rollouts eingrenzen.
+description: Nur bei ausdrücklichem Nutzerwunsch Intune-Win32-Pakete aus MSI/EXE bauen oder fehlgeschlagene Rollouts eingrenzen.
+compatibility: Benötigt Python 3; Paketierung und Laufzeitprüfung erfordern Windows-Werkzeuge.
 argument-hint: "[Ordner, Installer oder Fehlerbeschreibung]"
-disable-model-invocation: true
 ---
 
 # intune-win32
 
-Zwei Aufgaben, kein Flag: **was gemeint ist, steht in `$ARGUMENTS`.**
+Zwei Aufgaben, kein Flag: **was gemeint ist, steht in der Nutzeranfrage.**
+Den Skill-Root über den aktiven Skill-Kontext absolut auflösen und für `<skill-root>` einsetzen. Pfade unter `references/`, `scripts/`, `assets/` und `examples/` niemals relativ zum aktuellen Repo verwenden.
 
 | Im Text steht | Aufgabe |
 | --- | --- |
@@ -29,7 +30,7 @@ Abhängigkeit eingebaut.
 
 Ordnerpräfix, Log-Pfad, Doku-Datei, Zuweisungsgruppen und Anforderungen sind
 pro Umgebung verschieden. Sie stehen in einer optionalen `intune-paket.json`
-(Fundort, Schlüssel und Standardwerte in `${CLAUDE_SKILL_DIR}/references/konfiguration.md`).
+(Fundort, Schlüssel und Standardwerte in `references/konfiguration.md`).
 Diese Datei **zuerst suchen und lesen**. Fehlt sie, mit den dort dokumentierten
 Standardwerten arbeiten und beim User nachfragen, sobald etwas davon
 offensichtlich nicht passt – nicht eine Konvention erfinden und stillschweigend
@@ -82,7 +83,7 @@ Sprachpakete + Redist), gibt es schon `App\`/`Pack.cmd` aus einem früheren Lauf
 ### 2. Installer analysieren, statt Schalter zu raten
 
 Das ist der Teil, der Denkarbeit braucht – der Rest ist Mechanik. Vollständige
-Kommandos und Beispiele in `${CLAUDE_SKILL_DIR}/references/installer-analyse.md`.
+Kommandos und Beispiele in `references/installer-analyse.md`.
 
 Kurzfassung:
 
@@ -101,11 +102,7 @@ Kurzfassung:
   64-Bit-Prozess und sieht `WOW6432Node` **nicht** – dann muss die
   Abhängigkeit ebenfalls 64-Bit installiert werden).
 
-Wenn es trotz Analyse unsicher bleibt: den plausibelsten Wert eintragen und im
-Skript als `TODO pruefen` markiert lassen, damit der User es auf einem
-Testgerät verifiziert. Erkennungsmuster für `detect-*.ps1` zu eng → Rollout
-meldet `0x87D1041C`, zu weit → alte Versionen gelten als installiert. Den
-echten Anzeigenamen bestätigt der User nach dem ersten Testgerät.
+Bleibt Silent-Schalter oder Erkennungswert trotz Analyse unbelegt, nichts raten und kein Rollout-Paket als fertig ausgeben. Herstellerquelle, isolierten Installationstest oder eine ausdrückliche Nutzerentscheidung verlangen. Erkennungsmuster für `detect-*.ps1` zu eng → Rollout meldet `0x87D1041C`, zu weit → alte Versionen gelten als installiert.
 
 ### 3. Gerüst erzeugen
 
@@ -122,7 +119,7 @@ Die Mechanik erledigt das Helferskript (liest `intune-paket.json` selbst, falls
 vorhanden):
 
 ```bash
-python3 "${CLAUDE_SKILL_DIR}/scripts/new_package.py" "<Paketordner>" \
+python3 "<skill-root>/scripts/new_package.py" "<Paketordner>" \
   --mode auto --name <Paketname> --display-name "<Produkt>*<Version>*" \
   --silent-args "'/S'" --util-search "<Wurzel der Intune-Apps>"
 ```
@@ -138,7 +135,7 @@ abdeckt), dieselben vier Schritte von Hand:
    einem Nachbarpaket suchen (`find <Wurzel> -name IntuneWinAppUtil.exe`).
    Findet sich keine: beim User anfragen bzw. von
    github.com/microsoft/Microsoft-Win32-Content-Prep-Tool holen.
-3. Die Vorlagen aus `${CLAUDE_SKILL_DIR}/assets/` lesen, die
+3. Die Vorlagen aus `assets/` lesen, die
    `{{...}}`-Platzhalter ersetzen und die Dateien schreiben. Platzhalter:
    `PKGNAME`, `SETUPFILE`, `DISPLAYNAME`, `SILENTARGS` (PowerShell-Argumentliste,
    z. B. `'/S','/norestart'`), `UNINSTALLARGS`, `LOGDIR`, bei `copy` zusätzlich
@@ -172,7 +169,7 @@ erst ansehen, ob dort schon angepasste Logik drinsteht.
 Manche Hersteller liefern keinen fertigen Offline-Installer, sondern einen
 Download-Bootstrapper oder ein Selbstentpacker-Archiv. Dafür ein
 `01_Image-erzeugen.cmd` bzw. `01_Image-entpacken.cmd` in die **Paketwurzel**
-legen (Vorlage `${CLAUDE_SKILL_DIR}/assets/prepare.cmd.tmpl`). Regeln:
+legen (Vorlage `assets/prepare.cmd.tmpl`). Regeln:
 
 - **Mehrere Wege nacheinander probieren**, nicht auf ein Werkzeug verlassen:
   erst der herstellereigene Schalter (z. B. `-suppresslaunch -d <Ziel>`), dann
@@ -269,7 +266,7 @@ copy-paste-fertig, nicht als Prosa: Name, Version, Hersteller,
 Installations- und Deinstallationsbefehl, Installationsverhalten, Anforderungen,
 Erkennungsregel mit dem Pfad zum Detect-Skript, Rückgabecodes, Zuweisungsgruppe
 nach `assignment.groupPattern`. Werte und Fallstricke stehen in
-`${CLAUDE_SKILL_DIR}/references/intune-portal.md`; die Datei lesen, statt die
+`references/intune-portal.md`; die Datei lesen, statt die
 Werte aus dem Gedächtnis zu rekonstruieren.
 
 Zuweisungen, Gruppen und Richtlinien werden **nicht** selbst angelegt, sondern
@@ -278,8 +275,7 @@ eigene, ausdrücklich freigegebene Aktion.
 
 ## Dokumentation nachziehen
 
-Liegt im Wurzelordner der Intune-Apps die in `docFile` genannte Datei
-(Standard `CLAUDE.md`), das neue Paket dort in die Ordnertabelle eintragen und
+Ist `docFile` nach erkannter Repo-Konvention oder ausdrücklicher Auswahl gesetzt und liegt die Datei im Wurzelordner der Intune-Apps, das neue Paket dort in die Ordnertabelle eintragen und
 die Besonderheiten ergänzen: Silent-Weg **mit Begründung, woher er stammt**
 („aus der EXE ausgelesen" / „laut Herstellerdoku" / „geraten, noch zu testen"),
 Lizenzlage, Abhängigkeiten, Bezugsquelle des Installers, Standard-Zielordner.

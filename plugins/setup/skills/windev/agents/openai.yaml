@@ -1,0 +1,6 @@
+interface:
+  display_name: "Windows Dev Setup"
+  short_description: "Windows-Entwicklungsumgebung einrichten"
+  default_prompt: "Nutze $windev, um meine Windows-Entwicklungsumgebung einzurichten."
+policy:
+  allow_implicit_invocation: false
