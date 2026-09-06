@@ -72,6 +72,12 @@ Bündelt die Arbeit am Code: `/code:planning`, `/code:cleanup`, `/code:agent-doc
 
 ## setup
 
+### [2.1.0] – 2026-09-06
+
+#### Hinzugefügt
+
+- **`cloud` bereitet Repos für Cloud-Agenten vor.** Ohne Argumente analysiert der Skill Setups, Editor-Konfigurationen und CI. Mit `--fix` führt er alles auf einen Installer unter `.github/scripts` zusammen und prüft das Ergebnis; Commit und Push bleiben beim Nutzer. Zielbild, belegte Client-Verträge (Amp, Cursor, Codex, Claude Cloud, Devcontainer, Copilot) und eine Skriptvorlage liegen als Referenz bei.
+
 ### [2.0.0] – 2026-09-01
 
 #### Hinzugefügt

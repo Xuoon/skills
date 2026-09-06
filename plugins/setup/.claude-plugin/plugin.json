@@ -1,7 +1,7 @@
 {
   "name": "setup",
-  "version": "2.0.0",
-  "description": "Richtet Entwicklungsumgebungen und lokale Agent-Werkzeuge auf macOS und Windows ein.",
+  "version": "2.1.0",
+  "description": "Richtet lokale Entwicklungsumgebungen und Cloud-Agent-Setups ein und prüft ihre Konfiguration.",
   "author": {
     "name": "Sven Labitzki",
     "email": "sven@labitzki.de",

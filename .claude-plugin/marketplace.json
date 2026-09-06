@@ -14,7 +14,7 @@
     {
       "name": "setup",
       "source": "./plugins/setup",
-      "description": "Richtet Entwicklungsumgebungen und lokale Agent-Werkzeuge auf macOS und Windows ein."
+      "description": "Richtet lokale Entwicklungsumgebungen und Cloud-Agent-Setups ein und prüft ihre Konfiguration."
     },
     {
       "name": "windows",

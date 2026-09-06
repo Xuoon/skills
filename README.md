@@ -26,6 +26,7 @@ Vier Plugins, gruppiert nach Anlass. Mutationen brauchen immer ein dokumentierte
 | `windev` | `--best-practice` | Ohne Argument interaktiv einrichten; mit Flag belegte Standards direkt herstellen und nur echte Entscheidungen fragen |
 | `devdrive` | `--fix` | Windows Dev Drive planen oder anlegen und ausgewählte Caches und Repos umziehen. Standard ist read-only |
 | `claudex` | – | Claude Code auf macOS mit GPT über CLIProxyAPI einrichten, aktualisieren, reparieren oder entfernen |
+| `cloud` | `--fix` | Cloud-Agent-Setups, gemeinsame Repo-Skripte und CI analysieren; mit `--fix` lokal korrigieren, ohne Commit oder Push |
 | `cc-defaults` | – | Globale Anweisungsdatei des aktiven Agent-Clients analysieren und gemeinsam schärfen |
 
 ## windows — Windows-Werkzeuge
