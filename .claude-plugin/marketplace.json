@@ -25,6 +25,15 @@
       "name": "kram",
       "source": "./plugins/kram",
       "description": "Bündelt kleine Alltagsworkflows für Übergaben, einfache Erklärungen und private Verkaufsanzeigen."
+    },
+    {
+      "name": "emil-skills",
+      "source": {
+        "source": "github",
+        "repo": "emilkowalski/skills",
+        "ref": "main"
+      },
+      "description": "Animations- und Design-Skills von Emil Kowalski (animate, review-animations, apple-design, pick-ui-library, ...)."
     }
   ]
 }
