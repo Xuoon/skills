@@ -27,13 +27,14 @@
       "description": "Bündelt kleine Alltagsworkflows für Übergaben, einfache Erklärungen und private Verkaufsanzeigen."
     },
     {
-      "name": "emil-skills",
-      "source": {
-        "source": "github",
-        "repo": "emilkowalski/skills",
-        "ref": "main"
-      },
-      "description": "Animations- und Design-Skills von Emil Kowalski (animate, review-animations, apple-design, pick-ui-library, ...)."
+      "name": "labidesign-email",
+      "source": "./plugins/labidesign-email",
+      "description": "Emil Kowalskis Skills für Animationen und UI-Design, unverändert übernommen: Motion bauen, prüfen und benennen, Apple-Designprinzipien, Bibliothekswahl, Prototypen, Sonner und Swift."
+    },
+    {
+      "name": "labidesign-ui",
+      "source": "./plugins/labidesign-ui",
+      "description": "Jakub Krehels Skills für Produkt-Interfaces, unverändert übernommen: Typografie, Farben, Layout, Barrierefreiheit, UI-Politur und Produkttexte, dazu Review, Erklärung, Stresstest und Varianten von Komponenten."
     }
   ]
 }

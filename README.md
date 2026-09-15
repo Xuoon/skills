@@ -8,7 +8,7 @@
 
 Persönlicher Plugin-Marketplace für [ChatGPT und Codex](https://developers.openai.com/plugins/concepts/plugins), [Claude Code](https://code.claude.com/docs/en/plugins) und Clients des [Agent-Plugins-Standards](https://agent-plugins.org/). Philosophie: Evidenz statt Vermutung, Vorschlag vor Edit, löschen bevorzugt, knapper Output.
 
-Vier Plugins, gruppiert nach Anlass. Mutationen brauchen immer ein dokumentiertes Flag oder eine konkrete Auswahl im laufenden Dialog.
+Sechs Plugins, gruppiert nach Anlass. Mutationen brauchen immer ein dokumentiertes Flag oder eine konkrete Auswahl im laufenden Dialog.
 
 ## code — Arbeit am Code
 
@@ -43,6 +43,43 @@ Vier Plugins, gruppiert nach Anlass. Mutationen brauchen immer ein dokumentierte
 | `handoff` | freier Text | Session in ein Übergabe-Dokument destillieren, mit dem ein anderer Agent direkt weiterarbeitet — die letzte Antwort ist das Dokument selbst |
 | `bruh` | – | Die letzte Antwort in einfacher Sprache neu erklären. Keine neuen Informationen, Pfade und Befehle bleiben wörtlich |
 | `kleinanzeigen` | freier Text | Gebrauchtpreis eines Artikels recherchieren und die fertige Verkaufsanzeige schreiben — Titel, Preisempfehlung mit Marktspanne, Beschreibung zum Kopieren |
+
+## labidesign-email — Animation und UI-Design
+
+Emil Kowalskis [Skills](https://github.com/emilkowalski/skills) (MIT), unverändert übernommen. Skilltexte sind englisch.
+
+| Skill | Argumente | Verhalten |
+| --- | --- | --- |
+| `emil-design-eng` | – | Emils Philosophie zu UI-Politur, Komponentendesign und Animationsentscheidungen; der Hauptskill |
+| `animate` | freier Text | Animation von Grund auf bauen: Zweck, Werkzeug, Eigenschaften, Kurve, Dauer, Unterbrechung, Exit |
+| `animate-expo` | freier Text | Dasselbe für React Native und Expo: Gesten, Sheets, Haptik, Screen-Übergänge, Motion abseits des JS-Threads |
+| `review-animations` | Diff oder Dateien | Animationscode streng nach Emils Regeln prüfen; nur explizit aufrufbar |
+| `improve-animations` | – | Alle Animationen im Repo auditieren und priorisierte, eigenständige Pläne zur Umsetzung liefern; read-only |
+| `find-animation-opportunities` | – | Stellen finden, die von Motion profitieren würden, und benennen, was nicht animiert gehört; read-only |
+| `animation-vocabulary` | freier Text | Vage beschriebenen Motion-Effekt auf den exakten Fachbegriff abbilden |
+| `apple-design` | – | Apples Prinzipien für Interface-Design und flüssige Bewegung, für das Web übersetzt |
+| `pick-ui-library` | freier Text | Die passende Frontend-Bibliothek aus Emils kuratierter Liste wählen; nur explizit aufrufbar |
+| `prototype` | freier Text | Mehrere Varianten eines UI-Elements hinter einem Umschalter bauen; nur explizit aufrufbar |
+| `ask-sonner` | freier Text | Setup, Styling, Rezepte und Fehlerbilder der Toast-Bibliothek Sonner |
+| `write-swift` | freier Text | Modernes Swift: Wertetypen, Swift-6-Concurrency, Generics, Performance, Swift Testing |
+
+## labidesign-ui — Produkt-Interfaces
+
+Jakub Krehels [Skills](https://github.com/jakubkrehel/skills) (MIT), unverändert übernommen. Skilltexte sind englisch.
+
+| Skill | Argumente | Verhalten |
+| --- | --- | --- |
+| `better-interface` | – | Alle `better-*`-Skills als ein Review über Barrierefreiheit, Layout, Texte, Typografie, Farbe und UI-Politur |
+| `better-ui` | – | UI polieren: konzentrische Radien, optische Ausrichtung, Oberflächentiefe, passende Icons, Trefferflächen |
+| `better-typography` | – | Typoskala, Abstände, Größen, variable Fonts, OpenType, Umbruch und Kürzung |
+| `better-colors` | freier Text | Farbsystem aufbauen: Paletten erzeugen, semantische Tokens, Formate umrechnen, Kontrast prüfen |
+| `better-accessibility` | – | Barrierefreiheitsstandards und bewährte Praxis einhalten |
+| `better-layout` | – | Gruppierung, Ausrichtung, Lesereihenfolge und schrittweise Offenlegung |
+| `better-writing` | – | Produkttexte verbessern und vereinheitlichen |
+| `interface-review` | Diff oder Dateien | Arbeit über UI, Typografie, Layout, Farbe, Texte und Barrierefreiheit prüfen und Befunde ausführlich darlegen; nur explizit aufrufbar |
+| `explain-interface` | URL oder Bild | Herausfinden, wie eine Animation, ein Design oder ein UI-Stück im Web gebaut wurde; nur explizit aufrufbar |
+| `break` | Komponente | Eine Komponente in jedem Zustand auf einer temporären Seite rendern und stresstesten; nur explizit aufrufbar |
+| `variant` | Komponente | Mehrere Varianten einer Komponente bauen und beim Auswählen helfen; nur explizit aufrufbar |
 
 Die Aufrufsyntax gehört zum Client: Codex verwendet `$skill-name`, Claude Code `/<plugin>:<skill>` beziehungsweise den baren Alias, ChatGPT kann Skills über das Plugin oder eine natürliche Anfrage aktivieren. `bun run validate` hält die Skillnamen in diesem Katalog eindeutig.
 

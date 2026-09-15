@@ -35,6 +35,26 @@ claude plugin uninstall agent-docs cleanup windev claudex intune-win32
 
 `handoff` bleibt unverändert installiert.
 
+## labidesign-email
+
+### [1.0.0] – 2026-09-15
+
+Neu: Emil Kowalskis zwölf Skills für Animation und UI-Design als eigenes Plugin, eins zu eins aus [emilkowalski/skills](https://github.com/emilkowalski/skills) übernommen (MIT). `review-animations`, `pick-ui-library` und `prototype` laufen nur auf ausdrücklichen Aufruf.
+
+```
+/plugin install labidesign-email@labi
+```
+
+## labidesign-ui
+
+### [1.0.0] – 2026-09-15
+
+Neu: Jakub Krehels elf Skills für Produkt-Interfaces als eigenes Plugin, eins zu eins aus [jakubkrehel/skills](https://github.com/jakubkrehel/skills) übernommen (MIT). `interface-review`, `explain-interface`, `break` und `variant` laufen nur auf ausdrücklichen Aufruf.
+
+```
+/plugin install labidesign-ui@labi
+```
+
 ## code
 
 ### [1.1.0] – 2026-09-01

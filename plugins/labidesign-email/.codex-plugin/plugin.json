@@ -1,0 +1,26 @@
+{
+  "name": "labidesign-email",
+  "version": "1.0.0",
+  "description": "Emil Kowalskis Skills für Animationen und UI-Design, unverändert übernommen: Motion bauen, prüfen und benennen, Apple-Designprinzipien, Bibliothekswahl, Prototypen, Sonner und Swift.",
+  "author": {
+    "name": "Emil Kowalski",
+    "url": "https://emilkowal.ski"
+  },
+  "homepage": "https://github.com/emilkowalski/skills",
+  "repository": "https://github.com/Xuoon/skills",
+  "license": "MIT",
+  "keywords": ["agent-skills", "animation", "design", "ui", "swift"],
+  "skills": "./skills/",
+  "interface": {
+    "displayName": "Labidesign Email",
+    "shortDescription": "Animations- und Design-Skills von Emil Kowalski",
+    "longDescription": "Animationen bauen, prüfen und benennen, Apple-Designprinzipien, Bibliothekswahl, UI-Prototypen, Sonner-Toasts und modernes Swift, nach Emil Kowalskis Design-Engineering-Regeln.",
+    "developerName": "Emil Kowalski",
+    "category": "Developer Tools",
+    "capabilities": [],
+    "defaultPrompt": [
+      "Animiere das Öffnen dieses Dropdowns.",
+      "Prüfe die Animationen in diesem Diff."
+    ]
+  }
+}

@@ -24,9 +24,9 @@ Portabler Plugin-Marketplace „labi" für ChatGPT, Codex, Claude Code und Agent
 
 - **Namen sind API.** Plugin-Ordnername = Manifest-`name`; Skill-Ordnername = Frontmatter-`name`. Umbenennen ist Breaking Change.
 
-- **Skill-Frontmatter bleibt portabel.** Erlaubt sind Agent-Skills-Felder plus das von OpenAI tolerierte Claude-UI-Feld `argument-hint`; dessen Inhalt darf für die Ausführung nie erforderlich sein. Verboten sind experimentelle `allowed-tools`, `disable-model-invocation` und `disallowed-tools`. Client-Policy gehört nach `agents/openai.yaml` oder in den jeweiligen Adapter.
+- **Skill-Frontmatter bleibt portabel.** Erlaubt sind Agent-Skills-Felder plus das von OpenAI tolerierte Claude-UI-Feld `argument-hint`; dessen Inhalt darf für die Ausführung nie erforderlich sein. Verboten sind experimentelle `allowed-tools`, `disable-model-invocation` und `disallowed-tools`. Client-Policy gehört nach `agents/openai.yaml` oder in den jeweiligen Adapter. Eine `agents/openai.yaml` darf nur `interface`-Metadaten tragen; steht ein `policy`-Block darin, muss er `allow_implicit_invocation: false` setzen.
 
-- **Bundle-Pfade sind relativ zum Skill-Root.** Skilltexte verwenden `references/...`, `scripts/...`, `assets/...` oder `examples/...`; client-spezifische Pfadvariablen sind verboten. Jeder referenzierte Pfad muss existieren und im Skill bleiben.
+- **Bundle-Pfade bleiben im Skill.** Eigene Skills legen Begleitdateien unter `references/...`, `scripts/...`, `assets/...` oder `examples/...` ab; übernommene Skills dürfen sie neben `SKILL.md` lassen und per relativem Markdown-Link nennen. Client-spezifische Pfadvariablen sind verboten. Jeder Bundle-Pfad und jeder relative Link muss existieren und im Skill bleiben.
 
 - **Aufrufsyntax ist keine portable API.** Flags und Freitext stehen in der Nutzeranfrage. Client-spezifische Slash- oder Picker-Syntax gehört nur in die Installationsdoku des Clients.
 

@@ -56,6 +56,10 @@ CLIENT_SPECIFIC_TEXT = ("${CLAUDE_SKILL_DIR}", "$ARGUMENTS", "AskUserQuestion")
 BUNDLED_PATH = re.compile(
     r"(?<![A-Za-z0-9_./-])((?:references|scripts|assets|examples)/(?:[A-Za-z0-9_.-]+/)*[A-Za-z0-9_.-]*)"
 )
+# Beispiel-Links in Codeblöcken und Code-Spans sind keine Verweise.
+CODE_SPAN = re.compile(r"```.*?```|`[^`\n]*`", re.DOTALL)
+# Relative Markdown-Links auf Begleitdateien, z. B. [RECIPES.md](RECIPES.md).
+MARKDOWN_LINK = re.compile(r"\]\((?![a-z][a-z0-9+.-]*:|/|#)([^)\s#]+)(?:#[^)]*)?\)")
 FRONTMATTER = re.compile(r"\A---\r?\n(.*?)\r?\n---\r?\n", re.DOTALL)
 SEMVER = re.compile(r"\A\d+\.\d+\.\d+\Z")
 
@@ -211,15 +215,27 @@ def check_skills(report: Report, plugin_dir: Path) -> set[str]:
             if policy_file.is_file():
                 policy_data = yaml.safe_load(policy_file.read_text(encoding="utf-8"))
                 policy = policy_data.get("policy") if isinstance(policy_data, dict) else None
-                report.check(
-                    isinstance(policy, dict) and policy.get("allow_implicit_invocation") is False,
-                    f"{rel(policy_file)}: allow_implicit_invocation muss false sein",
-                )
+                # Eine openai.yaml nur mit interface-Metadaten lässt die implizite
+                # Aktivierung zu; erst ein policy-Block muss sie ausschalten.
+                if policy is not None or explicit_only:
+                    report.check(
+                        isinstance(policy, dict) and policy.get("allow_implicit_invocation") is False,
+                        f"{rel(policy_file)}: allow_implicit_invocation muss false sein",
+                    )
 
         for markdown_file in sorted(skill_file.parent.rglob("*.md")):
             text = markdown_file.read_text(encoding="utf-8")
             for token in CLIENT_SPECIFIC_TEXT:
                 report.check(token not in text, f"{rel(markdown_file)}: client-spezifischer Text {token!r}")
+            prose = CODE_SPAN.sub("", text)
+            for link in sorted(set(MARKDOWN_LINK.findall(prose))):
+                target = (markdown_file.parent / link).resolve()
+                try:
+                    target.relative_to(skill_file.parent.resolve())
+                except ValueError:
+                    report.fail(f"{rel(markdown_file)}: Link {link!r} zeigt aus dem Skill heraus")
+                    continue
+                report.check(target.is_file(), f"{rel(markdown_file)}: Link {link!r} zeigt auf keine Datei")
             for relative_path in sorted(set(BUNDLED_PATH.findall(text))):
                 if not report.check(
                     ".." not in PurePosixPath(relative_path).parts,

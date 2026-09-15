@@ -1,0 +1,34 @@
+{
+  "name": "labidesign-ui",
+  "version": "1.0.0",
+  "description": "Jakub Krehels Skills für Produkt-Interfaces, unverändert übernommen: Typografie, Farben, Layout, Barrierefreiheit, UI-Politur und Produkttexte, dazu Review, Erklärung, Stresstest und Varianten von Komponenten.",
+  "author": {
+    "name": "Jakub Krehel",
+    "email": "jakub@kbo.sk",
+    "url": "https://jakub.kr"
+  },
+  "homepage": "https://interfaces.dev/",
+  "repository": "https://github.com/Xuoon/skills",
+  "license": "MIT",
+  "keywords": [
+    "agent-skills",
+    "ui",
+    "typography",
+    "colors",
+    "accessibility",
+    "layout"
+  ],
+  "skills": "./skills/",
+  "interface": {
+    "displayName": "Labidesign UI",
+    "shortDescription": "Interface-Skills von Jakub Krehel",
+    "longDescription": "Typografie, Farben, Layout, Barrierefreiheit, UI-Politur und Produkttexte verbessern, dazu Interface-Review, Erklärung fremder UI, Stresstest und Varianten einer Komponente.",
+    "developerName": "Jakub Krehel",
+    "category": "Developer Tools",
+    "capabilities": [],
+    "defaultPrompt": [
+      "Verbessere die Typografie dieser Seite.",
+      "Prüfe dieses Interface auf Barrierefreiheit."
+    ]
+  }
+}
