@@ -50,8 +50,6 @@ Bietet der Client Subagenten an, läuft der Skill in einem benannten Subagenten 
 
 **Discovery-Kinder:** Explore-Subagenten mit einem kleinen, schnellen Modell (Claude Code: `model: sonnet`). Sie greppen und lesen, geben nur strukturierte Funde zurück und werden nie fortgesetzt. Bewertet wird ausschließlich im Sync-Agenten.
 
-Der Plugin-Hook nach einem Compact erinnert nur an den Sync; er ruft nichts auf und schreibt nichts.
-
 ## Routing
 
 Snapshot: `git status --short`, `git diff --stat` (ggf. gegen freeform Ref), `git ls-files` für vorhandene Agent-Doku und client-spezifische Rules; `AGENTS.override.md` sowie gitignorierte `CLAUDE.local.md`/`.claude.local.md` zusätzlich direkt auf Existenz prüfen.

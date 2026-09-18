@@ -57,6 +57,12 @@ Neu: Jakub Krehels elf Skills für Produkt-Interfaces als eigenes Plugin, eins z
 
 ## code
 
+### [1.2.1] – 2026-09-18
+
+#### Entfernt
+
+- **Erinnerung nach dem Compact.** Der Plugin-Hook ist weg; der Doku-Sync wird wie bisher per `agent-docs` angestoßen.
+
 ### [1.2.0] – 2026-09-18
 
 #### Hinzugefügt
