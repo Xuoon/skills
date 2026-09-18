@@ -57,6 +57,18 @@ Neu: Jakub Krehels elf Skills für Produkt-Interfaces als eigenes Plugin, eins z
 
 ## code
 
+### [1.2.0] – 2026-09-18
+
+#### Hinzugefügt
+
+- **`agent-docs` läuft in einem eigenen Subagenten.** Der Sync-Agent `agent-docs-sync` erbt das Modell des Hauptthreads und lässt die Discovery von kleinen, schnellen Explore-Kindern erledigen. Ein erneuter Aufruf setzt den bestehenden Agenten fort und liefert nur, was seit dem letzten Lauf neu ist.
+- **Erinnerung nach jedem Compact.** Ein Plugin-Hook weist nach der Kontextkomprimierung auf den ausstehenden Doku-Sync hin, sobald der Working Tree Änderungen enthält. Er ruft nichts auf und schreibt nichts.
+
+#### Geändert
+
+- **`rewrite-prune` tauscht nur noch das stale Token.** Eine Korrektur, die die Zeile verlängert oder neue Mechanik erklärt, gilt als Add und muss durchs Add-Gate; `needs verification` blockiert jetzt auch Rewrites.
+- **Init-Vorschläge bleiben einsprachig.** Überschriften folgen der Sprache der Repo-Doku, Command-Zeilen nennen nur die Falle, nicht die Script-Interna.
+
 ### [1.1.0] – 2026-09-01
 
 #### Behoben

@@ -1,0 +1,17 @@
+{
+  "description": "Erinnert nach jedem Compact an den Doku-Sync mit agent-docs.",
+  "hooks": {
+    "PostCompact": [
+      {
+        "matcher": "manual|auto",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "sh \"${CLAUDE_PLUGIN_ROOT}/hooks/post-compact.sh\"",
+            "timeout": 10
+          }
+        ]
+      }
+    ]
+  }
+}

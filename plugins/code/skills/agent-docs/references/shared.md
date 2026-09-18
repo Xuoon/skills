@@ -53,6 +53,13 @@ Lösch-Vorschläge brauchen Evidence, **aber keine** „would agent break?“-An
 4. **Minimal:** ≤ **3 Zeilen** Draft pro Konzept (Audit: ≤ 10 nur bei undocumented-critical). Keine neuen Sektionen „für Vollständigkeit“.
 5. **Netto-Budget:** Wenn die Session Docs **verlängert**, muss im selben Vorschlagspaket mindestens ein gleichwertiger Prune-Kandidat mitlaufen **oder** begründet werden, warum Netto-Wachstum unvermeidlich ist (neue Domain mit echten Invarianten).
 
+### REWRITE (`rewrite-prune`) — nur Token tauschen
+
+- Ersetzt wird genau das, was der Diff falsch gemacht hat (Name, Befehl, Pfad, Zahl); Satzbau und Umfang bleiben.
+- Wird die Zeile länger oder erklärt sie danach eine Mechanik, die vorher nicht drinstand, ist es ein **Add** und muss durchs Add-Gate.
+- `needs verification` gilt hier wie beim Add: unsicher → nicht anfassen, als Frage melden.
+- Stale-Stellen, die schon vor dem Diff falsch waren, sind ein eigener Kandidat mit eigener Evidence, nie Beifang eines Rewrites.
+
 ### Verbieten (sofort droppen)
 
 - Feature, das gerade gebaut wurde, als Tutorial/Implementierungsbeschreibung in Rules schreiben.
@@ -74,7 +81,7 @@ Pro Kandidat **genau** dieser Block — **Delete-Blöcke vor Add-Blöcken** list
 **Why:** <ein Satz: falsch / fehlt agent-blocking / verzichtbar>
 **Gate:** delete | add | rewrite-prune
 **Evidence:** <pfad:zeile oder diff>
-**Netto:** <−N | +N | 0 Zeilen Schätzung>
+**Netto:** <−N | +N | 0 Zeilen Schätzung; wird eine Zeile länger, zusätzlich „+N Zeichen“>
 
 ```diff
 - <alt>

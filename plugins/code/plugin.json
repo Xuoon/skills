@@ -1,7 +1,7 @@
 {
   "$schema": "https://agent-plugins.org/schemas/1.0.0/plugin.schema.json",
   "name": "code",
-  "version": "1.1.0",
+  "version": "1.2.0",
   "description": "Die vier Workflows für Planung, Bereinigung, Agent-Dokumentation und das Veröffentlichen von Codeänderungen.",
   "author": {
     "name": "Sven Labitzki",

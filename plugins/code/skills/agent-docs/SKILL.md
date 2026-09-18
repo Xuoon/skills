@@ -42,6 +42,16 @@ agent-docs nur apps/dash gegen main
 
 Modus + (freeform) Diff-Basis/Subtree in **einem Satz** festnageln, dann los.
 
+## Ausführung
+
+Bietet der Client Subagenten an, läuft der Skill in einem benannten Subagenten `agent-docs-sync`; sonst im Hauptthread. Der Sync-Agent bekommt **kein** Modell vorgegeben und erbt das des Hauptthreads — Gate, Prune und Vorschlagstext brauchen das stärkste verfügbare Modell. Sein Auftrag enthält Modus, Flags, Diff-Basis, Subtree und den absoluten Pfad dieses Skill-Ordners, damit er `SKILL.md` und `references/` selbst liest.
+
+**Folgeaufruf:** Existiert `agent-docs-sync` noch aus einem früheren Lauf (Claude Code: `ListAgents`), wird er fortgesetzt statt neu gestartet (Claude Code: `SendMessage`). Er bekommt immer den vollständigen Working-Tree-Diff plus `git diff --stat`, nicht nur ein Delta; er selbst liest nur neu, was sich seit seinem letzten Stand geändert hat, schlägt nichts erneut vor, was der Nutzer abgelehnt hat, und liefert nur das Neue. Ist er nicht mehr erreichbar, neu spawnen — das kostet einen vollen Erstlauf, sonst nichts.
+
+**Discovery-Kinder:** Explore-Subagenten mit einem kleinen, schnellen Modell (Claude Code: `model: sonnet`). Sie greppen und lesen, geben nur strukturierte Funde zurück und werden nie fortgesetzt. Bewertet wird ausschließlich im Sync-Agenten.
+
+Der Plugin-Hook nach einem Compact erinnert nur an den Sync; er ruft nichts auf und schreibt nichts.
+
 ## Routing
 
 Snapshot: `git status --short`, `git diff --stat` (ggf. gegen freeform Ref), `git ls-files` für vorhandene Agent-Doku und client-spezifische Rules; `AGENTS.override.md` sowie gitignorierte `CLAUDE.local.md`/`.claude.local.md` zusätzlich direkt auf Existenz prüfen.
@@ -61,11 +71,10 @@ Snapshot: `git status --short`, `git diff --stat` (ggf. gegen freeform Ref), `gi
    > Finde in der kanonischen Agent-Doku, client-spezifischen Rules und Code-Doku-Refs:
    > (A) Stellen die **falsch/stale** zum Diff sind
    > (B) Stellen die durch den Diff **redundant** werden (löschen)
-   > (C) **Nur wenn** agent-blocking und non-obvious: materielle Lücken
-   > Output strukturiert: `{file,line,kind:wrong|stale|redundant|missing-blocking,evidence}`.
-   > Keine Fixes. Keine „nice to have"-Lücken.
+   > Output strukturiert: `{file,line,kind:wrong|stale|redundant,evidence}`.
+   > Keine Fixes, keine Lücken, keine Bewertung.
 
-3. **Filter.** Jeden Treffer durchs asymmetrische Gate. Drop: nice-to-have, Inventar, UI-Chrome, Implementation-Spec der frischen Feature-Arbeit, spekulative Completeness.
+3. **Filter.** Jeden Treffer durchs asymmetrische Gate. Drop: nice-to-have, Inventar, UI-Chrome, Implementation-Spec der frischen Feature-Arbeit, spekulative Completeness. Materielle Lücken (**nur** agent-blocking und non-obvious) prüft der Sync-Agent hier selbst — das ist eine Bewertung, keine Suche, und gehört nicht in den Discovery-Auftrag.
 
 4. **Mini-Prune (Pflicht wenn irgendein ADD übrig ist).** Kurzer prune-sweep auf **dieselben** Dateien + offensichtliche Cross-Duplikate des Themas. Mindestens ein Delete/Shorten-Kandidat im Paket **oder** schriftlich: warum Netto-Wachstum unvermeidlich (neue Domain-Invariante).
 
@@ -152,6 +161,8 @@ Gegen Aufblasen: Completeness darf **nicht** steigen, indem man Impl-Detail oder
 ## Fix-Regeln
 
 - Nur Issues aus dem Lauf. Kein Scope-Creep.
+- `rewrite-prune` ersetzt das stale Token und sonst nichts. Wird die Zeile dabei länger, ist es ein Add und geht durchs Add-Gate — `Netto: 0 Zeilen` tarnt keinen Zuwachs.
+- `needs verification` blockiert auch Rewrites, nicht nur Adds. Stale-Stellen, die nicht aus dem Diff dieser Session stammen, gehören als eigener Kandidat markiert, nicht in einen Rewrite gemischt.
 - Neue Datei nur wenn eigener Themenbereich **und** Merge unzumutbar.
 - Nichts erfinden. Spekulation → drop.
 

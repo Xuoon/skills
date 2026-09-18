@@ -10,3 +10,6 @@ __pycache__/
 
 # Privates Plugin, bewusst nicht veröffentlicht
 /private/
+
+# Eval-Suiten bleiben lokal
+plugins/*/evals/
