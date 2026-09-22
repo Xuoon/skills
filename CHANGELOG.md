@@ -47,6 +47,12 @@ claude plugin uninstall agent-docs cleanup windev claudex intune-win32
 
 ## code
 
+### [1.3.1] – 2026-09-22
+
+#### Geändert
+
+- **Das Plugin steht unter der MIT-Lizenz.** Du darfst es frei verwenden, ändern und weitergeben.
+
 ### [1.3.0] – 2026-09-22
 
 #### Geändert
