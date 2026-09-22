@@ -1,49 +1,31 @@
-# Style: Was gute Agent-Doku ausmacht
+# Style: Was in Agent-Doku gehört
 
-Maßstab für alle Modi, für die kanonische Agent-Doku und client-spezifische Rules gleichermaßen: so viel wie nötig, nicht so viel wie möglich. Allgemeine Regeln zum Schreiben für Agenten (Verweise, Hierarchie, Pruning) stehen im Skill `writing-for-agents` aus `mattpocock-skills` (https://github.com/mattpocock/skills). Ist er verfügbar, beim Formulieren neuer oder umgeschriebener Zeilen laden; diese Datei regelt nur, was in Agent-Doku gehört.
+Maßstab für alle Modi. Code und Tests sind die Quelle der Wahrheit; Agent-Doku hält nur fest, was dort nicht steht. Allgemeine Regeln zum Schreiben für Agenten (Verweise, Hierarchie, Pruning) stehen im Skill `writing-for-agents` aus `mattpocock-skills` (https://github.com/mattpocock/skills). Ist er verfügbar, beim Formulieren neuer oder umgeschriebener Zeilen laden.
 
-## Architektur der Doku
+## Jede Aussage einordnen
 
-- **Overview** = Was ist das, Commands, wenige Invarianten, **Verweise**. Keine Domain-Novellen.
-- **Rules** = Tiefe pro Domäne (Security, Lifecycle, non-obvious Business-Regeln).
-- **Hierarchie:** Repo-weite Regeln ins Root, echte Subtree-Deltas nahe an App/Package. Lade-, Merge- und Override-Reihenfolge ist Client-Semantik und muss belegt werden; nicht jeder Client behandelt die nächste Datei gleich.
-- **Eine Datei pro Verzeichnis:** `AGENTS.md` oder `CLAUDE.md`, nicht beide. Liest der Client `AGENTS.md` nicht selbst ein, genügt eine `CLAUDE.md` mit `@AGENTS.md`, ohne eigenen Inhalt.
-
-## Was reingehört (Agent-blocking)
-
-- Copy-paste-fähige Build-/Test-/Lint-Befehle, wenn sie **nicht** trivial aus `package.json` folgen (Aggregate, Traps).
-- Security: Auth, Tenant-Isolation, Secrets, Rate-Limits, Public-Surface-Minimierung.
-- Lifecycle-Achsen und Naming, die Code allein nicht „falsch macht“-sicher machen (`nummer` vs `status`, German domain fields).
-- Kanonische Helper: „nutze X, baue kein Y“.
-- Gotchas: non-obvious Formate, Side-Effect-Imports, Drift-Schutz, „warum so“.
-- Env/CI/Deploy nur wo Agents sonst brechen (manuelles Convex-Deploy, dual CSP headers, …).
-
-## Was NICHT reingehört
-
-| Kategorie | Beispiel | Stattdessen |
+| Klasse | Erkennen | Vorgehen |
 | --- | --- | --- |
-| Code-Paraphrase | Ordnerbäume, „es gibt create/update/remove“ | weglassen |
-| Inventar | alle Exports, alle Props, alle Placeholder-Keys | `package.json` / Code / eine SSOT-Zeile |
-| Implementation-Detail | Prefetch ±N Wochen, Debounce 250 ms Pfad, Sidebar-IntersectionObserver | Code; Doku nur „Kalender cached clientseitig“ falls überhaupt |
-| UI-Chrome-Nacherzählung | welche Slots wo, welche Button-Labels | design-Rule einmal; Domain-Rules nicht wiederholen |
-| Generics | „schreibe Tests“, „halte Code sauber“ | weglassen |
-| Historie | „früher war…“, „infoSlot entfernt“ | aktuelle Invariante („gibt es nicht“) oder weg |
-| Mensch-Tutorials | Onboarding-Prosa | README |
-| Doppel-Pointer | drei Key-Reference-Listen | Root-Index + `paths:` |
-| Session-Changelog | „wir haben gerade Prefetch gebaut, hier die Spec“ | Sync updated nur **Verträge**, nicht die Implementierung |
+| `code` | Erzählt nach, was der Code zeigt: Funktionsnamen, Feldlisten, Abläufe, Helper- oder Komponenteninventar, Ordnerbäume | löschen; ein Agent findet es per Suche |
+| `test-exists` | Prüfbare Regel, die ein vorhandener Test, Typ oder eine Lint-Regel schon erzwingt | löschen; Beleg ist der Test (`datei:zeile`) |
+| `test-missing` | Prüfbare Regel, die nichts erzwingt | Test oder Lint-Regel als Nebenbefund vorschlagen; die Zeile bleibt, bis es ihn gibt |
+| `keep` | Nicht aus dem Code ablesbar: Warum und Absicht, bewusste Eigenheiten, die wie Bugs aussehen, Fallen außerhalb des Codes (Deploy, Infra, externe Dienste), Kompatibilitätsverträge, Sicherheitsgrenzen, „nutze X statt Y“, das kein Lint ausdrückt | behalten, knapp mit Grund |
+| `human` | Rechts- oder Prozessdoku für Menschen (Verfahrensdokumentation, Runbook) | nach `docs/`, in der Agent-Doku ein Verweis |
+| `stale` | Stimmt nicht mehr mit dem Code | korrigieren oder löschen; weicht der Code von einer gewollten Regel ab, ist das ein Code-Nebenbefund |
 
-**Negativ-Inventare** („X gibt es nicht“) nur als bewusste Abgrenzung (z.B. kein `infoSlot`), nicht als Feature-Liste.
+Test für jede Zeile: Würde ein Agent ohne sie etwas Falsches tun, das weder ein Test noch ein Blick in den Code verhindert? Nein heißt streichen.
+
+## Wo was steht
+
+- **Root-Agentdatei** (`AGENTS.md` oder `CLAUDE.md`, nicht beide): Zweck in einem Satz, Befehle mit ihren Fallen, repo-weite Konventionen und ein Verzeichnis „Bereich → Datei“ für alle bereichsbezogenen Dateien.
+- **Bereichsregeln**: `.claude/rules/<thema>.md` mit `paths:`, wenn Claude Code sie beim Anfassen der Dateien automatisch laden soll; sonst eine verschachtelte `AGENTS.md` im Bereich. Eine Datei je Thema, kein Thema in zwei Dateien.
+- **Menschen-Doku** unter `docs/`, von der Root-Datei verlinkt.
+- **Codex** lädt beim Start nur `AGENTS.md` vom Repo-Root bis zum Arbeitsordner (höchstens 32 KiB) und kennt `.claude/rules` nicht. Bereichsregeln erreicht Codex nur über das Verzeichnis in der Root-Datei; fehlt es, ist das ein Befund.
+- Liest der Client `AGENTS.md` nicht selbst ein, genügt eine `CLAUDE.md` mit `@AGENTS.md`, ohne eigenen Inhalt.
 
 ## Form
 
-| Art | Zielgröße (Richtwert, kein Hard-Fail) |
-| --- | --- |
-| Root Overview | ≤ ~50 Zeilen |
-| App/Package Overview | ≤ ~40 Zeilen |
-| Domain Rule | ≤ ~60 Zeilen typisch; Security darf länger sein |
-| Overview hard cap | ~150 Zeilen max |
-
-- Flach: `#`/`##`, Bullets, Tabellen nur für aufzählbare Fakten (Statusfarben, Commands).
-- Eine Zeile pro Konzept. Test: Würde ein Agent ohne diese Zeile etwas Falsches tun? Nein heißt streichen.
-- Pointer-Satz: `… kanonisch in [foo.md](./foo.md)`, die Mechanik nicht nochmal ausführen.
+- Größe ist ein Signal, keine Grenze. Eine lange Datei ist in Ordnung, wenn jede Zeile die Einordnung oben besteht; eine kurze Datei voller Code-Nacherzählung ist es nicht.
+- Flach: `#`/`##`, Bullets, Tabellen nur für aufzählbare Fakten.
+- Eine Zeile je Konzept, der Grund im selben Satz. Pointer-Satz: `… kanonisch in [foo.md](./foo.md)`, die Mechanik nicht noch einmal ausführen.
 - Lifecycle-, Schema- oder Security-Änderung: Doku im selben PR (Sync).

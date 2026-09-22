@@ -54,6 +54,15 @@ claude plugin uninstall agent-docs cleanup windev claudex intune-win32
 
 ## code
 
+### [2.1.0] – 2026-09-23
+
+#### Geändert
+
+- **`agent-docs` behandelt Code und Tests als Quelle der Wahrheit.** Jede Doku-Aussage wird eingeordnet: Code-Nacherzählung und von Tests erzwungene Regeln fallen weg, prüfbare Regeln ohne Test werden als Test-Vorschlag gemeldet, Rechtsdoku wandert nach `docs/`.
+- **`agent-docs` kürzt auch Doku, die im selben Diff dazugekommen ist**, wenn sie Code nacherzählt.
+- **`agent-docs` prüft, ob Codex die Bereichsregeln erreicht.** Codex liest `.claude/rules` nicht; fehlt das Verzeichnis in der Root-`AGENTS.md`, ist das ein Befund.
+- **Keine festen Zeilengrenzen mehr.** Eine Datei ist nicht zu lang, solange jede Zeile etwas enthält, das nicht im Code steht.
+
 ### [2.0.0] – 2026-09-22
 
 #### Entfernt

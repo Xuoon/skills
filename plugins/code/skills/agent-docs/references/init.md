@@ -20,7 +20,8 @@ Qualitätsmaßstab: [style.md](style.md). Gates: [shared.md](shared.md).
 2. **Style-Gate.** Jeden Fund: würde die Zeile style.md + Add-Gate überleben? Nein → raus. Kurz ist Erfolg.
 
 3. **Draft (Minimum).**
-   - Kanonische Root-Agentdatei: 1-Satz-Was, Commands (nur Traps/Aggregate), 3–7 Invarianten max, Rules-Index falls Rules existieren.
+   - Kanonische Root-Agentdatei: 1-Satz-Was, Commands (nur Traps/Aggregate), wenige Invarianten, Verzeichnis „Bereich → Datei“ falls Bereichsregeln existieren (Codex erreicht sie sonst nicht).
+   - Prüfbare Regeln nicht als Doku-Zeile, sondern als Test-Vorschlag im Bericht.
    - Sprache durchgehend die der vorhandenen Repo-Doku oder Code-Kommentare — auch Überschriften; kein Einleitungs-Boilerplate („This file provides guidance …“).
    - Pro Command nur die Falle (was schiefgeht, wenn man ihn falsch oder in falscher Reihenfolge aufruft), nie was das Script intern tut.
    - Nur eine Agentdatei vorschlagen, `AGENTS.md` oder `CLAUDE.md`. Einen `@AGENTS.md`-Verweis nur, wenn der Client `AGENTS.md` nachweislich nicht selbst lädt.

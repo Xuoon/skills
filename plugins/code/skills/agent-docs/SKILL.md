@@ -13,12 +13,12 @@ argument-hint: "[--audit] [--fix]"
 
 # agent-docs: Doku am Code halten
 
-Kleinster passender Modus. Der Skill macht Doku richtiger oder kürzer, nicht länger.
+Kleinster passender Modus. Code und Tests sind die Quelle der Wahrheit; der Skill macht Doku richtiger oder kürzer, nicht länger, und schlägt Tests vor, wo eine Regel prüfbar ist.
 
 Zuerst lesen:
 
 1. `references/shared.md`: Scope, Gate, Vorschlagsformat, Verify
-2. `references/style.md`: was hineingehört, was nicht, Größenrichtwerte
+2. `references/style.md`: wie jede Aussage eingeordnet wird und wo sie hingehört
 3. Bei jedem Add oder Wunsch nach „dünner": `references/prune-sweep.md`
 
 ## Argumente aus der Nutzeranfrage
@@ -49,8 +49,8 @@ Snapshot: `git status --short`, `git diff --stat` (gegebenenfalls gegen die gena
 ## Sync (Standard)
 
 1. **Snapshot.** Working Tree und Session; bei genannter Ref der Diff gegen `merge-base <ref> HEAD`. Optional `wc -l` auf die betroffenen Doku-Dateien als Baseline.
-2. **Doku lesen.** Zu den geänderten Code-Pfaden die Agent-Doku, die client-spezifischen Rules und Code-Kommentare mit Doku-Verweisen durchgehen und sammeln: Stellen, die durch den Diff falsch oder veraltet sind, und Stellen, die durch den Diff überflüssig werden. Je Fund `{file, line, kind: wrong|stale|redundant, evidence}`.
-3. **Filtern.** Jeden Fund durchs Gate aus `shared.md`. Raus fallen Nice-to-have, Inventar, UI-Chrome, die Implementierung der frischen Feature-Arbeit und spekulative Vollständigkeit. Eine Lücke zählt nur, wenn der nächste Agent ohne die Zeile etwas Falsches tun würde und es nicht aus dem Code ersichtlich ist.
+2. **Doku lesen.** Zu den geänderten Code-Pfaden die Agent-Doku, die client-spezifischen Rules und Code-Kommentare mit Doku-Verweisen durchgehen und sammeln: Stellen, die durch den Diff falsch oder veraltet sind, und Stellen, die durch den Diff überflüssig werden. Überflüssig ist auch eine Regel, die ein Test im Diff jetzt erzwingt. Doku-Zeilen, die der Diff selbst hinzufügt, gehören mit zum Prüfgegenstand: Code-Nacherzählung darin wird gekürzt oder gestrichen. Je Fund `{file, line, kind: wrong|stale|redundant, evidence}`.
+3. **Filtern.** Jeden Fund durchs Gate aus `shared.md`. Raus fallen Nice-to-have, Inventar, UI-Chrome, die Implementierung der frischen Feature-Arbeit und spekulative Vollständigkeit. Eine Lücke zählt nur, wenn der nächste Agent ohne die Zeile etwas Falsches tun würde und es nicht aus dem Code ersichtlich ist. Ist die Lücke eine prüfbare Regel, wird ein Test als Nebenbefund vorgeschlagen statt einer Doku-Zeile.
 4. **Mini-Prune, sobald ein Add übrig ist.** Kurzer Prune-Sweep auf dieselben Dateien und offensichtliche Duplikate des Themas. Mindestens ein Kandidat zum Löschen oder Kürzen im Paket, oder schriftlich, warum Netto-Wachstum unvermeidlich ist (neue Domain-Invariante).
 5. **Vorschlag.** Blöcke laut `shared.md`, Deletes vor Adds, `Netto:` schätzen. Ohne `--fix` endet der Lauf hier.
 6. **Anwenden und prüfen, nur mit `--fix`.** Bestätigte Blöcke schreiben, dann Verify laut `shared.md` samt Δ Zeilen. Reines Wachstum ohne genehmigte Ausnahme im Report markieren.
@@ -74,10 +74,11 @@ Vollständigkeit ohne Kürze ist ein Fehlschlag: aufgeblähte, korrekte Doku ist
    - b) `paths:`: `ok|dead|too-broad|too-narrow` mit Beispielen.
    - c) Links und Verweise in Code-Kommentaren auflösen.
    - d) Prune-Sweep laut `prune-sweep.md`.
-   - e) Aktive Kette: für Root und betroffene Subtrees belegen, welche Dateien der erkannte Client tatsächlich lädt, in welcher Reihenfolge und welche Datei im selben Verzeichnis eine andere verdrängt.
+   - e) Aktive Kette: für Root und betroffene Subtrees belegen, welche Dateien der erkannte Client tatsächlich lädt, in welcher Reihenfolge und welche Datei im selben Verzeichnis eine andere verdrängt. Nutzt das Repo auch Codex, prüfen, ob die Root-`AGENTS.md` jede Bereichsdatei verzeichnet (siehe `style.md`).
+   - f) Einordnung jeder Aussage nach `style.md` (`code`, `test-exists`, `test-missing`, `keep`, `human`, `stale`); `test-exists` nur mit gefundenem Test als Beleg.
 2. **Scoring** je Datei (unten).
 3. **Report** nach Vorlage (unten).
-4. **Fix-Vorschläge** im Format aus `shared.md`. Reihenfolge: (1) kaputt, falsch, Security, (2) Löschen, Kürzen, Zusammenführen, (3) fehlende blockierende Punkte (Entwurf mit höchstens 10 Zeilen in einer vorhandenen Datei). Keine Kosmetik, kein Auffüllen von Inventar.
+4. **Fix-Vorschläge** im Format aus `shared.md`. Reihenfolge: (1) kaputt, falsch, Security, (2) Löschen, Kürzen, Zusammenführen, Verschieben nach `docs/`, (3) fehlende blockierende Punkte (Entwurf mit höchstens 10 Zeilen in einer vorhandenen Datei). Test- und Lint-Vorschläge stehen getrennt als Nebenbefund. Keine Kosmetik, kein Auffüllen von Inventar.
 5. Ohne `--fix` endet der Lauf hier; Report und Vorschläge sind das Ergebnis.
 6. **Anwenden und prüfen, nur mit `--fix`.** Vorschläge schreiben, Verify laut `shared.md`, neu bewerten. Sinkt die Kürze durch reine Adds, das Add zurücknehmen und den Prune vorziehen.
 
@@ -87,14 +88,14 @@ Vollständigkeit ohne Kürze ist ein Fehlschlag: aufgeblähte, korrekte Doku ist
 | --- | ---: | --- |
 | Accuracy | 25 | Aussagen stimmen mit dem Code |
 | Completeness | 15 | Blockierende Invarianten sind da, nicht „alles Erwähnenswerte" |
-| Conciseness | 25 | Nichts Generisches, kein Code-Duplikat, kein Implementierungsdetail, kein Duplikat zwischen Dateien, Größe im Richtwert aus `style.md` |
+| Conciseness | 25 | Keine Zeilen der Klassen `code` oder `test-exists`, nichts Generisches, kein Duplikat zwischen Dateien |
 | Actionability | 15 | Eine Session vermeidet die kritischen Fehler, ohne den Code neu zu lesen |
 | Currency | 10 | Keine veralteten Verweise oder Links |
 | Cross-references | 10 | Links stimmen, keine doppelt erklärte Mechanik |
 
 Noten: A ab 90, B ab 70, C ab 50, D ab 30, F darunter.
 
-Completeness steigt nicht durch zusätzliches Implementierungsdetail oder Inventar. Eine Datei über dem Richtwert aus `style.md` (Overview etwa 40–50, Domain etwa 60, hart etwa 150 Zeilen) ohne Security-Begründung bekommt höchstens 15/25 bei Conciseness. Ein echtes Duplikat zwischen Dateien kostet bei Cross-references und Conciseness. Kürze ist kein Fehler; eine aufgeblähte, korrekte Datei ist kein A.
+Completeness steigt nicht durch zusätzliches Implementierungsdetail oder Inventar. Conciseness misst den Anteil der Zeilen, die die Einordnung nicht bestehen; die Länge allein kostet nichts. Ein echtes Duplikat zwischen Dateien kostet bei Cross-references und Conciseness. Kürze ist kein Fehler; eine aufgeblähte, korrekte Datei ist kein A.
 
 ### Report-Vorlage
 
@@ -116,6 +117,9 @@ Completeness steigt nicht durch zusätzliches Implementierungsdetail oder Invent
 **Undocumented-critical**
 - <code path> — warum blockierend — wohin (vorhandene Datei und Abschnitt) — Entwurf ≤10 Zeilen
 
+**Test- und Lint-Vorschläge**
+- <regel> — wo der Test hingehört — was er prüft — welche Doku-Zeile danach entfällt
+
 **Nebenbefunde (Code)**
 - …
 ```
@@ -127,6 +131,7 @@ Completeness steigt nicht durch zusätzliches Implementierungsdetail oder Invent
 - `needs verification` blockiert auch Rewrites. Veraltete Stellen, die nicht aus dem Diff dieser Session stammen, sind ein eigener Kandidat und kein Beifang eines Rewrites.
 - Neue Datei nur für einen eigenen Themenbereich, wenn Zusammenführen unzumutbar ist.
 - Nichts erfinden; Spekulation fällt weg.
+- Eine `test-missing`-Zeile bleibt stehen, bis der Test existiert. Tests zu schreiben ist Code-Arbeit und nicht Teil dieses Skills.
 - Eine Freigabe für Code („mach einfach") ist keine Freigabe für Doku-Edits. Geschrieben wird nur mit `--fix` oder ausdrücklichem OK zur Doku.
 
 ## Sonderfälle

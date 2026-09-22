@@ -40,6 +40,7 @@ Ausreichend **eines** von:
 3. Generisch, selbstverständlich, aus Verzeichnisnamen trivial.
 4. Drift-anfälliges Implementation-Detail (Zahlen/Pads/UI-Chrome die der Code allein trägt).
 5. Historien-Sprache („früher…“, „nicht mehr…“) ohne aktuelle Invariante.
+6. Ein Test, Typ oder eine Lint-Regel erzwingt die Aussage bereits (Beleg: `datei:zeile`).
 
 Lösch-Vorschläge brauchen Evidence, **aber keine** „would agent break?“-Angst — weniger Tokens reduzieren Fehler.
 
@@ -49,6 +50,7 @@ Lösch-Vorschläge brauchen Evidence, **aber keine** „would agent break?“-An
 
 1. **Blockierend:** Ohne die Zeile würde der nächste Agent eine falsche Änderung machen (Security, Lifecycle, Naming, kanonischer Helper), nicht nur langsamer arbeiten.
 2. **Non-obvious:** Steht nicht trivial im Code/Dateinamen/Typ.
+2a. **Nicht prüfbar:** Ließe sich die Regel als Test, Typ oder Lint erzwingen, wird das als Nebenbefund vorgeschlagen, nicht als Doku-Zeile.
 3. **Single home:** Kanonischer Ort klar; keine zweite Datei bekommt denselben Fakt.
 4. **Minimal:** ≤ **3 Zeilen** Draft pro Konzept (Audit: ≤ 10 nur bei undocumented-critical). Keine neuen Sektionen „für Vollständigkeit“.
 5. **Netto-Budget:** Wenn die Session Docs **verlängert**, muss im selben Vorschlagspaket mindestens ein gleichwertiger Prune-Kandidat mitlaufen **oder** begründet werden, warum Netto-Wachstum unvermeidlich ist (neue Domain mit echten Invarianten).
