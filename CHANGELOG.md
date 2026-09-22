@@ -6,6 +6,13 @@ Was sich an den Plugins ändert, aus Sicht dessen, der sie benutzt. Jedes Plugin
 
 ### 2026-09-22
 
+`kram` ist entfernt. Statt `handoff` und `bruh` gibt es `handoff` und `wait-what` aus [mattpocock-skills](https://github.com/mattpocock/skills), `kleinanzeigen` ist privat.
+
+```
+claude plugin uninstall kram@labi
+/plugin install mattpocock-skills@claude-plugins-official
+```
+
 `labidesign-email` und `labidesign-ui` sind entfernt. Emils und Jakubs Skills gibt es weiter in ihren eigenen Marketplaces [emilkowalski/skills](https://github.com/emilkowalski/skills) und [jakubkrehel/skills](https://github.com/jakubkrehel/skills).
 
 Die Plugins liefern nur noch die Manifeste für Claude Code und Codex; das Agent-Plugins-Manifest und die Anleitung für ChatGPT Work sind entfernt.
@@ -46,6 +53,17 @@ claude plugin uninstall agent-docs cleanup windev claudex intune-win32
 `handoff` bleibt unverändert installiert.
 
 ## code
+
+### [2.0.0] – 2026-09-22
+
+#### Entfernt
+
+- **`planning`.** Stattdessen `grill-me` aus [mattpocock-skills](https://github.com/mattpocock/skills) für die Fragerunde und den Plan-Modus von Claude Code für den Plan zum Freigeben.
+
+#### Geändert
+
+- **`agent-docs` verweist für allgemeine Schreibregeln auf `writing-for-agents`** aus mattpocock-skills, wenn es installiert ist. Die eigene Stilreferenz regelt nur noch, was in Agent-Doku gehört.
+- **`agent-docs` meldet „nichts zu tun" in einem Satz**, ohne Tabelle der geprüften Stellen.
 
 ### [1.3.1] – 2026-09-22
 
@@ -113,6 +131,12 @@ Bündelt die Arbeit am Code: `/code:planning`, `/code:cleanup`, `/code:agent-doc
 - **`/code:agent-docs` pflegt jetzt auch Changelog-Dateien.** Ein Changelog ist für Endnutzer geschrieben: was neu, geändert oder entfernt ist. Keine Migrations- oder Baugeschichte, keine Verifikationsblöcke. Bei mehreren Changelogs im Monorepo nur der zum geänderten Bereich.
 
 ## setup
+
+### [3.0.0] – 2026-09-22
+
+#### Entfernt
+
+- **`cc-defaults` und `claudex`.** `setup` enthält nur noch `windev`, `devdrive` und `cloud`.
 
 ### [2.1.1] – 2026-09-22
 
@@ -182,29 +206,3 @@ Bündelt die Windows-Werkzeuge: `/windows:intune-win32` und `/windows:irm-skript
 #### Geändert
 
 - **`/intune-win32` heißt `/windows:intune-win32`.** Verhalten bleibt.
-
-## kram
-
-### [1.1.1] – 2026-09-22
-
-#### Entfernt
-
-- **Agent-Plugins-Manifest.** Das Plugin liefert nur noch die Manifeste für Claude Code und Codex.
-
-### [1.1.0] – 2026-09-01
-
-#### Geändert
-
-- **`handoff` und `bruh` sind client-neutral verpackt.** Beide bleiben in ChatGPT und Codex explizit aufzurufen; die inhaltlichen Grenzen stehen direkt im Skill statt in herstellerspezifischen Tool-Sperren.
-
-### [1.0.0] – 2026-08-28
-
-Bündelt die kleinen Alltagsbefehle: `/kram:handoff`, `/kram:bruh` und `/kram:kleinanzeigen`.
-
-#### Hinzugefügt
-
-- **`/kram:kleinanzeigen`** — recherchiert den realistischen Gebrauchtpreis eines Artikels und schreibt die fertige Verkaufsanzeige: Titel, Preisempfehlung mit Marktspanne, Beschreibung zum Kopieren mit Gewährleistungsausschluss. Grundlage sind tatsächlich erzielte Verkaufspreise, nicht die Forderungen in laufenden Inseraten.
-
-#### Geändert
-
-- **`/handoff` heißt `/kram:handoff`**, **`/bruh` heißt `/kram:bruh`**. Verhalten bleibt, die baren Befehle ebenfalls.

@@ -135,4 +135,4 @@ Completeness steigt nicht durch zusätzliches Implementierungsdetail oder Invent
 
 **Frisch gebautes Feature:** Aktualisiert werden Verträge (Lifecycle, Security, kanonischer Helper), nicht die Implementierungsbeschreibung (Algorithmen, Cache-Werte, Komponentenbaum). Trägt der Code die Wahrheit, sind 0 Doku-Zeilen ein gültiges Ergebnis.
 
-**Nichts zu tun:** gültiges und erwünschtes Ergebnis. Melden: `Sync: 0 candidates (gate).` Nichts erfinden.
+**Nichts zu tun:** gültiges und erwünschtes Ergebnis. Melden: `Sync: 0 candidates (gate).` und ein Satz, warum. Keine Abgleichstabelle der geprüften Stellen, nichts erfinden.

@@ -9,7 +9,7 @@
     {
       "name": "code",
       "source": "./plugins/code",
-      "description": "Die vier Workflows für Planung, Bereinigung, Agent-Dokumentation und das Veröffentlichen von Codeänderungen."
+      "description": "Drei Workflows für Bereinigung, Agent-Dokumentation und das Veröffentlichen von Codeänderungen."
     },
     {
       "name": "setup",
@@ -20,11 +20,6 @@
       "name": "windows",
       "source": "./plugins/windows",
       "description": "Erstellt und analysiert Windows-Bereitstellungspakete und PowerShell-Werkzeuge."
-    },
-    {
-      "name": "kram",
-      "source": "./plugins/kram",
-      "description": "Bündelt kleine Alltagsworkflows für Übergaben, einfache Erklärungen und private Verkaufsanzeigen."
     }
   ]
 }

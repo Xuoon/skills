@@ -1,6 +1,0 @@
-interface:
-  display_name: "Übergabe"
-  short_description: "Session für den nächsten Agenten übergeben"
-  default_prompt: "Nutze $handoff, um diese Session für den nächsten Agenten zu übergeben."
-policy:
-  allow_implicit_invocation: false

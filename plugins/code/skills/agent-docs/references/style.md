@@ -1,8 +1,6 @@
 # Style: Was gute Agent-Doku ausmacht
 
-Maßstab für alle Modi. Gilt für die kanonische Agent-Doku und client-spezifische Rules gleichermaßen.
-
-**Leitidee:** Desto weniger Zeilen, desto weniger mögliche Fehler — **so viel wie nötig, nicht so viel wie möglich.** Token-effizient und agent-blocking.
+Maßstab für alle Modi, für die kanonische Agent-Doku und client-spezifische Rules gleichermaßen: so viel wie nötig, nicht so viel wie möglich. Allgemeine Regeln zum Schreiben für Agenten (Verweise, Hierarchie, Pruning) stehen im Skill `writing-for-agents` aus `mattpocock-skills` (https://github.com/mattpocock/skills). Ist er verfügbar, beim Formulieren neuer oder umgeschriebener Zeilen laden; diese Datei regelt nur, was in Agent-Doku gehört.
 
 ## Architektur der Doku
 
@@ -45,11 +43,7 @@ Maßstab für alle Modi. Gilt für die kanonische Agent-Doku und client-spezifis
 | Domain Rule | ≤ ~60 Zeilen typisch; Security darf länger sein |
 | Overview hard cap | ~150 Zeilen max |
 
-- Flach: `#`/`##`, Bullets, Tabellen nur für enumerierbare Fakten (Statusfarben, Commands).
-- **Eine Zeile pro Konzept.** Test: „Würde ein Agent ohne diese Zeile etwas **Falsches** tun?“ — nein → streichen.
-- Relative Markdown-Links müssen resolven.
-- Pointer-Satz: `… kanonisch in [foo.md](./foo.md)` — Mechanik nicht nochmal ausführen.
-
-## Wartung
-
-- Doku wie Code: Lifecycle/Schema/Security-Änderung → Doku im selben PR (Sync).
+- Flach: `#`/`##`, Bullets, Tabellen nur für aufzählbare Fakten (Statusfarben, Commands).
+- Eine Zeile pro Konzept. Test: Würde ein Agent ohne diese Zeile etwas Falsches tun? Nein heißt streichen.
+- Pointer-Satz: `… kanonisch in [foo.md](./foo.md)`, die Mechanik nicht nochmal ausführen.
+- Lifecycle-, Schema- oder Security-Änderung: Doku im selben PR (Sync).

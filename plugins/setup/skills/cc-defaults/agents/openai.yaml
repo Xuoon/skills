@@ -1,6 +1,0 @@
-interface:
-  display_name: "Globale Vorgaben"
-  short_description: "Globale Agent-Anweisungen gemeinsam schärfen"
-  default_prompt: "Nutze $cc-defaults, um meine globalen Agent-Anweisungen zu prüfen."
-policy:
-  allow_implicit_invocation: false

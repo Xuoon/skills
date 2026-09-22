@@ -1,6 +1,6 @@
 {
   "name": "setup",
-  "version": "2.1.1",
+  "version": "3.0.0",
   "description": "Richtet lokale Entwicklungsumgebungen und Cloud-Agent-Setups ein und prüft ihre Konfiguration.",
   "author": {
     "name": "Sven Labitzki",
@@ -21,7 +21,7 @@
   "interface": {
     "displayName": "Setup",
     "shortDescription": "Entwicklungsumgebungen reproduzierbar einrichten",
-    "longDescription": "Workflows für Windows-Entwicklung, Dev Drives, Claude Code mit GPT, globale Agent-Client-Vorgaben und repo-lokale Cloud-Agent-Setups.",
+    "longDescription": "Workflows für Windows-Entwicklung, Dev Drives und repo-lokale Cloud-Agent-Setups.",
     "developerName": "Sven Labitzki",
     "category": "Productivity",
     "capabilities": [],

@@ -1,6 +1,6 @@
 {
   "name": "setup",
-  "version": "2.1.1",
+  "version": "3.0.0",
   "description": "Richtet lokale Entwicklungsumgebungen und Cloud-Agent-Setups ein und prüft ihre Konfiguration.",
   "author": {
     "name": "Sven Labitzki",
