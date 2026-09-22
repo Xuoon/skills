@@ -9,7 +9,7 @@ Maßstab für alle Modi. Gilt für die kanonische Agent-Doku und client-spezifis
 - **Overview** = Was ist das, Commands, wenige Invarianten, **Verweise**. Keine Domain-Novellen.
 - **Rules** = Tiefe pro Domäne (Security, Lifecycle, non-obvious Business-Regeln).
 - **Hierarchie:** Repo-weite Regeln ins Root, echte Subtree-Deltas nahe an App/Package. Lade-, Merge- und Override-Reihenfolge ist Client-Semantik und muss belegt werden; nicht jeder Client behandelt die nächste Datei gleich.
-- **Portabilität:** Gemeinsame Regeln kanonisch in `AGENTS.md`; ein `CLAUDE.md` darf sie per `@AGENTS.md` importieren und nur echte Claude-Deltas ergänzen. Keine Inhaltskopie. Imports vermeiden Drift, sparen aber keinen Kontext.
+- **Eine Datei pro Verzeichnis:** `AGENTS.md` oder `CLAUDE.md`, nicht beide. Liest der Client `AGENTS.md` nicht selbst ein, genügt eine `CLAUDE.md` mit `@AGENTS.md`, ohne eigenen Inhalt.
 
 ## Was reingehört (Agent-blocking)
 

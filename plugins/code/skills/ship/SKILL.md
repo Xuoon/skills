@@ -53,7 +53,7 @@ Gelöscht wird nur, was **nachweislich** gemergt oder verwaist ist:
 ## Commit- und PR-Format
 
 - **Commit und PR-Titel:** Conventional Commit mit deutschem Betreff, im Stil der letzten Commits des Repos.
-- **Kopf ohne Überschrift:** 2–4 Sätze oder Punkte zu Umsetzung und Anlass, keine Diff-Nacherzählung.
+- **Kopf ohne Überschrift:** 2–4 Sätze zum Anlass, keine Diff-Nacherzählung.
 - **`## Changelog`:** Jeder Punkt beginnt mit einem fetten Anker, Gedankenstrich und einem Satz (`**fix(rmm): Neustart-Gate** — …`). Mehr als zwei Einzeländerungen werden Unterpunkte; maximal zwei Ebenen. Bezeichner, Pfade und Befehle stehen in Backticks. Keine Tabellen, Klappblöcke oder Checkboxen.
 - **`## Prüfung`:** Nur Evidenz, die nicht aus dem Diff folgt, etwa Geräteprüfung, reproduzierter Fehler oder geprobte Migration. Bewusst Ungeprüftes gehört ebenfalls hierher; kein „Tests grün“ und kein CI-Status.
 - **`## Manuelle Schritte`:** Nur wenn nach dem Merge wirklich etwas zu tun ist; nummeriert in Ausführungsreihenfolge mit exakten Befehlen.

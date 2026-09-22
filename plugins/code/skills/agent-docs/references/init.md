@@ -23,7 +23,7 @@ Qualitätsmaßstab: [style.md](style.md). Gates: [shared.md](shared.md).
    - Kanonische Root-Agentdatei: 1-Satz-Was, Commands (nur Traps/Aggregate), 3–7 Invarianten max, Rules-Index falls Rules existieren.
    - Sprache durchgehend die der vorhandenen Repo-Doku oder Code-Kommentare — auch Überschriften; kein Einleitungs-Boilerplate („This file provides guidance …“).
    - Pro Command nur die Falle (was schiefgeht, wenn man ihn falsch oder in falscher Reihenfolge aufruft), nie was das Script intern tut.
-   - Nutzt das Repo nachweislich `AGENTS.md` **und** Claude Code, `CLAUDE.md` nur als `@AGENTS.md`-Kompatibilitäts-Pointer plus echte Claude-Deltas vorschlagen; gemeinsame Regeln nie kopieren.
+   - Nur eine Agentdatei vorschlagen, `AGENTS.md` oder `CLAUDE.md`. Einen `@AGENTS.md`-Verweis nur, wenn der Client `AGENTS.md` nachweislich nicht selbst lädt.
    - Client-spezifische Rules-Verzeichnisse **nur** bei belegter Repo-Konvention und ≥1 echter pfadgebundener Regel; Globs sofort gegen Dateien prüfen.
    - Package-Agentdatei nur bei **eigenen** non-obvious Regeln — nie pro forma pro Workspace.
    - Keine Domain-Rule, die nur Ordner beschreibt.

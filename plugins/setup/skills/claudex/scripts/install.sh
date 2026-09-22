@@ -293,7 +293,7 @@ if [ -n "$MODEL" ]; then
     fail "Gewünschtes Modell ist nicht verfügbar: $MODEL"
   }
 else
-  for candidate in gpt-5.6-sol gpt-5.5 gpt-5.4 gpt-5-codex; do
+  for candidate in gpt-6-sol gpt-5.6-sol gpt-5.5 gpt-5.4 gpt-5-codex; do
     if printf '%s\n' "$MODEL_IDS" | grep -Fxq "$candidate"; then
       MODEL="$candidate"
       break

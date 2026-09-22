@@ -23,20 +23,11 @@ CODEX_MARKETPLACE_FILE = REPO_ROOT / ".agents" / "plugins" / "marketplace.json"
 CHANGELOG_FILE = REPO_ROOT / "CHANGELOG.md"
 README_FILE = REPO_ROOT / "README.md"
 
-# Drei Manifeste verbinden denselben Skillbestand mit Agent Plugins, Claude Code
-# sowie ChatGPT/Codex. Gemeinsame Identitätsfelder müssen übereinstimmen.
-STANDARD_MANIFEST = Path("plugin.json")
+# Zwei Manifeste verbinden denselben Skillbestand mit Claude Code und Codex.
+# Gemeinsame Identitätsfelder müssen übereinstimmen.
 CLAUDE_MANIFEST = Path(".claude-plugin") / "plugin.json"
 CODEX_MANIFEST = Path(".codex-plugin") / "plugin.json"
 
-AGENT_PLUGINS_SCHEMA = "https://agent-plugins.org/schemas/1.0.0/plugin.schema.json"
-# Schema 1.0.0 ist geschlossen (additionalProperties: false); alles
-# Client-Spezifische gehört unter "extensions".
-STANDARD_FIELDS = {
-    "$schema", "name", "version", "description", "author",
-    "homepage", "repository", "license", "keywords", "extensions",
-}
-STANDARD_NAME = re.compile(r"^(?!.*(?:--|\.\.))[a-z0-9](?:[a-z0-9.-]*[a-z0-9])?$")
 SHARED_FIELDS = ("name", "version", "description")
 AGENT_SKILLS_FIELDS = {"name", "description", "license", "compatibility", "metadata", "argument-hint"}
 CODEX_INTERFACE_FIELDS = {
@@ -94,50 +85,30 @@ def rel(path: Path) -> str:
 
 
 def check_manifests(report: Report, plugin_dir: Path) -> dict | None:
-    """Alle drei Manifeste vorhanden, valide und in Identitätsfeldern gleich."""
+    """Beide Manifeste vorhanden, valide und in Identitätsfeldern gleich."""
     name = plugin_dir.name
-    standard_file = plugin_dir / STANDARD_MANIFEST
     claude_file = plugin_dir / CLAUDE_MANIFEST
     codex_file = plugin_dir / CODEX_MANIFEST
 
-    ok = report.check(standard_file.is_file(), f"{name}: {STANDARD_MANIFEST} fehlt (Agent-Plugins-Standard)")
-    ok &= report.check(claude_file.is_file(), f"{name}: {CLAUDE_MANIFEST} fehlt (Claude Code lädt sonst nicht)")
+    ok = report.check(claude_file.is_file(), f"{name}: {CLAUDE_MANIFEST} fehlt (Claude Code lädt sonst nicht)")
     ok &= report.check(codex_file.is_file(), f"{name}: {CODEX_MANIFEST} fehlt (ChatGPT/Codex lädt sonst nicht)")
     if not ok:
         return None
 
-    standard = read_json(standard_file)
     claude = read_json(claude_file)
     codex = read_json(codex_file)
     if not report.check(
-        all(isinstance(manifest, dict) for manifest in (standard, claude, codex)),
+        all(isinstance(manifest, dict) for manifest in (claude, codex)),
         f"{name}: jedes Manifest muss ein JSON-Objekt enthalten",
     ):
         return None
     for field in sorted(set(codex) - CODEX_FIELDS):
         report.fail(f"{name}: Codex-Manifestfeld {field!r} ist nicht erlaubt")
 
-    report.check(
-        standard.get("$schema") == AGENT_PLUGINS_SCHEMA,
-        f"{name}: plugin.json $schema muss {AGENT_PLUGINS_SCHEMA} sein",
-    )
-    for field in sorted(set(standard) - STANDARD_FIELDS):
-        report.fail(f"{name}: plugin.json Feld {field!r} ist im Schema 1.0.0 nicht erlaubt (gehört unter extensions)")
-    report.check(
-        bool(STANDARD_NAME.match(str(standard.get("name", "")))),
-        f"{name}: plugin.json name {standard.get('name')!r} verletzt das Namensmuster des Standards",
-    )
-
     for field in (*SHARED_FIELDS, "author"):
-        values = (standard.get(field), claude.get(field), codex.get(field))
         report.check(
-            values[0] == values[1] == values[2],
-            f"{name}: {field} läuft zwischen Standard-, Claude- und Codex-Manifest auseinander",
-        )
-    for field in ("homepage", "repository", "keywords"):
-        report.check(
-            standard.get(field) == codex.get(field),
-            f"{name}: {field} läuft zwischen Standard- und Codex-Manifest auseinander",
+            claude.get(field) == codex.get(field),
+            f"{name}: {field} läuft zwischen Claude- und Codex-Manifest auseinander",
         )
 
     for manifest_name, manifest in (("Claude", claude), ("Codex", codex)):
@@ -181,7 +152,7 @@ def check_manifests(report: Report, plugin_dir: Path) -> dict | None:
             and all(isinstance(prompt, str) and 0 < len(prompt) <= 128 for prompt in prompts),
             f"{name}: Codex-interface.defaultPrompt braucht 1-3 Strings mit höchstens 128 Zeichen",
         )
-    return standard
+    return claude
 
 
 def check_skills(report: Report, plugin_dir: Path) -> set[str]:
@@ -193,7 +164,7 @@ def check_skills(report: Report, plugin_dir: Path) -> set[str]:
         return set()
     report.check(
         not (plugin_dir / "SKILL.md").is_file(),
-        f"{name}: SKILL.md im Plugin-Root — der Standard entdeckt nur skills/<skill>/SKILL.md",
+        f"{name}: SKILL.md im Plugin-Root — gefunden wird nur skills/<skill>/SKILL.md",
     )
 
     for skill_file in skills:
@@ -307,7 +278,7 @@ def check_marketplaces(report: Report, plugin_dirs: list[Path]) -> None:
             f"{name}: Claude-source {source!r} passt nicht zum Plugin-Ordner",
         )
         report.check(bool(entry.get("description")), f"{name}: Claude-Katalogeintrag ohne description")
-        manifest_file = PLUGINS_DIR / str(name) / STANDARD_MANIFEST
+        manifest_file = PLUGINS_DIR / str(name) / CLAUDE_MANIFEST
         if name in on_disk and manifest_file.is_file():
             manifest_description = read_json(manifest_file).get("description")
             report.check(entry.get("description") == manifest_description, f"{name}: Katalog- und Manifestbeschreibung laufen auseinander")
@@ -383,10 +354,10 @@ def check_release_gate(report: Report, base_ref: str) -> None:
     changelog = CHANGELOG_FILE.read_text(encoding="utf-8")
 
     for name in sorted(touched):
-        manifest_file = PLUGINS_DIR / name / STANDARD_MANIFEST
+        manifest_file = PLUGINS_DIR / name / CLAUDE_MANIFEST
         if not manifest_file.is_file():
             try:
-                git("show", f"{base_ref}:plugins/{name}/{STANDARD_MANIFEST}")
+                git("show", f"{base_ref}:plugins/{name}/{CLAUDE_MANIFEST.as_posix()}")
             except subprocess.CalledProcessError:
                 continue
             marketplace_notes = changelog_section(changelog, "Marketplace")
@@ -397,7 +368,7 @@ def check_release_gate(report: Report, base_ref: str) -> None:
             continue
 
         try:
-            base_manifest = json.loads(git("show", f"{base_ref}:plugins/{name}/{STANDARD_MANIFEST}"))
+            base_manifest = json.loads(git("show", f"{base_ref}:plugins/{name}/{CLAUDE_MANIFEST.as_posix()}"))
         except subprocess.CalledProcessError:
             version = read_json(manifest_file).get("version")
             report.check(
@@ -432,7 +403,8 @@ def main() -> int:
     args = parser.parse_args()
 
     report = Report()
-    plugin_dirs = sorted(p for p in PLUGINS_DIR.iterdir() if p.is_dir())
+    # Punkt-Ordner wie .claude/ legt der Client selbst an; sie sind keine Plugins.
+    plugin_dirs = sorted(p for p in PLUGINS_DIR.iterdir() if p.is_dir() and not p.name.startswith("."))
 
     # Jeder Skill ist zusätzlich bar erreichbar (/ship neben /code:ship). Zwei
     # gleichnamige Skills teilen sich diesen baren Befehl — einer verliert.

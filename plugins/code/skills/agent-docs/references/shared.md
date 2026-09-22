@@ -16,7 +16,7 @@ Wird von jedem agent-docs-Skill zuerst geladen. Qualitätsmaßstab: [style.md](s
 
 ## Ground Rules (alle Modi)
 
-- **Kein Silent-Fix, kein Auto-Apply.** Standard ist **nur der Vorschlag**; geschrieben wird erst mit `--fix` (oder auf ausdrückliches OK). Die Kontrolle bleibt immer beim Nutzer.
+- **Kein stiller Fix.** Standard ist der Vorschlag; geschrieben wird erst mit `--fix` oder auf ausdrückliches OK.
 - **Evidence Pflicht.** Jeder Claim mit `file:line` in Doku **und** Code. Unsicher → `needs verification`, nicht raten.
 - **Löschen > umschreiben > ergänzen.** Kürzere Doku ist bessere Doku. Mehr Zeilen = mehr Drift- und Fehlerfläche.
 - **One Source of Truth.** Jede Mechanik/Zahl/Invariante **eine** kanonische Stelle; woanders max. ein Pointer-Satz mit Link. Niemals dieselbe Mechanik zweimal ausführen.
@@ -24,7 +24,7 @@ Wird von jedem agent-docs-Skill zuerst geladen. Qualitätsmaßstab: [style.md](s
 - **Code owns implementation detail.** Prefetch-Pads, Debounce-ms, UI-Chrome-Layouts, Dateibaum, Prop-Listen — gehören in den Code, nicht in Rules. Docs halten **Verträge** (Invarianten, Lifecycle, Security, „nutze X nicht Y“).
 - **Prosa ist keine Enforcement.** Formatierung und mechanisch prüfbare Stilregeln gehören in Formatter/Lint/CI; Agent-Doku nennt nur nicht offensichtliche Ausnahmen oder den exakten Prüfpfad.
 - **Voice/Sprache der Datei matchen** (DE/EN, Bullet/Tabelle).
-- **Future Agent als Maßstab.** Ohne Fix: misled/blocked **oder** muss Müll lesen (beides zählt).
+- **Maßstab ist der nächste Agent.** Ohne Fix wird er in die Irre geführt oder muss Überflüssiges lesen; beides zählt.
 - **Nebenbefunde separat.** Code-Bugs aus dem Doku-Lauf: eigene Liste, nicht als Doku-Issue fixen.
 
 ## Asymmetrisches Edit-Gate (ADD vs DELETE)
@@ -47,7 +47,7 @@ Lösch-Vorschläge brauchen Evidence, **aber keine** „would agent break?“-An
 
 **Alle** müssen gelten:
 
-1. **Agent-blocking:** Ohne die Zeile würde der nächste Agent eine **falsche** Änderung machen (Security, Lifecycle, Naming, kanonischer Helper) — nicht nur „wüsste es schneller“.
+1. **Blockierend:** Ohne die Zeile würde der nächste Agent eine falsche Änderung machen (Security, Lifecycle, Naming, kanonischer Helper), nicht nur langsamer arbeiten.
 2. **Non-obvious:** Steht nicht trivial im Code/Dateinamen/Typ.
 3. **Single home:** Kanonischer Ort klar; keine zweite Datei bekommt denselben Fakt.
 4. **Minimal:** ≤ **3 Zeilen** Draft pro Konzept (Audit: ≤ 10 nur bei undocumented-critical). Keine neuen Sektionen „für Vollständigkeit“.
@@ -70,7 +70,7 @@ Lösch-Vorschläge brauchen Evidence, **aber keine** „would agent break?“-An
 
 ## Discovery-Ausführung
 
-Falls Subagenten verfügbar sind parallel und gründlich arbeiten (Sync: 1 pro Bereich; Audit: ~1 pro 3–5 Files), sonst dieselben Aufträge seriell abarbeiten. Output-Format **festnageln**: nur strukturierte Daten, kein Fließtext; verified nur als Count; Abweichungen ausführlich; 1-Satz-Einschätzung pro Datei.
+Standard ist der Hauptthread. Subagenten nur beim Audit oder bei einem Diff über viele Bereiche, dann je Bereich einer. Ihr Rückgabeformat vorgeben: nur strukturierte Daten, bestätigte Aussagen nur als Anzahl, Abweichungen ausführlich, eine Satz-Einschätzung je Datei.
 
 ## Vorschlags-Format + Approval
 

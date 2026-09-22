@@ -1,6 +1,0 @@
-interface:
-  display_name: "Prototype"
-  short_description: "Mehrere Varianten eines UI-Elements hinter einem Umschalter bauen"
-  default_prompt: "Nutze $prototype, um mehrere Varianten dieses UI-Elements zu bauen."
-policy:
-  allow_implicit_invocation: false

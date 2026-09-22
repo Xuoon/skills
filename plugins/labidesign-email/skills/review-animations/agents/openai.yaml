@@ -1,6 +1,0 @@
-interface:
-  display_name: "Review Animations"
-  short_description: "Animationscode streng nach Emils Regeln prüfen"
-  default_prompt: "Nutze $review-animations, um die Animationen in diesem Diff zu prüfen."
-policy:
-  allow_implicit_invocation: false

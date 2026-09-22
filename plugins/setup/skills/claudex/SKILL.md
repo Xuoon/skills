@@ -65,7 +65,7 @@ Ohne Rückfrage gelten diese Standardwerte:
 
 - Port: `8318`
 - CLIProxyAPI-Version: `latest`, mit strenger GitHub-Redirect-Prüfung und offizieller SHA-256-Datei
-- Modell: automatische Auswahl aus `/v1/models`, bevorzugt `gpt-5.6-sol`, danach weitere
+- Modell: automatische Auswahl aus `/v1/models`, bevorzugt `gpt-6-sol`, danach weitere
   verfügbare GPT-Modelle
 - OAuth: Browser-Callback (`--codex-login`)
 

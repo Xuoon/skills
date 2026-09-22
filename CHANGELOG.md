@@ -4,6 +4,16 @@ Was sich an den Plugins ändert, aus Sicht dessen, der sie benutzt. Jedes Plugin
 
 ## Marketplace
 
+### 2026-09-22
+
+`labidesign-email` und `labidesign-ui` sind entfernt. Emils und Jakubs Skills gibt es weiter in ihren eigenen Marketplaces [emilkowalski/skills](https://github.com/emilkowalski/skills) und [jakubkrehel/skills](https://github.com/jakubkrehel/skills).
+
+Die Plugins liefern nur noch die Manifeste für Claude Code und Codex; das Agent-Plugins-Manifest und die Anleitung für ChatGPT Work sind entfernt.
+
+```
+claude plugin uninstall labidesign-email labidesign-ui
+```
+
 ### 2026-09-01
 
 Alle vier Plugins lassen sich zusätzlich über denselben Repo-Marketplace in ChatGPT und Codex installieren. Die Skills verwenden portable Bundle-Pfade; OpenAI-spezifische Aktivierungsregeln liegen in `agents/openai.yaml`, andere Clients werden durch enge Beschreibungen und Inhalts-Gates begrenzt.
@@ -35,27 +45,15 @@ claude plugin uninstall agent-docs cleanup windev claudex intune-win32
 
 `handoff` bleibt unverändert installiert.
 
-## labidesign-email
-
-### [1.0.0] – 2026-09-15
-
-Neu: Emil Kowalskis zwölf Skills für Animation und UI-Design als eigenes Plugin, eins zu eins aus [emilkowalski/skills](https://github.com/emilkowalski/skills) übernommen (MIT). `review-animations`, `pick-ui-library` und `prototype` laufen nur auf ausdrücklichen Aufruf.
-
-```
-/plugin install labidesign-email@labi
-```
-
-## labidesign-ui
-
-### [1.0.0] – 2026-09-15
-
-Neu: Jakub Krehels elf Skills für Produkt-Interfaces als eigenes Plugin, eins zu eins aus [jakubkrehel/skills](https://github.com/jakubkrehel/skills) übernommen (MIT). `interface-review`, `explain-interface`, `break` und `variant` laufen nur auf ausdrücklichen Aufruf.
-
-```
-/plugin install labidesign-ui@labi
-```
-
 ## code
+
+### [1.3.0] – 2026-09-22
+
+#### Geändert
+
+- **`agent-docs` arbeitet im Hauptthread.** Der eigene Sync-Agent und das Fortsetzen früherer Läufe entfallen; Subagenten kommen nur noch beim Audit oder bei einem Diff über viele Bereiche zum Einsatz.
+- **`agent-docs` schlägt eine Agentdatei pro Verzeichnis vor**, `AGENTS.md` oder `CLAUDE.md`. Einen `@AGENTS.md`-Verweis gibt es nur noch, wenn der Client `AGENTS.md` nicht selbst lädt.
+- **`ship` schreibt den PR-Kopf als 2–4 Sätze zum Anlass.**
 
 ### [1.2.1] – 2026-09-18
 
@@ -110,6 +108,12 @@ Bündelt die Arbeit am Code: `/code:planning`, `/code:cleanup`, `/code:agent-doc
 
 ## setup
 
+### [2.1.1] – 2026-09-22
+
+#### Geändert
+
+- **`claudex` wählt `gpt-6-sol` zuerst**, wenn der Proxy das Modell anbietet.
+
 ### [2.1.0] – 2026-09-06
 
 #### Hinzugefügt
@@ -148,6 +152,12 @@ Bündelt die Einrichtung: `/setup:windev`, `/setup:claudex` und `/setup:labi-def
 
 ## windows
 
+### [1.1.1] – 2026-09-22
+
+#### Entfernt
+
+- **Agent-Plugins-Manifest.** Das Plugin liefert nur noch die Manifeste für Claude Code und Codex.
+
 ### [1.1.0] – 2026-09-01
 
 #### Geändert
@@ -168,6 +178,12 @@ Bündelt die Windows-Werkzeuge: `/windows:intune-win32` und `/windows:irm-skript
 - **`/intune-win32` heißt `/windows:intune-win32`.** Verhalten bleibt.
 
 ## kram
+
+### [1.1.1] – 2026-09-22
+
+#### Entfernt
+
+- **Agent-Plugins-Manifest.** Das Plugin liefert nur noch die Manifeste für Claude Code und Codex.
 
 ### [1.1.0] – 2026-09-01
 
