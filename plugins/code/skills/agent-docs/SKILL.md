@@ -78,7 +78,7 @@ Vollständigkeit ohne Kürze ist ein Fehlschlag: aufgeblähte, korrekte Doku ist
    - f) Einordnung jeder Aussage nach `style.md` (`code`, `test-exists`, `test-missing`, `keep`, `human`, `stale`); `test-exists` nur mit gefundenem Test als Beleg.
 2. **Scoring** je Datei (unten).
 3. **Report** nach Vorlage (unten).
-4. **Fix-Vorschläge** im Format aus `shared.md`. Reihenfolge: (1) kaputt, falsch, Security, (2) Löschen, Kürzen, Zusammenführen, Verschieben nach `docs/`, (3) fehlende blockierende Punkte (Entwurf mit höchstens 10 Zeilen in einer vorhandenen Datei). Test- und Lint-Vorschläge stehen getrennt als Nebenbefund. Keine Kosmetik, kein Auffüllen von Inventar.
+4. **Fix-Vorschläge** im Format aus `shared.md`. Reihenfolge: (1) kaputt, falsch, Security, (2) Löschen, Kürzen, Zusammenführen, Verschieben in den Doku-Ordner für Menschen, (3) fehlende blockierende Punkte (Entwurf mit höchstens 10 Zeilen in einer vorhandenen Datei). Test- und Lint-Vorschläge stehen getrennt als Nebenbefund. Keine Kosmetik, kein Auffüllen von Inventar.
 5. Ohne `--fix` endet der Lauf hier; Report und Vorschläge sind das Ergebnis.
 6. **Anwenden und prüfen, nur mit `--fix`.** Vorschläge schreiben, Verify laut `shared.md`, neu bewerten. Sinkt die Kürze durch reine Adds, das Add zurücknehmen und den Prune vorziehen.
 

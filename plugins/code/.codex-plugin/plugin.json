@@ -1,6 +1,6 @@
 {
   "name": "code",
-  "version": "2.1.0",
+  "version": "2.1.1",
   "description": "Drei Workflows für Bereinigung, Agent-Dokumentation und das Veröffentlichen von Codeänderungen.",
   "author": {
     "name": "Sven Labitzki",

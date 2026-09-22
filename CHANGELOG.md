@@ -54,6 +54,12 @@ claude plugin uninstall agent-docs cleanup windev claudex intune-win32
 
 ## code
 
+### [2.1.1] – 2026-09-23
+
+#### Geändert
+
+- **`agent-docs` legt Doku für Menschen standardmäßig unter `.claude/docs/` ab**, neben den Agent-Regeln in `.claude/rules/`. Eine vorhandene Konvention des Repos geht vor.
+
 ### [2.1.0] – 2026-09-23
 
 #### Geändert

@@ -28,7 +28,7 @@ Gegenrichtung zu Completeness. Verhindert, dass Sync/Audit Docs fett machen.
    | --- | --- |
    | Generisch / Best Practice | löschen |
    | Von Test, Typ oder Lint erzwungen (`test-exists`) | löschen, Test als Beleg |
-   | Rechts- oder Prozessdoku für Menschen (`human`) | nach `docs/`, Verweis behalten |
+   | Rechts- oder Prozessdoku für Menschen (`human`) | in den Doku-Ordner für Menschen, Verweis behalten |
    | Aus Dateinamen trivial | löschen |
    | Implementation-Detail (Code owns it) | löschen |
    | UI-Chrome in Domain-Rule (schon in design) | löschen / Pointer |
